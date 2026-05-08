@@ -1,0 +1,179 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  CLIENT
+  ADMIN
+}
+
+enum MemberStatus {
+  PENDING_VERIFICATION
+  ACTIVE
+  SUSPENDED
+  BLOCKED
+}
+
+enum OtpChannel {
+  SMS
+  EMAIL
+}
+
+enum SubscriptionStatus {
+  DRAFT
+  PENDING_CONSENT
+  ACTIVE
+  ACTIVE_MANUAL
+  CANCELLED
+}
+
+enum Frequency {
+  MONTHLY
+  QUARTERLY
+  SEMIANNUAL
+  ANNUAL
+}
+
+enum PaymentMethod {
+  BANK_TRANSFER
+  WALLET
+}
+
+enum WalletProvider {
+  WAAFI
+  CAC_PAY
+  D_MONEY
+  SABAPAY
+  DAHABPLACE
+}
+
+enum PaymentMode {
+  AUTOMATIC
+  MANUAL
+}
+
+enum AccountType {
+  CLIENT_ADHERENT
+  ASSOCIATION
+}
+
+model User {
+  id   String @id @default(cuid())
+  role Role   @default(CLIENT)
+
+  // ✅ Nouveau
+  accountType AccountType @default(CLIENT_ADHERENT)
+
+  // ✅ Client adhérent
+  fullName String?
+
+  // ✅ Association
+  companyName String?
+
+  // ✅ Commun
+  phone   String  @unique
+  phone2  String?
+  email   String  @unique
+  country String
+  city    String
+  commune String?
+
+  passwordHash String
+  status       MemberStatus @default(PENDING_VERIFICATION)
+
+  // ✅ Docs (obligatoires côté code seulement pour CLIENT_ADHERENT)
+  idDocPath  String?
+  selfiePath String?
+
+  otpLockedUntil     DateTime?
+  otpSendCountHour   Int       @default(0)
+  otpSendWindowStart DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  otps          Otp[]
+  subscriptions Subscription[]
+  auditLogs     AuditLog[]
+}
+
+model Otp {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  channel   OtpChannel
+  codeHash  String
+  expiresAt DateTime
+  attempts  Int        @default(0)
+  usedAt    DateTime?
+
+  createdAt DateTime @default(now())
+}
+
+model Subscription {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  bankCountry String
+  bankName    String
+  currency    String
+
+  // ✅ Nouveau: méthode de paiement
+  paymentMethod PaymentMethod @default(BANK_TRANSFER)
+
+  // ✅ Si BANK_TRANSFER → mode (AUTO/MANUAL) obligatoire
+  mode PaymentMode?
+
+  // ✅ Champs banque (optionnels si WALLET)
+  accountNumber String?
+  rib           String?
+  swiftBic      String?
+
+  // ✅ Si WALLET (uniquement Djibouti) → provider + walletAccount
+  walletProvider WalletProvider?
+  walletAccount  String? // ex: numéro téléphone / wallet id
+
+  amount    Int
+  frequency Frequency
+
+  status SubscriptionStatus @default(PENDING_CONSENT)
+
+  consentAccepted  Boolean   @default(false)
+  consentVersion   String?
+  consentAt        DateTime?
+  consentIp        String?
+  consentUserAgent String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, createdAt])
+}
+
+model AuditLog {
+  id     String  @id @default(cuid())
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  action   String
+  entity   String
+  entityId String?
+  meta     Json?
+
+  ip        String?
+  userAgent String?
+
+  createdAt DateTime @default(now())
+
+  @@index([action, createdAt])
+  @@index([userId, createdAt])
+}
