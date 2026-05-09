@@ -7,7 +7,6 @@
   "create_account": "Créer un compte",
   "login": "Se connecter",
   "logout": "Déconnexion",
-
   "register_title": "Inscription",
   "register_subtitle": "Création du compte + documents. Ensuite OTP par email.",
   "full_name": "Nom complet",
@@ -22,7 +21,6 @@
   "accept_terms_hint": "Ex : après confirmation, la cotisation suit les règles du service.",
   "submit_register": "Créer mon compte",
   "back": "Retour",
-
   "otp_title": "Vérification OTP",
   "otp_desc": "Un code a été envoyé à votre email.",
   "verify": "Vérifier",
@@ -37,7 +35,6 @@
   "email_required": "Email requis",
   "otp_code_6_digits": "Le code doit contenir 6 chiffres",
   "otp_footer": "Si tu ne reçois rien, vérifie Spam/Promotions ou réessaie avec le bon email.",
-
   "client_create_sub": "Créer une Transactions",
   "client_sub_desc": "Wallet (Djibouti) ou virement bancaire.",
   "currency": "Devise",
@@ -53,14 +50,12 @@
   "my_subs": "Mes Transactions",
   "accept_conditions": "Accepter les conditions",
   "consent_ok": "Consentement accepté",
-
   "login_subtitle": "Accès client ou admin.",
   "login_success": "Connexion réussie ✅",
   "login_error": "Erreur login",
   "fill_required": "Veuillez remplir les champs requis.",
   "required": "Obligatoire",
   "login_hint": "Conseil: si tu viens de t’inscrire, vérifie ton OTP puis connecte-toi.",
-
   "sub_created": "Transactions créée ✅",
   "sub_create_error": "Erreur création",
   "consent_accepted": "Consentement accepté ✅",
@@ -75,7 +70,6 @@
   "load_error": "Erreur de chargement.",
   "no_subs": "Aucune cotisation.",
   "total": "total",
-
   "admin_overview": "Vue d’ensemble",
   "admin_clients": "Clients",
   "admin_subscriptions": "Transactions",
@@ -137,11 +131,10 @@
   "admin_sub_status_updated": "Statut cotisation mis à jour ✅",
   "admin_consent_forced": "Consentement forcé ✅",
   "error_generic": "Erreur",
-
   "account_type": "Type de compte",
   "account_type_client": "Client adhérent",
   "account_type_association": "Association",
-  "association_hint": "Association : infos société + contacts. Pas de documents.",
+  "association_hint": "Association : informations association + représentant + pièce du président.",
   "client_hint": "Client adhérent : formulaire complet + documents + selfie.",
   "company_name": "Nom de la société",
   "company_name_ph": "Ex : Association Xeer Ciise",
@@ -152,11 +145,9 @@
   "commune_ph": "Ex : Ras-Dika / Balbala",
   "optional": "Optionnel",
   "invite_community": "Inviter ma communauté",
-
   "role_adherent": "ADHÉRENT",
   "role_association": "ASSOCIATION",
   "role_unknown": "UTILISATEUR",
-
   "invite_title": "Invite ta communauté",
   "invite_card_title": "Invite tes proches 🚀",
   "invite_desc": "Partage via WhatsApp, SMS, ou copie un lien unique.",
@@ -170,22 +161,17 @@
   "invite_dashboard": "Accéder à mon tableau de bord →",
   "invite_tip": "Astuce: plus tu invites, plus ta communauté grandit vite.",
   "invite_message": "Rejoins-moi sur cette plateforme ✅\nInscris-toi ici:",
-
   "about": "À propos",
   "features": "Fonctionnalités",
   "contact": "Contact",
-
   "about_title": "Une solution pensée pour l'essentiel",
   "about_desc": "Nous avons conçu cette plateforme pour répondre aux vrais besoins du terrain. Simple à utiliser, puissante par nature, et accessible depuis n'importe où dans le monde.",
-
   "about_card_01": "Inscription en 2 minutes",
   "about_card_02": "Interface intuitive",
   "about_card_03": "Support 7j/7",
   "about_card_04": "Mises à jour continues",
-
   "features_title": "Tout ce dont vous avez besoin",
   "features_desc": "Des outils puissants réunis dans une seule plateforme élégante.",
-
   "feature_1_title": "Ultra rapide",
   "feature_1_desc": "Des performances optimisées pour une expérience fluide et réactive à chaque instant.",
   "feature_2_title": "Sécurisé",
@@ -194,10 +180,33 @@
   "feature_3_desc": "Disponible en plusieurs langues pour toucher un public mondial sans barrières.",
   "feature_4_title": "Analytique",
   "feature_4_desc": "Tableaux de bord en temps réel pour piloter vos activités avec précision.",
-
   "contact_title": "Parlons ensemble",
   "contact_desc": "Une question, une idée ou un projet ? Notre équipe vous répond rapidement.",
   "contact_cta": "Nous contacter",
-
-  "footer_rights": "Tous droits réservés"
+  "footer_rights": "Tous droits réservés",
+  "association_name": "Nom de l’association",
+  "association_name_ph": "Ex : Association Xeer Ciise",
+  "association_phone": "Téléphone de l’association",
+  "representative_type": "Type de représentant",
+  "representative_type_ph": "-- Choisir un type --",
+  "representative_president": "Président",
+  "representative_secretary_general": "Secrétaire général",
+  "representative_vice_president": "Vice-président",
+  "representative_name": "Nom du représentant",
+  "representative_name_ph": "Nom complet du représentant",
+  "representative_phone": "Téléphone du représentant",
+  "representative_address": "Adresse du représentant",
+  "representative_address_ph": "Adresse complète",
+  "representative_email": "Email du représentant",
+  "association_status": "Statut de l’association",
+  "association_status_ph": "Ex : Association déclarée",
+  "president_id_doc": "Pièce d’identité du président de l’association",
+  "president_id_doc_hint": "Image ou PDF, conservé côté serveur sans URL publique.",
+  "confirm_password": "Confirmer mot de passe",
+  "passwords_mismatch": "Les mots de passe ne correspondent pas.",
+  "country_required": "Pays obligatoire.",
+  "representative_type_required": "Type de représentant obligatoire.",
+  "representative_fields_required": "Tous les champs du représentant sont obligatoires.",
+  "president_id_doc_required": "Pièce d’identité du président obligatoire.",
+  "association_document_reference": "Référence document président"
 }

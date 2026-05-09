@@ -7,7 +7,6 @@
   "create_account": "Samee akoon",
   "login": "Gal",
   "logout": "Ka bax",
-
   "register_title": "Is-diiwaangelin",
   "register_subtitle": "Abuur akoon + dukumiintiyo. Kadib OTP email.",
   "full_name": "Magaca oo dhan",
@@ -22,7 +21,6 @@
   "accept_terms_hint": "Tusaale: kadib xaqiijin, lacag-bixintu waxay raacdaa xeerarka adeegga.",
   "submit_register": "Samee akoonkayga",
   "back": "Dib u noqo",
-
   "otp_title": "Xaqiijinta OTP",
   "otp_desc": "Koodh ayaa laguu soo diray email.",
   "verify": "Xaqiiji",
@@ -37,7 +35,6 @@
   "email_required": "Email waa khasab",
   "otp_code_6_digits": "Koodhku waa inuu noqdaa 6 tiro",
   "otp_footer": "Haddii aadan helin, hubi Spam ama mar kale isku day.",
-
   "client_create_sub": "Samee Macamil",
   "client_sub_desc": "Wallet (Jabuuti) ama wareejin bangi.",
   "currency": "Lacag",
@@ -53,14 +50,12 @@
   "my_subs": "Macamilooyinkayga",
   "accept_conditions": "Aqbal shuruudaha",
   "consent_ok": "Oggolaansho waa la aqbalay",
-
   "login_subtitle": "Gelitaan macmiil ama admin.",
   "login_success": "Si guul leh ayaad u gashay ✅",
   "login_error": "Khalad gelitaan",
   "fill_required": "Fadlan buuxi meelaha khasabka ah.",
   "required": "Khasab",
   "login_hint": "Talo: haddii aad is-diiwaangelisay, xaqiiji OTP kadibna gal.",
-
   "sub_created": "Macamil waa la sameeyay ✅",
   "sub_create_error": "Khalad abuuris",
   "consent_accepted": "Oggolaansho waa la aqbalay ✅",
@@ -75,7 +70,6 @@
   "load_error": "Khalad rarid.",
   "no_subs": "Ma jiraan macamilo.",
   "total": "Wadarta",
-
   "admin_overview": "Guudmar",
   "admin_clients": "Macmiil",
   "admin_subscriptions": "Macamilo",
@@ -137,11 +131,10 @@
   "admin_sub_status_updated": "Xaaladda macamil waa la cusbooneysiiyay ✅",
   "admin_consent_forced": "Oggolaansho waa la qasbay ✅",
   "error_generic": "Khalad",
-
   "account_type": "Nooca akoonka",
   "account_type_client": "Macmiil xubin",
   "account_type_association": "Urur",
-  "association_hint": "Urur: xog shirkad + xiriir. Dukumiinti looma baahna.",
+  "association_hint": "Urur: xogta ururka + wakiilka + aqoonsiga madaxweynaha.",
   "client_hint": "Macmiil xubin: foom buuxa + dukumiinti + selfie.",
   "company_name": "Magaca shirkadda",
   "company_name_ph": "Tusaale: Ururka Xeer Ciise",
@@ -152,11 +145,9 @@
   "commune_ph": "Tusaale: Ras-Dika / Balbala",
   "optional": "Ikhtiyaari",
   "invite_community": "Ku casuun bulshadayda",
-
   "role_adherent": "XUBIN",
   "role_association": "URUR",
   "role_unknown": "ISTICMAALE",
-
   "invite_title": "Ku casuun bulshadayda",
   "invite_card_title": "Ku casuun asxaabtaada 🚀",
   "invite_desc": "La wadaag WhatsApp, SMS, ama ku koobbi link gaar ah.",
@@ -170,22 +161,17 @@
   "invite_dashboard": "Gal dashboard-kayga →",
   "invite_tip": "Talo: inta badan oo aad casuunto, ayay bulshadu u kortaa.",
   "invite_message": "Ku soo biir madashan ✅\nIsdiiwaangeli halkan:",
-
   "about": "Ku saabsan",
   "features": "Astaamo",
   "contact": "Xiriir",
-
   "about_title": "Xal loogu talagalay waxa muhiimka ah",
   "about_desc": "Waxaan u naqshadeynay madashan si ay u daboolto baahiyaha dhabta ah ee adeegga. Way fududahay, awoodna way leedahay, waxaana laga isticmaali karaa meel kasta oo dunida ah.",
-
   "about_card_01": "Is-diiwaangelin 2 daqiiqo",
   "about_card_02": "Interface fudud",
   "about_card_03": "Taageero 7/7",
   "about_card_04": "Cusbooneysiin joogto ah",
-
   "features_title": "Wax kasta oo aad u baahan tahay",
   "features_desc": "Qalab awood leh oo lagu mideeyay hal madal oo qurux badan.",
-
   "feature_1_title": "Aad u dhakhso badan",
   "feature_1_desc": "Waxqabad la hagaajiyay si ay khibraddu u noqoto mid siman oo degdeg ah mar walba.",
   "feature_2_title": "Ammaan",
@@ -194,10 +180,33 @@
   "feature_3_desc": "Waxaa lagu heli karaa luuqado badan si loo gaaro dad badan oo caalami ah.",
   "feature_4_title": "Falanqayn",
   "feature_4_desc": "Dashboard-waqtiga-dhabta ah si aad u maamusho si sax ah.",
-
   "contact_title": "Aan wada hadalno",
   "contact_desc": "Su’aal, fikrad ama mashruuc? Kooxdayadu si dhakhso ah ayay kuugu soo jawaabi doontaa.",
   "contact_cta": "Nala soo xiriir",
-
-  "footer_rights": "Xuquuqda oo dhan waa la xifdiyay"
+  "footer_rights": "Xuquuqda oo dhan waa la xifdiyay",
+  "association_name": "Magaca ururka",
+  "association_name_ph": "Tusaale: Ururka Xeer Ciise",
+  "association_phone": "Telefoonka ururka",
+  "representative_type": "Nooca wakiilka",
+  "representative_type_ph": "-- Dooro nooc --",
+  "representative_president": "Madaxweyne",
+  "representative_secretary_general": "Xoghaye guud",
+  "representative_vice_president": "Madaxweyne ku-xigeen",
+  "representative_name": "Magaca wakiilka",
+  "representative_name_ph": "Magaca buuxa ee wakiilka",
+  "representative_phone": "Telefoonka wakiilka",
+  "representative_address": "Cinwaanka wakiilka",
+  "representative_address_ph": "Cinwaan buuxa",
+  "representative_email": "Emailka wakiilka",
+  "association_status": "Xaaladda ururka",
+  "association_status_ph": "Tusaale: Urur diiwaangashan",
+  "president_id_doc": "Aqoonsiga madaxweynaha ururka",
+  "president_id_doc_hint": "Sawir ama PDF, server-ka ayaa lagu haynayaa URL guud la’aan.",
+  "confirm_password": "Xaqiiji furaha sirta",
+  "passwords_mismatch": "Furayaasha sirta isma waafaqaan.",
+  "country_required": "Waddanku waa qasab.",
+  "representative_type_required": "Nooca wakiilka waa qasab.",
+  "representative_fields_required": "Dhammaan xogta wakiilka waa qasab.",
+  "president_id_doc_required": "Aqoonsiga madaxweynaha waa qasab.",
+  "association_document_reference": "Tixraaca dukumentiga madaxweynaha"
 }

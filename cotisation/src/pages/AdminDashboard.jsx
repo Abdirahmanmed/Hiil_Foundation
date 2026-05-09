@@ -156,7 +156,17 @@ export default function AdminDashboard() {
     const s = userSearch.trim().toLowerCase();
     if (!s) return users;
     return users.filter((u) =>
-      [u.fullName, u.email, u.phone, u.country, u.city, u.role, u.status]
+      [
+        u.fullName,
+        u.companyName,
+        u.email,
+        u.phone,
+        u.country,
+        u.city,
+        u.accountType,
+        u.role,
+        u.status,
+      ]
         .filter(Boolean)
         .join(" ")
         .toLowerCase()
@@ -482,9 +492,11 @@ export default function AdminDashboard() {
                       title={t("admin_user_details")}
                     >
                       <div className="font-extrabold text-slate-900">
-                        {u.fullName}
+                        {u.companyName || u.fullName}
                       </div>
-                      <div className="text-xs text-slate-500">{u.email}</div>
+                      <div className="text-xs text-slate-500">
+                        {u.email} • {u.accountType || "CLIENT_ADHERENT"}
+                      </div>
                     </button>
 
                     <div className="col-span-2 text-slate-700">{u.phone}</div>
@@ -874,13 +886,56 @@ export default function AdminDashboard() {
               return (
                 <div className="space-y-4">
                   <div className="grid gap-3 md:grid-cols-2">
-                    <SoftKpi label={t("name")} value={u.fullName} />
+                    <SoftKpi label={t("name")} value={u.companyName || u.fullName} />
+                    <SoftKpi label={t("account_type")} value={u.accountType} />
                     <SoftKpi label={t("role")} value={u.role} />
                     <SoftKpi label={t("email")} value={u.email} />
                     <SoftKpi label={t("phone")} value={u.phone} />
                     <SoftKpi label={t("country")} value={u.country} />
                     <SoftKpi label={t("city")} value={u.city} />
                   </div>
+
+                  {u.accountType === "ASSOCIATION" ? (
+                    <div className="rounded-2xl border border-emerald-100 bg-white p-4">
+                      <div className="text-xs font-black text-slate-600">
+                        {t("account_type_association")}
+                      </div>
+                      <div className="mt-3 grid gap-3 md:grid-cols-2">
+                        <SoftKpi
+                          label={t("association_status")}
+                          value={u.associationStatus}
+                        />
+                        <SoftKpi
+                          label={t("representative_type")}
+                          value={u.representativeType}
+                        />
+                        <SoftKpi
+                          label={t("representative_name")}
+                          value={u.representativeName}
+                        />
+                        <SoftKpi
+                          label={t("representative_phone")}
+                          value={u.representativePhone}
+                        />
+                        <SoftKpi
+                          label={t("representative_email")}
+                          value={u.representativeEmail}
+                        />
+                        <SoftKpi
+                          label={t("representative_address")}
+                          value={u.representativeAddress}
+                        />
+                        <SoftKpi
+                          label={t("association_document_reference")}
+                          value={
+                            u.presidentIdDocPath
+                              ? u.presidentIdDocPath.split("/").pop()
+                              : "—"
+                          }
+                        />
+                      </div>
+                    </div>
+                  ) : null}
 
                   <div className="rounded-2xl border border-emerald-100 bg-emerald-50/40 p-4">
                     <div className="flex items-center justify-between">

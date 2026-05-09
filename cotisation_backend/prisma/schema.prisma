@@ -75,7 +75,16 @@ model User {
   fullName String?
 
   // ✅ Association
+  // nom de l’association (champ historique réutilisé)
   companyName String?
+
+  associationStatus       String?
+  representativeType      String?
+  representativeName      String?
+  representativePhone     String?
+  representativeAddress   String?
+  representativeEmail     String?
+  presidentIdDocPath      String?
 
   // ✅ Commun
   phone   String  @unique
