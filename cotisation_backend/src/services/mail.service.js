@@ -4,8 +4,6 @@ import tls from "node:tls";
 import nodemailer from "nodemailer";
 import { env } from "../config/env.js";
 
-const SMTP_CONNECTION_TIMEOUT_MS = 10_000;
-
 function smtpSecureLabel() {
   return env.EMAIL_SECURE ? "implicit TLS" : "STARTTLS";
 }
@@ -16,11 +14,20 @@ function logSmtpError(context, err) {
     port: env.EMAIL_PORT,
     secure: env.EMAIL_SECURE,
     mode: smtpSecureLabel(),
+    connectionTimeoutMs: env.EMAIL_CONNECTION_TIMEOUT_MS,
+    greetingTimeoutMs: env.EMAIL_GREETING_TIMEOUT_MS,
+    socketTimeoutMs: env.EMAIL_SOCKET_TIMEOUT_MS,
     code: err?.code,
     command: err?.command,
     responseCode: err?.responseCode,
     message: err?.message || String(err),
   });
+}
+
+function createEmailDeliveryError(message) {
+  const error = new Error(message);
+  error.status = 502;
+  return error;
 }
 
 function lookupIpv4(host) {
@@ -45,7 +52,7 @@ async function connectSocket({ host, port, secure }) {
       port,
       family: 4,
       servername: host,
-      timeout: SMTP_CONNECTION_TIMEOUT_MS,
+      timeout: env.EMAIL_CONNECTION_TIMEOUT_MS,
     };
     const socket = secure ? tls.connect(socketOptions) : net.connect(socketOptions);
 
@@ -68,7 +75,7 @@ async function connectSocket({ host, port, secure }) {
       settle(reject, err);
     };
     const onTimeout = () => {
-      const err = new Error(`SMTP connection timed out after ${SMTP_CONNECTION_TIMEOUT_MS}ms`);
+      const err = new Error(`SMTP connection timed out after ${env.EMAIL_CONNECTION_TIMEOUT_MS}ms`);
       err.code = "ETIMEDOUT";
       onError(err);
     };
@@ -88,19 +95,19 @@ const transporter = nodemailer.createTransport({
     pass: env.EMAIL_PASS,
   },
 
-  // Render peut résoudre smtp.gmail.com en IPv6 alors que la sortie IPv6 n'est
-  // pas toujours routable. On fournit donc à Nodemailer une socket déjà ouverte
-  // sur une adresse IPv4 explicite pour éviter ENETUNREACH sur 2607:*:587.
+  // Render peut résoudre certains relais SMTP en IPv6 alors que la sortie IPv6
+  // n'est pas toujours routable. On fournit donc à Nodemailer une socket déjà
+  // ouverte sur une adresse IPv4 explicite, sans dépendre d'un provider précis.
   getSocket: (_options, callback) => {
     connectSocket({ host: env.EMAIL_HOST, port: env.EMAIL_PORT, secure: env.EMAIL_SECURE })
       .then((socketOptions) => callback(null, socketOptions))
       .catch((err) => callback(err));
   },
 
-  connectionTimeout: SMTP_CONNECTION_TIMEOUT_MS,
-  greetingTimeout: 10_000,
-  socketTimeout: 15_000,
-  dnsTimeout: 10_000,
+  connectionTimeout: env.EMAIL_CONNECTION_TIMEOUT_MS,
+  greetingTimeout: env.EMAIL_GREETING_TIMEOUT_MS,
+  socketTimeout: env.EMAIL_SOCKET_TIMEOUT_MS,
+  dnsTimeout: env.EMAIL_CONNECTION_TIMEOUT_MS,
 
   requireTLS: !env.EMAIL_SECURE,
 
@@ -123,7 +130,7 @@ export async function sendOtpMail({ email, code }) {
     return info;
   } catch (err) {
     logSmtpError("OTP", err);
-    throw err;
+    throw createEmailDeliveryError("Impossible d’envoyer l’email OTP pour le moment. Réessayez plus tard.");
   }
 }
 
@@ -166,6 +173,6 @@ export async function sendExpenseApprovalTokenEmail({ to, expense, token }) {
     return info;
   } catch (err) {
     logSmtpError("Expense approval token", err);
-    throw err;
+    throw createEmailDeliveryError("Impossible d’envoyer l’email du token d’approbation pour le moment. Réessayez plus tard.");
   }
 }
