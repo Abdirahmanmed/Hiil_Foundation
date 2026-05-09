@@ -1,11 +1,21 @@
 import "dotenv/config";
 
+function parseBoolean(name, fallback = false) {
+  const value = process.env[name];
+  if (value === undefined || value === "") return fallback;
+  if (["true", "1", "yes", "on"].includes(value.toLowerCase())) return true;
+  if (["false", "0", "no", "off"].includes(value.toLowerCase())) return false;
+  throw new Error(`❌ Variable d’environnement invalide : ${name} doit être true ou false`);
+}
+
 function required(name) {
   if (!process.env[name]) {
     throw new Error(`❌ Variable d’environnement manquante : ${name}`);
   }
   return process.env[name];
 }
+
+const emailPort = Number(process.env.EMAIL_PORT || 587);
 
 export const env = {
   // Server
@@ -32,7 +42,8 @@ export const env = {
 
   // EMAIL (OTP)
   EMAIL_HOST: required("EMAIL_HOST"),
-  EMAIL_PORT: Number(process.env.EMAIL_PORT || 587),
+  EMAIL_PORT: emailPort,
+  EMAIL_SECURE: parseBoolean("EMAIL_SECURE", emailPort === 465),
   EMAIL_USER: required("EMAIL_USER"),
   EMAIL_PASS: required("EMAIL_PASS"),
 

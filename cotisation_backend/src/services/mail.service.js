@@ -1,26 +1,112 @@
+import dns from "node:dns";
+import net from "node:net";
+import tls from "node:tls";
 import nodemailer from "nodemailer";
 import { env } from "../config/env.js";
 
+const SMTP_CONNECTION_TIMEOUT_MS = 10_000;
+
+function smtpSecureLabel() {
+  return env.EMAIL_SECURE ? "implicit TLS" : "STARTTLS";
+}
+
+function logSmtpError(context, err) {
+  console.error(`❌ ${context} SMTP email failed`, {
+    host: env.EMAIL_HOST,
+    port: env.EMAIL_PORT,
+    secure: env.EMAIL_SECURE,
+    mode: smtpSecureLabel(),
+    code: err?.code,
+    command: err?.command,
+    responseCode: err?.responseCode,
+    message: err?.message || String(err),
+  });
+}
+
+function lookupIpv4(host) {
+  return new Promise((resolve, reject) => {
+    dns.lookup(host, { family: 4 }, (err, address) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      resolve(address);
+    });
+  });
+}
+
+async function connectSocket({ host, port, secure }) {
+  const address = await lookupIpv4(host);
+
+  return new Promise((resolve, reject) => {
+    let settled = false;
+    const socketOptions = {
+      host: address,
+      port,
+      family: 4,
+      servername: host,
+      timeout: SMTP_CONNECTION_TIMEOUT_MS,
+    };
+    const socket = secure ? tls.connect(socketOptions) : net.connect(socketOptions);
+
+    const cleanup = () => {
+      socket.removeListener("connect", onConnect);
+      socket.removeListener("secureConnect", onSecureConnect);
+      socket.removeListener("error", onError);
+      socket.removeListener("timeout", onTimeout);
+    };
+    const settle = (fn, value) => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      fn(value);
+    };
+    const onConnect = () => settle(resolve, { connection: socket });
+    const onSecureConnect = () => settle(resolve, { connection: socket, secured: true });
+    const onError = (err) => {
+      socket.destroy();
+      settle(reject, err);
+    };
+    const onTimeout = () => {
+      const err = new Error(`SMTP connection timed out after ${SMTP_CONNECTION_TIMEOUT_MS}ms`);
+      err.code = "ETIMEDOUT";
+      onError(err);
+    };
+
+    socket.once(secure ? "secureConnect" : "connect", secure ? onSecureConnect : onConnect);
+    socket.once("error", onError);
+    socket.once("timeout", onTimeout);
+  });
+}
+
 const transporter = nodemailer.createTransport({
-  host: env.EMAIL_HOST,                 // smtp.gmail.com
-  port: Number(env.EMAIL_PORT || 587),  // 587
-  secure: false,                        // 587 => STARTTLS
+  host: env.EMAIL_HOST,
+  port: env.EMAIL_PORT,
+  secure: env.EMAIL_SECURE,
   auth: {
     user: env.EMAIL_USER,
     pass: env.EMAIL_PASS,
   },
 
-  // ✅ Evite blocage infini (Render)
-  connectionTimeout: 10_000,
+  // Render peut résoudre smtp.gmail.com en IPv6 alors que la sortie IPv6 n'est
+  // pas toujours routable. On fournit donc à Nodemailer une socket déjà ouverte
+  // sur une adresse IPv4 explicite pour éviter ENETUNREACH sur 2607:*:587.
+  getSocket: (_options, callback) => {
+    connectSocket({ host: env.EMAIL_HOST, port: env.EMAIL_PORT, secure: env.EMAIL_SECURE })
+      .then((socketOptions) => callback(null, socketOptions))
+      .catch((err) => callback(err));
+  },
+
+  connectionTimeout: SMTP_CONNECTION_TIMEOUT_MS,
   greetingTimeout: 10_000,
   socketTimeout: 15_000,
+  dnsTimeout: 10_000,
 
-  // ✅ Force STARTTLS (souvent utile sur hébergeurs)
-  requireTLS: true,
+  requireTLS: !env.EMAIL_SECURE,
 
-  // ✅ Parfois nécessaire sur infra cloud
   tls: {
-    rejectUnauthorized: false,
+    servername: env.EMAIL_HOST,
+    minVersion: "TLSv1.2",
   },
 });
 
@@ -36,18 +122,17 @@ export async function sendOtpMail({ email, code }) {
     console.log("✅ OTP email sent:", info.messageId);
     return info;
   } catch (err) {
-    console.error("❌ OTP email failed:", err?.message || err);
+    logSmtpError("OTP", err);
     throw err;
   }
 }
 
-// ✅ Optionnel: test SMTP au démarrage (très utile)
 export async function verifyMailer() {
   try {
     await transporter.verify();
-    console.log("✅ SMTP ready");
-  } catch (e) {
-    console.error("❌ SMTP verify failed:", e?.message || e);
+    console.log(`✅ SMTP ready (${env.EMAIL_HOST}:${env.EMAIL_PORT}, ${smtpSecureLabel()}, IPv4 forced)`);
+  } catch (err) {
+    logSmtpError("SMTP verify", err);
   }
 }
 
@@ -80,7 +165,7 @@ export async function sendExpenseApprovalTokenEmail({ to, expense, token }) {
     console.log("✅ Expense approval token email sent:", info.messageId);
     return info;
   } catch (err) {
-    console.error("❌ Expense approval token email failed:", err?.message || err);
+    logSmtpError("Expense approval token", err);
     throw err;
   }
 }
