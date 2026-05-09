@@ -219,5 +219,14 @@
   "city_placeholder": "Tusaale: Djibouti-ville",
   "password_hint": "Ugu yaraan 8 xaraf",
   "password_placeholder": "Ugu yaraan 8 xaraf",
-  "confirm_password_placeholder": "Ku celi furaha sirta"
+  "confirm_password_placeholder": "Ku celi furaha sirta",
+  "role_expense_manager": "Gestionnaire dépense",
+  "role_super_admin": "Super Admin",
+  "role_treasury": "Équipe trésorerie",
+  "expenses_dashboard": "Dashboard dépenses",
+  "expense_management": "Gestion de dépense",
+  "create_expense": "Créer une dépense",
+  "payment_orders": "Ordres de paiement",
+  "create_payment_order": "Créer un ordre de paiement",
+  "print": "Imprimer"
 }

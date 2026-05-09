@@ -92,7 +92,7 @@ export async function login(req, res, next) {
 
 export async function me(req, res, next) {
   try {
-    const user = await authService.getMe({ userId: req.user.sub });
+    const user = await authService.getMe({ userId: req.user.id });
     return res.json({ user });
   } catch (err) {
     next(err);

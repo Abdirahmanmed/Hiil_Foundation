@@ -6,6 +6,9 @@ import Login from "./pages/Login";
 import OtpVerify from "./pages/OtpVerify";
 import ClientDashboard from "./pages/ClientDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
+import ExpenseManagerDashboard from "./pages/ExpenseManagerDashboard";
+import SuperAdminDashboard from "./pages/SuperAdminDashboard";
+import TreasuryDashboard from "./pages/TreasuryDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
@@ -57,6 +60,33 @@ export default function App() {
             element={
               <ProtectedRoute role="ADMIN">
                 <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/expense-manager"
+            element={
+              <ProtectedRoute role="GESTIONNAIRE_DEPENSE">
+                <ExpenseManagerDashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/super-admin"
+            element={
+              <ProtectedRoute role="SUPER_ADMIN">
+                <SuperAdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/treasury"
+            element={
+              <ProtectedRoute role="EQUIPE_TRESORERIE">
+                <TreasuryDashboard />
               </ProtectedRoute>
             }
           />

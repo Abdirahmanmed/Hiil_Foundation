@@ -219,5 +219,14 @@
   "city_placeholder": "Ex : Djibouti-ville",
   "password_hint": "Minimum 8 caractères",
   "password_placeholder": "Minimum 8 caractères",
-  "confirm_password_placeholder": "Répétez votre mot de passe"
+  "confirm_password_placeholder": "Répétez votre mot de passe",
+  "role_expense_manager": "Gestionnaire dépense",
+  "role_super_admin": "Super Admin",
+  "role_treasury": "Équipe trésorerie",
+  "expenses_dashboard": "Dashboard dépenses",
+  "expense_management": "Gestion de dépense",
+  "create_expense": "Créer une dépense",
+  "payment_orders": "Ordres de paiement",
+  "create_payment_order": "Créer un ordre de paiement",
+  "print": "Imprimer"
 }

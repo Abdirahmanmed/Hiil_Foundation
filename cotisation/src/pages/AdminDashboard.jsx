@@ -517,6 +517,9 @@ export default function AdminDashboard() {
                       >
                         <option value="CLIENT">CLIENT</option>
                         <option value="ADMIN">ADMIN</option>
+                        <option value="GESTIONNAIRE_DEPENSE">GESTIONNAIRE_DEPENSE</option>
+                        <option value="SUPER_ADMIN">SUPER_ADMIN</option>
+                        <option value="EQUIPE_TRESORERIE">EQUIPE_TRESORERIE</option>
                       </Select>
                     </div>
 

@@ -12,6 +12,9 @@ datasource db {
 enum Role {
   CLIENT
   ADMIN
+  GESTIONNAIRE_DEPENSE
+  SUPER_ADMIN
+  EQUIPE_TRESORERIE
 }
 
 enum MemberStatus {
@@ -44,6 +47,9 @@ enum Frequency {
 enum PaymentMethod {
   BANK_TRANSFER
   WALLET
+  VIREMENT_BANCAIRE
+  CASH
+  CHEQUE
 }
 
 enum WalletProvider {
@@ -62,6 +68,35 @@ enum PaymentMode {
 enum AccountType {
   CLIENT_ADHERENT
   ASSOCIATION
+}
+
+enum ExpenseType {
+  ALIMENTATION
+  CONSTRUCTION
+  MEDICAMENT
+}
+
+enum Country {
+  DJIBOUTI
+  ETHIOPIE
+}
+
+enum ExpenseStatus {
+  EN_ATTENTE
+  APPROUVER
+  EFFECTUER
+  REJETER
+}
+
+enum Currency {
+  FRANC
+  DOLLAR
+  BIRR_ETHIOPIEN
+}
+
+enum PaymentOrderStatus {
+  CREE
+  IMPRIME
 }
 
 model User {
@@ -111,6 +146,8 @@ model User {
   otps          Otp[]
   subscriptions Subscription[]
   auditLogs     AuditLog[]
+  expenses      Expense[]
+  paymentOrders PaymentOrder[]
 }
 
 model Otp {
@@ -185,4 +222,56 @@ model AuditLog {
 
   @@index([action, createdAt])
   @@index([userId, createdAt])
+}
+
+model Expense {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  date               DateTime
+  type               ExpenseType
+  label              String
+  quantity           Int
+  unitPrice          Int
+  amount             Int
+  beneficiaryName    String
+  beneficiaryCountry Country
+  beneficiaryCity    String
+  status             ExpenseStatus @default(EN_ATTENTE)
+
+  createdById           String
+  createdBy             User      @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  approvedByManagerAt   DateTime?
+  approvalTokenHash     String?
+  approvalTokenExpiresAt DateTime?
+  superAdminNotifiedAt  DateTime?
+
+  paymentOrders PaymentOrder[]
+
+  @@index([createdById, createdAt])
+  @@index([status, createdAt])
+}
+
+model PaymentOrder {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  expenseId String
+  expense   Expense @relation(fields: [expenseId], references: [id], onDelete: Restrict)
+
+  createdById String
+  createdBy   User   @relation(fields: [createdById], references: [id], onDelete: Restrict)
+
+  tokenUsedHash   String
+  paymentMethod   PaymentMethod
+  currency        Currency
+  paymentCountry  Country
+  amount          Int
+  referenceNumber String             @unique
+  status          PaymentOrderStatus @default(CREE)
+
+  @@index([expenseId])
+  @@index([createdById, createdAt])
 }
