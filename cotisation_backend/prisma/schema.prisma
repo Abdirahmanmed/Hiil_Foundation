@@ -78,7 +78,7 @@ model User {
   // nom de l’association (champ historique réutilisé)
   companyName String?
 
-  associationStatus       String?
+  associationStatusDocPath String?
   representativeType      String?
   representativeName      String?
   representativePhone     String?

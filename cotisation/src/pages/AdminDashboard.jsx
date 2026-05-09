@@ -903,7 +903,11 @@ export default function AdminDashboard() {
                       <div className="mt-3 grid gap-3 md:grid-cols-2">
                         <SoftKpi
                           label={t("association_status")}
-                          value={u.associationStatus}
+                          value={
+                            u.associationStatusDocPath
+                              ? u.associationStatusDocPath.split("/").pop()
+                              : "—"
+                          }
                         />
                         <SoftKpi
                           label={t("representative_type")}

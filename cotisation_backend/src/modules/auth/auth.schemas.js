@@ -24,14 +24,13 @@ export const registerSchema = z
     email: z.preprocess(trim, z.string().email("Email invalide")),
     country: requiredTrimmedString("Pays requis", 2),
     city: requiredTrimmedString("Ville requise", 2),
-    password: z.string().min(6, "Mot de passe min 6 caractères"),
+    password: z.string().min(8, "Mot de passe min 8 caractères"),
     confirmPassword: z.string().optional(),
 
     // ASSOCIATION
     companyName: optionalTrimmedString,
     phone2: optionalTrimmedString,
     commune: optionalTrimmedString,
-    associationStatus: optionalTrimmedString,
     representativeType: z.string().optional().transform(trim),
     representativeName: optionalTrimmedString,
     representativePhone: optionalTrimmedString,
@@ -100,11 +99,6 @@ export const registerSchema = z
           "representativeAddress",
           data.representativeAddress,
           "Adresse du représentant requise",
-        ],
-        [
-          "associationStatus",
-          data.associationStatus,
-          "Statut de l’association requis",
         ],
       ].forEach(([path, value, message]) => {
         if (!value || value.length < 2) {

@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useMemo, useState } from "react";
 import Brand from "../components/Brand";
 import LanguageSwitcher from "../components/LanguageSwitcher";
+import { useAuth } from "../context/AuthContext";
 
 /* ─── Palette ─────────────────────────────────────────────── */
 const G = {
@@ -66,6 +67,7 @@ export default function Home() {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language?.startsWith("ar");
   const [menuOpen, setMenuOpen] = useState(false);
+  const { user } = useAuth();
 
   // i18n-driven content (memo for perf + to avoid rerenders)
   const NAV_LINKS = useMemo(
@@ -162,6 +164,26 @@ export default function Home() {
             >
               <LanguageSwitcher />
 
+              {!user ? (
+                <Link
+                  to="/login"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    padding: "0.6rem 1rem",
+                    borderRadius: "0.75rem",
+                    border: `1px solid ${G.greenBorder}`,
+                    background: G.greenLight,
+                    color: G.green,
+                    fontWeight: 800,
+                    fontSize: "0.85rem",
+                    textDecoration: "none",
+                  }}
+                >
+                  {t("login")}
+                </Link>
+              ) : null}
+
               <button
                 onClick={() => setMenuOpen(!menuOpen)}
                 className="mobile-burger"
@@ -207,6 +229,23 @@ export default function Home() {
                   {label}
                 </a>
               ))}
+              {!user ? (
+                <Link
+                  to="/login"
+                  onClick={() => setMenuOpen(false)}
+                  style={{
+                    display: "block",
+                    padding: "0.65rem 0",
+                    color: G.green,
+                    textDecoration: "none",
+                    fontWeight: 800,
+                    fontSize: "0.9rem",
+                    borderBottom: `1px solid ${G.border}`,
+                  }}
+                >
+                  {t("login")}
+                </Link>
+              ) : null}
             </div>
           )}
         </div>

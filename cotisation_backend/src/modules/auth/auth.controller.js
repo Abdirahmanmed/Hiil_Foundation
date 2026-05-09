@@ -21,7 +21,6 @@ export async function register(req, res, next) {
       city: req.body.city,
       commune: req.body.commune,
 
-      associationStatus: req.body.associationStatus,
       representativeType: req.body.representativeType,
       representativeName: req.body.representativeName,
       representativePhone: req.body.representativePhone,
@@ -53,7 +52,7 @@ export async function register(req, res, next) {
         associationName: user.companyName,
         associationPhone: user.phone,
         associationCountry: user.country,
-        associationStatus: user.associationStatus,
+        associationStatusDocPath: user.associationStatusDocPath,
         representativeType: user.representativeType,
         representativeName: user.representativeName,
         representativePhone: user.representativePhone,

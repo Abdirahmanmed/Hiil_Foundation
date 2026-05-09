@@ -79,6 +79,7 @@ export default function Register() {
       const password = fd.get("password");
       const confirmPassword = fd.get("confirmPassword");
       const presidentIdDoc = fd.get("presidentIdDoc");
+      const associationStatusDoc = fd.get("associationStatusDoc");
 
       if (password !== confirmPassword) {
         return toast.error(t("passwords_mismatch"));
@@ -106,6 +107,10 @@ export default function Register() {
       if (!presidentIdDoc || presidentIdDoc.size === 0) {
         return toast.error(t("president_id_doc_required"));
       }
+
+      if (!associationStatusDoc || associationStatusDoc.size === 0) {
+        return toast.error(t("association_status_doc_required"));
+      }
     }
 
     // ✅ NOMS EXACTS BACKEND
@@ -122,7 +127,7 @@ export default function Register() {
       fd.delete("companyName");
       fd.delete("phone2");
       fd.delete("commune");
-      fd.delete("associationStatus");
+      fd.delete("associationStatusDoc");
       fd.delete("representativeType");
       fd.delete("representativeName");
       fd.delete("representativePhone");
@@ -310,7 +315,7 @@ export default function Register() {
                     >
                       <Input
                         name="representativePhone"
-                        placeholder={t("phone_placeholder")}
+                        placeholder={t("representative_phone_placeholder")}
                         inputMode="tel"
                         required
                         className="border-emerald-100 bg-white text-slate-800 placeholder:text-slate-400 focus:border-emerald-400 focus:ring-emerald-200"
@@ -345,14 +350,13 @@ export default function Register() {
                 ) : null}
 
                 <div className="grid gap-4 md:grid-cols-2">
-                  <Field label={t("association_status")} hint={t("required")}>
-                    <Input
-                      name="associationStatus"
-                      placeholder={t("association_status_ph")}
-                      required
-                      className="border-emerald-100 bg-white text-slate-800 placeholder:text-slate-400 focus:border-emerald-400 focus:ring-emerald-200"
-                    />
-                  </Field>
+                  <FileBox
+                    title={t("association_status")}
+                    subtitle={t("association_status_doc_hint")}
+                    name="associationStatusDoc"
+                    accept="image/*,application/pdf"
+                    required
+                  />
 
                   <FileBox
                     title={t("president_id_doc")}
@@ -367,7 +371,7 @@ export default function Register() {
                   <Field label={t("password")} hint={t("password_hint")}>
                     <Input
                       name="password"
-                      placeholder="********"
+                      placeholder={t("password_placeholder")}
                       type="password"
                       required
                       className="border-emerald-100 bg-white text-slate-800 placeholder:text-slate-400 focus:border-emerald-400 focus:ring-emerald-200"
@@ -377,7 +381,7 @@ export default function Register() {
                   <Field label={t("confirm_password")} hint={t("required")}>
                     <Input
                       name="confirmPassword"
-                      placeholder="********"
+                      placeholder={t("confirm_password_placeholder")}
                       type="password"
                       required
                       className="border-emerald-100 bg-white text-slate-800 placeholder:text-slate-400 focus:border-emerald-400 focus:ring-emerald-200"
@@ -425,7 +429,7 @@ export default function Register() {
                   <Field label={t("password")} hint={t("password_hint")}>
                     <Input
                       name="password"
-                      placeholder="********"
+                      placeholder={t("password_placeholder")}
                       type="password"
                       required
                       className="border-emerald-100 bg-white text-slate-800 placeholder:text-slate-400 focus:border-emerald-400 focus:ring-emerald-200"
@@ -485,9 +489,11 @@ export default function Register() {
                   <div className="text-sm font-extrabold text-slate-900">
                     {t("accept_terms")}
                   </div>
-                  <div className="mt-1 text-xs text-slate-600">
-                    {t("accept_terms_hint")}
-                  </div>
+                  {t("accept_terms_hint") ? (
+                    <div className="mt-1 text-xs text-slate-600">
+                      {t("accept_terms_hint")}
+                    </div>
+                  ) : null}
                 </div>
               </label>
             </div>

@@ -10,6 +10,7 @@ export async function createUser({ data, files, req }) {
   const idDoc = files?.idDoc?.[0];
   const selfie = files?.selfie?.[0];
   const presidentIdDoc = files?.presidentIdDoc?.[0];
+  const associationStatusDoc = files?.associationStatusDoc?.[0];
 
   // ✅ Fichiers requis seulement pour ADHERENT
   if (isAdherent) {
@@ -20,10 +21,18 @@ export async function createUser({ data, files, req }) {
     }
   }
 
-  if (isAssociation && !presidentIdDoc) {
-    const err = new Error("Pièce d’identité du président requise.");
-    err.status = 400;
-    throw err;
+  if (isAssociation) {
+    if (!presidentIdDoc) {
+      const err = new Error("Pièce d’identité du président requise.");
+      err.status = 400;
+      throw err;
+    }
+
+    if (!associationStatusDoc) {
+      const err = new Error("Statut de l’association requis.");
+      err.status = 400;
+      throw err;
+    }
   }
 
   const passwordHash = await hashPassword(data.password);
@@ -46,7 +55,9 @@ export async function createUser({ data, files, req }) {
       city: data.city,
       commune: isAssociation ? data.commune : null,
 
-      associationStatus: isAssociation ? data.associationStatus : null,
+      associationStatusDocPath: isAssociation
+        ? associationStatusDoc.path
+        : null,
       representativeType: isAssociation ? data.representativeType : null,
       representativeName: isAssociation ? data.representativeName : null,
       representativePhone: isAssociation ? data.representativePhone : null,
@@ -72,7 +83,7 @@ export async function createUser({ data, files, req }) {
       country: true,
       city: true,
       commune: true,
-      associationStatus: true,
+      associationStatusDocPath: true,
       representativeType: true,
       representativeName: true,
       representativePhone: true,
@@ -150,7 +161,7 @@ export async function loginUser({ email, password, req }) {
       associationName: user.companyName,
       associationPhone: user.phone,
       associationCountry: user.country,
-      associationStatus: user.associationStatus,
+      associationStatusDocPath: user.associationStatusDocPath,
       representativeType: user.representativeType,
       representativeName: user.representativeName,
       representativePhone: user.representativePhone,
@@ -176,7 +187,7 @@ export async function getMe({ userId }) {
       country: true,
       city: true,
       commune: true,
-      associationStatus: true,
+      associationStatusDocPath: true,
       representativeType: true,
       representativeName: true,
       representativePhone: true,

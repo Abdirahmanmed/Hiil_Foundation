@@ -12,6 +12,7 @@ router.post(
     { name: "idDoc", maxCount: 1 },
     { name: "selfie", maxCount: 1 },
     { name: "presidentIdDoc", maxCount: 1 },
+    { name: "associationStatusDoc", maxCount: 1 },
   ]),
   register,
 );

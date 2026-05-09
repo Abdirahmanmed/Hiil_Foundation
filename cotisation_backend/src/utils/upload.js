@@ -11,13 +11,15 @@ function ensureDir(dir) {
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    // fieldname : "idDoc" | "selfie" | "presidentIdDoc"
+    // fieldname : "idDoc" | "selfie" | "presidentIdDoc" | "associationStatusDoc"
     const dir =
       file.fieldname === "selfie"
         ? "uploads/selfies"
         : file.fieldname === "presidentIdDoc"
           ? "private_uploads/president_id_docs"
-          : "uploads/id_docs";
+          : file.fieldname === "associationStatusDoc"
+            ? "private_uploads/association_status_docs"
+            : "uploads/id_docs";
     ensureDir(dir);
     cb(null, dir);
   },
