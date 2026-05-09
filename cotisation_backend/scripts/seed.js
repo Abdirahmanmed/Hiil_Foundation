@@ -1,39 +1,68 @@
 import prisma from "../src/config/prisma.js";
 import { hashPassword } from "../src/utils/hash.js";
 
+const users = [
+  {
+    fullName: "Administrateur Principal",
+    email: "admin@cotisations.com",
+    phone: "77000000",
+    role: "ADMIN",
+    password: "Admin@123",
+  },
+  {
+    fullName: "Gestionnaire de Dépense",
+    email: "gestionnaire@hiilfoundation.org",
+    phone: "77111111",
+    role: "GESTIONNAIRE_DEPENSE",
+    password: "Gestion@123",
+  },
+  {
+    fullName: "Super Admin",
+    email: "abdirahmanneymar71@gmail.com",
+    phone: "77222222",
+    role: "SUPER_ADMIN",
+    password: "Super@123",
+  },
+  {
+    fullName: "Équipe Trésorerie",
+    email: "tresorerie@hiilfoundation.org",
+    phone: "77333333",
+    role: "EQUIPE_TRESORERIE",
+    password: "Tresor@123",
+  },
+];
+
 async function main() {
-  const email = "admin@cotisations.com";
-  const phone = "77000000";
+  for (const user of users) {
+    const exists = await prisma.user.findFirst({
+      where: {
+        OR: [{ email: user.email }, { phone: user.phone }],
+      },
+    });
 
-  const exists = await prisma.user.findFirst({
-    where: {
-      OR: [{ email }, { phone }],
-    },
-  });
+    if (exists) {
+      console.log(`ℹ️ Utilisateur existe déjà : ${user.email}`);
+      continue;
+    }
 
-  if (exists) {
-    console.log("ℹ️ Admin existe déjà :", exists.email);
-    return;
+    const passwordHash = await hashPassword(user.password);
+
+    await prisma.user.create({
+      data: {
+        fullName: user.fullName,
+        email: user.email,
+        phone: user.phone,
+        country: "Djibouti",
+        city: "Djibouti",
+        passwordHash,
+        role: user.role,
+        status: "ACTIVE",
+      },
+    });
+
+    console.log(`✅ Créé : ${user.email} | ${user.role}`);
+    console.log(`🔑 Mot de passe : ${user.password}`);
   }
-
-  const passwordHash = await hashPassword("Admin@123");
-
-  const admin = await prisma.user.create({
-    data: {
-      fullName: "Super Admin",
-      email,
-      phone,
-      country: "Djibouti",
-      city: "Djibouti",
-      passwordHash,
-      role: "ADMIN",
-      status: "ACTIVE",
-    },
-  });
-
-  console.log("✅ Admin créé avec succès");
-  console.log("📧 Email :", email);
-  console.log("🔑 Mot de passe :", "Admin@123");
 }
 
 main()
