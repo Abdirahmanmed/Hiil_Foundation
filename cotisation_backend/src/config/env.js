@@ -15,7 +15,18 @@ function required(name) {
   return process.env[name];
 }
 
-const emailPort = Number(process.env.EMAIL_PORT || 587);
+function parsePositiveInteger(name, fallback) {
+  const rawValue = process.env[name];
+  const value = rawValue === undefined || rawValue === "" ? fallback : Number(rawValue);
+
+  if (!Number.isInteger(value) || value <= 0) {
+    throw new Error(`❌ Variable d’environnement invalide : ${name} doit être un entier positif`);
+  }
+
+  return value;
+}
+
+const emailPort = parsePositiveInteger("EMAIL_PORT", 587);
 
 export const env = {
   // Server
@@ -46,6 +57,9 @@ export const env = {
   EMAIL_SECURE: parseBoolean("EMAIL_SECURE", emailPort === 465),
   EMAIL_USER: required("EMAIL_USER"),
   EMAIL_PASS: required("EMAIL_PASS"),
+  EMAIL_CONNECTION_TIMEOUT_MS: parsePositiveInteger("EMAIL_CONNECTION_TIMEOUT_MS", 30_000),
+  EMAIL_GREETING_TIMEOUT_MS: parsePositiveInteger("EMAIL_GREETING_TIMEOUT_MS", 30_000),
+  EMAIL_SOCKET_TIMEOUT_MS: parsePositiveInteger("EMAIL_SOCKET_TIMEOUT_MS", 60_000),
 
   // Upload
   UPLOAD_MAX_MB: Number(process.env.UPLOAD_MAX_MB || 10),
