@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export const http = axios.create({
-  baseURL: "http://localhost:4000",
+  baseURL: "https://hiil-foundation-api.onrender.com",
 });
 
 http.interceptors.request.use((config) => {
