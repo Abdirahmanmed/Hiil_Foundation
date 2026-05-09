@@ -249,7 +249,7 @@ export async function getUserDetails({ userId }) {
       country: true,
       city: true,
       commune: true,
-      associationStatus: true,
+      associationStatusDocPath: true,
       representativeType: true,
       representativeName: true,
       representativePhone: true,

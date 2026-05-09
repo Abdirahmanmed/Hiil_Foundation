@@ -14,7 +14,7 @@ export default function Brand() {
       </div>
       <div>
         <div className="text-lg font-black tracking-tight">Hiil Foundation</div>
-        <div className="text-xs text-black/55">Sécurisé • VIP-ready</div>
+        <div className="text-xs text-black/55">Transactions sécurisées</div>
       </div>
     </div>
   );

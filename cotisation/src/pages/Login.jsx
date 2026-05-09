@@ -98,10 +98,6 @@ export default function Login() {
             <div className="text-2xl font-black tracking-tight text-slate-900">
               {t("login")}
             </div>
-            <div className="mt-1 text-sm text-slate-600">
-              {t("login_subtitle")}
-            </div>
-
             <form onSubmit={onSubmit} className="mt-6 space-y-5">
               <Field label={t("email")} hint={t("required")}>
                 <Input
