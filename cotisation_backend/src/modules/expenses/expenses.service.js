@@ -107,11 +107,12 @@ export async function approveExpense({ user, id, req }) {
   }
 
   const superAdmins = await prisma.user.findMany({
-    where: { role: "SUPER_ADMIN", email: { not: null } },
+    where: { role: "SUPER_ADMIN" },
     select: { email: true },
   });
-  if (!superAdmins.length) {
-    const err = new Error("Aucun SUPER_ADMIN avec email n'est configuré");
+  const superAdminEmails = superAdmins.map((admin) => admin.email).filter(Boolean);
+  if (!superAdminEmails.length) {
+    const err = new Error("Aucun Super Admin avec email valide trouvé.");
     err.status = 409;
     throw err;
   }
@@ -133,10 +134,10 @@ export async function approveExpense({ user, id, req }) {
   });
 
   await Promise.all(
-    superAdmins.map((admin) => sendExpenseApprovalTokenEmail({ to: admin.email, expense, token })),
+    superAdminEmails.map((email) => sendExpenseApprovalTokenEmail({ to: email, expense, token })),
   );
 
-  await auditLog({ userId: user.id, action: "EXPENSE_APPROVE", entity: "Expense", entityId: id, req, meta: { expiresAt, notifiedSuperAdmins: superAdmins.length } });
+  await auditLog({ userId: user.id, action: "EXPENSE_APPROVE", entity: "Expense", entityId: id, req, meta: { expiresAt, notifiedSuperAdmins: superAdminEmails.length } });
   return { message: "Demande envoyée au Super Admin avec token par email" };
 }
 
