@@ -50,3 +50,37 @@ export async function verifyMailer() {
     console.error("❌ SMTP verify failed:", e?.message || e);
   }
 }
+
+export async function sendExpenseApprovalTokenEmail({ to, expense, token }) {
+  const expiresAt = expense.approvalTokenExpiresAt
+    ? new Date(expense.approvalTokenExpiresAt).toLocaleString("fr-FR")
+    : "Non renseignée";
+  const lines = [
+    "Bonjour,",
+    "",
+    "Une dépense Hiil Foundation a été approuvée par le gestionnaire des dépenses.",
+    `Référence dépense : ${expense.id}`,
+    `Libellé : ${expense.label}`,
+    `Montant : ${expense.amount}`,
+    `Bénéficiaire : ${expense.beneficiaryName}`,
+    `Token : ${token}`,
+    `Expiration : ${expiresAt}`,
+    "",
+    "Le SUPER_ADMIN doit transmettre ce token manuellement à l’équipe trésorerie.",
+    "Le token n’est pas stocké en clair en base de données.",
+  ];
+
+  try {
+    const info = await transporter.sendMail({
+      from: `Hiil Foundation <${env.EMAIL_USER}>`,
+      to,
+      subject: "Token d’approbation de dépense - Hiil Foundation",
+      text: lines.join("\n"),
+    });
+    console.log("✅ Expense approval token email sent:", info.messageId);
+    return info;
+  } catch (err) {
+    console.error("❌ Expense approval token email failed:", err?.message || err);
+    throw err;
+  }
+}

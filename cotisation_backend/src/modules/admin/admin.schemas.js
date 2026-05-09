@@ -5,7 +5,7 @@ export const setUserStatusSchema = z.object({
 });
 
 export const setUserRoleSchema = z.object({
-  role: z.enum(["CLIENT", "ADMIN"]),
+  role: z.enum(["CLIENT", "ADMIN", "GESTIONNAIRE_DEPENSE", "SUPER_ADMIN", "EQUIPE_TRESORERIE"]),
 });
 
 export const resetUserOtpSchema = z.object({});

@@ -40,7 +40,7 @@ export async function setUserStatus(req, res, next) {
   try {
     const body = setUserStatusSchema.parse(req.body);
     const updated = await adminService.setUserStatus({
-      adminId: req.user.sub,
+      adminId: req.user.id,
       userId: req.params.userId,
       status: body.status,
       req,
@@ -55,7 +55,7 @@ export async function setUserRole(req, res, next) {
   try {
     const body = setUserRoleSchema.parse(req.body);
     const updated = await adminService.setUserRole({
-      adminId: req.user.sub,
+      adminId: req.user.id,
       userId: req.params.userId,
       role: body.role,
       req,
@@ -70,7 +70,7 @@ export async function resetUserOtp(req, res, next) {
   try {
     resetUserOtpSchema.parse(req.body || {});
     const updated = await adminService.resetUserOtpSecurity({
-      adminId: req.user.sub,
+      adminId: req.user.id,
       userId: req.params.userId,
       req,
     });
@@ -86,7 +86,7 @@ export async function setSubStatus(req, res, next) {
   try {
     const body = setSubscriptionStatusSchema.parse(req.body);
     const updated = await adminService.setSubscriptionStatus({
-      adminId: req.user.sub,
+      adminId: req.user.id,
       subscriptionId: req.params.subscriptionId,
       status: body.status,
       req,
@@ -101,7 +101,7 @@ export async function forceConsent(req, res, next) {
   try {
     const body = forceConsentSchema.parse(req.body || {});
     const updated = await adminService.forceSubscriptionConsent({
-      adminId: req.user.sub,
+      adminId: req.user.id,
       subscriptionId: req.params.subscriptionId,
       consentVersion: body.consentVersion,
       req,

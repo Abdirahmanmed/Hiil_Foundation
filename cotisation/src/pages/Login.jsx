@@ -47,8 +47,15 @@ export default function Login() {
       // ✅ si nouveau client qui vient de valider OTP → propose invitation
       const inviteAfter = localStorage.getItem("invite_after_login") === "1";
 
-      if (data.user.role === "ADMIN") {
-        nav("/admin");
+      const roleRedirects = {
+        ADMIN: "/admin",
+        GESTIONNAIRE_DEPENSE: "/expense-manager",
+        SUPER_ADMIN: "/super-admin",
+        EQUIPE_TRESORERIE: "/treasury",
+      };
+
+      if (roleRedirects[data.user.role]) {
+        nav(roleRedirects[data.user.role]);
         return;
       }
 
