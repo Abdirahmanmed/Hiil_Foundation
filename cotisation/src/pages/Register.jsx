@@ -47,6 +47,7 @@ export default function Register() {
 
   // ✅ Backend attendu: CLIENT_ADHERENT | ASSOCIATION
   const [accountType, setAccountType] = useState("CLIENT_ADHERENT");
+  const [representativeType, setRepresentativeType] = useState("");
   const isAssociation = accountType === "ASSOCIATION";
 
   const m = useMutation({
@@ -74,12 +75,46 @@ export default function Register() {
 
     const fd = new FormData(e.currentTarget);
 
+    if (isAssociation) {
+      const password = fd.get("password");
+      const confirmPassword = fd.get("confirmPassword");
+      const presidentIdDoc = fd.get("presidentIdDoc");
+
+      if (password !== confirmPassword) {
+        return toast.error(t("passwords_mismatch"));
+      }
+
+      if (!fd.get("country")) {
+        return toast.error(t("country_required"));
+      }
+
+      if (!fd.get("representativeType")) {
+        return toast.error(t("representative_type_required"));
+      }
+
+      const representativeRequiredFields = [
+        "representativeName",
+        "representativePhone",
+        "representativeAddress",
+        "representativeEmail",
+      ];
+
+      if (representativeRequiredFields.some((field) => !fd.get(field))) {
+        return toast.error(t("representative_fields_required"));
+      }
+
+      if (!presidentIdDoc || presidentIdDoc.size === 0) {
+        return toast.error(t("president_id_doc_required"));
+      }
+    }
+
     // ✅ NOMS EXACTS BACKEND
     fd.set("accountType", accountType);
     fd.set("acceptedConditions", "true");
 
     if (isAssociation) {
       fd.delete("fullName");
+      fd.delete("phone2");
       fd.delete("idDoc");
       fd.delete("selfie");
       fd.delete("consentAccepted");
@@ -87,6 +122,14 @@ export default function Register() {
       fd.delete("companyName");
       fd.delete("phone2");
       fd.delete("commune");
+      fd.delete("associationStatus");
+      fd.delete("representativeType");
+      fd.delete("representativeName");
+      fd.delete("representativePhone");
+      fd.delete("representativeAddress");
+      fd.delete("representativeEmail");
+      fd.delete("presidentIdDoc");
+      fd.delete("confirmPassword");
     }
 
     m.mutate(fd);
@@ -130,7 +173,10 @@ export default function Register() {
               <Field label={t("account_type")} hint={t("required")}>
                 <Select
                   value={accountType}
-                  onChange={(e) => setAccountType(e.target.value)}
+                  onChange={(e) => {
+                    setAccountType(e.target.value);
+                    setRepresentativeType("");
+                  }}
                   className="border-emerald-100 bg-white text-slate-800 focus:border-emerald-400 focus:ring-emerald-200"
                 >
                   <option value="CLIENT_ADHERENT">
@@ -153,16 +199,16 @@ export default function Register() {
             {isAssociation ? (
               <>
                 <div className="grid gap-4 md:grid-cols-2">
-                  <Field label={t("company_name")} hint={t("required")}>
+                  <Field label={t("association_name")} hint={t("required")}>
                     <Input
                       name="companyName"
-                      placeholder={t("company_name_ph")}
+                      placeholder={t("association_name_ph")}
                       required
                       className="border-emerald-100 bg-white text-slate-800 placeholder:text-slate-400 focus:border-emerald-400 focus:ring-emerald-200"
                     />
                   </Field>
 
-                  <Field label={t("phone")} hint={t("required")}>
+                  <Field label={t("association_phone")} hint={t("required")}>
                     <Input
                       name="phone"
                       placeholder={t("phone_placeholder")}
@@ -174,15 +220,6 @@ export default function Register() {
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2">
-                  <Field label={t("phone_2")} hint={t("optional")}>
-                    <Input
-                      name="phone2"
-                      placeholder={t("phone2_ph")}
-                      inputMode="tel"
-                      className="border-emerald-100 bg-white text-slate-800 placeholder:text-slate-400 focus:border-emerald-400 focus:ring-emerald-200"
-                    />
-                  </Field>
-
                   <Field label={t("email")} hint={t("required")}>
                     <Input
                       name="email"
@@ -192,18 +229,24 @@ export default function Register() {
                       className="border-emerald-100 bg-white text-slate-800 placeholder:text-slate-400 focus:border-emerald-400 focus:ring-emerald-200"
                     />
                   </Field>
+
+                  <Field label={t("country")} hint={t("required")}>
+                    <Select
+                      name="country"
+                      defaultValue=""
+                      required
+                      className="border-emerald-100 bg-white text-slate-800 focus:border-emerald-400 focus:ring-emerald-200"
+                    >
+                      <option value="" disabled>
+                        {t("choose_country_first")}
+                      </option>
+                      <option value="Djibouti">Djibouti</option>
+                      <option value="Ethiopie">Ethiopie</option>
+                    </Select>
+                  </Field>
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2">
-                  <Field label={t("country")} hint={t("required")}>
-                    <Input
-                      name="country"
-                      placeholder={t("country_placeholder")}
-                      required
-                      className="border-emerald-100 bg-white text-slate-800 placeholder:text-slate-400 focus:border-emerald-400 focus:ring-emerald-200"
-                    />
-                  </Field>
-
                   <Field label={t("city")} hint={t("required")}>
                     <Input
                       name="city"
@@ -212,21 +255,128 @@ export default function Register() {
                       className="border-emerald-100 bg-white text-slate-800 placeholder:text-slate-400 focus:border-emerald-400 focus:ring-emerald-200"
                     />
                   </Field>
-                </div>
 
-                <div className="grid gap-4 md:grid-cols-2">
-                  <Field label={t("commune")} hint={t("required")}>
+                  <Field label={t("commune")} hint={t("optional")}>
                     <Input
                       name="commune"
                       placeholder={t("commune_ph")}
+                      className="border-emerald-100 bg-white text-slate-800 placeholder:text-slate-400 focus:border-emerald-400 focus:ring-emerald-200"
+                    />
+                  </Field>
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  <Field label={t("representative_type")} hint={t("required")}>
+                    <Select
+                      name="representativeType"
+                      value={representativeType}
+                      onChange={(e) => setRepresentativeType(e.target.value)}
+                      required
+                      className="border-emerald-100 bg-white text-slate-800 focus:border-emerald-400 focus:ring-emerald-200"
+                    >
+                      <option value="" disabled>
+                        {t("representative_type_ph")}
+                      </option>
+                      <option value="PRESIDENT">
+                        {t("representative_president")}
+                      </option>
+                      <option value="SECRETAIRE_GENERAL">
+                        {t("representative_secretary_general")}
+                      </option>
+                      <option value="VICE_PRESIDENT">
+                        {t("representative_vice_president")}
+                      </option>
+                    </Select>
+                  </Field>
+                </div>
+
+                {representativeType ? (
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <Field
+                      label={t("representative_name")}
+                      hint={t("required")}
+                    >
+                      <Input
+                        name="representativeName"
+                        placeholder={t("representative_name_ph")}
+                        required
+                        className="border-emerald-100 bg-white text-slate-800 placeholder:text-slate-400 focus:border-emerald-400 focus:ring-emerald-200"
+                      />
+                    </Field>
+
+                    <Field
+                      label={t("representative_phone")}
+                      hint={t("required")}
+                    >
+                      <Input
+                        name="representativePhone"
+                        placeholder={t("phone_placeholder")}
+                        inputMode="tel"
+                        required
+                        className="border-emerald-100 bg-white text-slate-800 placeholder:text-slate-400 focus:border-emerald-400 focus:ring-emerald-200"
+                      />
+                    </Field>
+
+                    <Field
+                      label={t("representative_address")}
+                      hint={t("required")}
+                    >
+                      <Input
+                        name="representativeAddress"
+                        placeholder={t("representative_address_ph")}
+                        required
+                        className="border-emerald-100 bg-white text-slate-800 placeholder:text-slate-400 focus:border-emerald-400 focus:ring-emerald-200"
+                      />
+                    </Field>
+
+                    <Field
+                      label={t("representative_email")}
+                      hint={t("required")}
+                    >
+                      <Input
+                        name="representativeEmail"
+                        placeholder={t("email_placeholder")}
+                        type="email"
+                        required
+                        className="border-emerald-100 bg-white text-slate-800 placeholder:text-slate-400 focus:border-emerald-400 focus:ring-emerald-200"
+                      />
+                    </Field>
+                  </div>
+                ) : null}
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  <Field label={t("association_status")} hint={t("required")}>
+                    <Input
+                      name="associationStatus"
+                      placeholder={t("association_status_ph")}
                       required
                       className="border-emerald-100 bg-white text-slate-800 placeholder:text-slate-400 focus:border-emerald-400 focus:ring-emerald-200"
                     />
                   </Field>
 
+                  <FileBox
+                    title={t("president_id_doc")}
+                    subtitle={t("president_id_doc_hint")}
+                    name="presidentIdDoc"
+                    accept="image/*,application/pdf"
+                    required
+                  />
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-2">
                   <Field label={t("password")} hint={t("password_hint")}>
                     <Input
                       name="password"
+                      placeholder="********"
+                      type="password"
+                      required
+                      className="border-emerald-100 bg-white text-slate-800 placeholder:text-slate-400 focus:border-emerald-400 focus:ring-emerald-200"
+                    />
+                  </Field>
+
+                  <Field label={t("confirm_password")} hint={t("required")}>
+                    <Input
+                      name="confirmPassword"
                       placeholder="********"
                       type="password"
                       required

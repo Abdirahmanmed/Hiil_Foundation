@@ -9,6 +9,7 @@ export async function createUser({ data, files, req }) {
 
   const idDoc = files?.idDoc?.[0];
   const selfie = files?.selfie?.[0];
+  const presidentIdDoc = files?.presidentIdDoc?.[0];
 
   // ✅ Fichiers requis seulement pour ADHERENT
   if (isAdherent) {
@@ -17,6 +18,12 @@ export async function createUser({ data, files, req }) {
       err.status = 400;
       throw err;
     }
+  }
+
+  if (isAssociation && !presidentIdDoc) {
+    const err = new Error("Pièce d’identité du président requise.");
+    err.status = 400;
+    throw err;
   }
 
   const passwordHash = await hashPassword(data.password);
@@ -32,12 +39,20 @@ export async function createUser({ data, files, req }) {
       companyName: isAssociation ? data.companyName : null,
 
       phone: data.phone,
-      phone2: isAssociation ? (data.phone2 || null) : null,
+      phone2: null,
 
       email: data.email,
       country: data.country,
       city: data.city,
       commune: isAssociation ? data.commune : null,
+
+      associationStatus: isAssociation ? data.associationStatus : null,
+      representativeType: isAssociation ? data.representativeType : null,
+      representativeName: isAssociation ? data.representativeName : null,
+      representativePhone: isAssociation ? data.representativePhone : null,
+      representativeAddress: isAssociation ? data.representativeAddress : null,
+      representativeEmail: isAssociation ? data.representativeEmail : null,
+      presidentIdDocPath: isAssociation ? presidentIdDoc.path : null,
 
       passwordHash,
       status: "PENDING_VERIFICATION",
@@ -57,6 +72,12 @@ export async function createUser({ data, files, req }) {
       country: true,
       city: true,
       commune: true,
+      associationStatus: true,
+      representativeType: true,
+      representativeName: true,
+      representativePhone: true,
+      representativeAddress: true,
+      representativeEmail: true,
       status: true,
       role: true,
       accountType: true,
@@ -126,6 +147,15 @@ export async function loginUser({ email, password, req }) {
       country: user.country,
       city: user.city,
       commune: user.commune,
+      associationName: user.companyName,
+      associationPhone: user.phone,
+      associationCountry: user.country,
+      associationStatus: user.associationStatus,
+      representativeType: user.representativeType,
+      representativeName: user.representativeName,
+      representativePhone: user.representativePhone,
+      representativeAddress: user.representativeAddress,
+      representativeEmail: user.representativeEmail,
       role: user.role,
       status: user.status,
       accountType: user.accountType,
@@ -146,6 +176,12 @@ export async function getMe({ userId }) {
       country: true,
       city: true,
       commune: true,
+      associationStatus: true,
+      representativeType: true,
+      representativeName: true,
+      representativePhone: true,
+      representativeAddress: true,
+      representativeEmail: true,
       role: true,
       status: true,
       accountType: true,

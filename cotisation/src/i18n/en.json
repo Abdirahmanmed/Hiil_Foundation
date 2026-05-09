@@ -7,7 +7,6 @@
   "create_account": "Create account",
   "login": "Login",
   "logout": "Logout",
-
   "register_title": "Registration",
   "register_subtitle": "Account creation + documents. Then OTP by email.",
   "full_name": "Full name",
@@ -22,7 +21,6 @@
   "accept_terms_hint": "Example: after confirmation, the contribution follows service rules.",
   "submit_register": "Create my account",
   "back": "Back",
-
   "otp_title": "OTP Verification",
   "otp_desc": "A code has been sent to your email.",
   "verify": "Verify",
@@ -37,7 +35,6 @@
   "email_required": "Email required",
   "otp_code_6_digits": "Code must contain 6 digits",
   "otp_footer": "If you receive nothing, check Spam/Promotions or retry with the correct email.",
-
   "client_create_sub": "Create a Transaction",
   "client_sub_desc": "Wallet (Djibouti) or bank transfer.",
   "currency": "Currency",
@@ -53,14 +50,12 @@
   "my_subs": "My Transactions",
   "accept_conditions": "Accept conditions",
   "consent_ok": "Consent accepted",
-
   "login_subtitle": "Client or admin access.",
   "login_success": "Login successful ✅",
   "login_error": "Login error",
   "fill_required": "Please fill required fields.",
   "required": "Required",
   "login_hint": "Tip: if you just registered, verify your OTP then login.",
-
   "sub_created": "Transaction created ✅",
   "sub_create_error": "Creation error",
   "consent_accepted": "Consent accepted ✅",
@@ -75,7 +70,6 @@
   "load_error": "Loading error.",
   "no_subs": "No transactions.",
   "total": "total",
-
   "admin_overview": "Overview",
   "admin_clients": "Clients",
   "admin_subscriptions": "Transactions",
@@ -137,11 +131,10 @@
   "admin_sub_status_updated": "Transaction status updated ✅",
   "admin_consent_forced": "Consent forced ✅",
   "error_generic": "Error",
-
   "account_type": "Account type",
   "account_type_client": "Member client",
   "account_type_association": "Association",
-  "association_hint": "Association: company info + contacts. No documents.",
+  "association_hint": "Association: association details + representative + president ID document.",
   "client_hint": "Member client: full form + documents + selfie.",
   "company_name": "Company name",
   "company_name_ph": "Example: Xeer Ciise Association",
@@ -152,11 +145,9 @@
   "commune_ph": "Example: Ras-Dika / Balbala",
   "optional": "Optional",
   "invite_community": "Invite my community",
-
   "role_adherent": "MEMBER",
   "role_association": "ASSOCIATION",
   "role_unknown": "USER",
-
   "invite_title": "Invite your community",
   "invite_card_title": "Invite your friends 🚀",
   "invite_desc": "Share via WhatsApp, SMS, or copy a unique link.",
@@ -170,22 +161,17 @@
   "invite_dashboard": "Go to my dashboard →",
   "invite_tip": "Tip: the more you invite, the faster your community grows.",
   "invite_message": "Join me on this platform ✅\nSign up here:",
-
   "about": "About",
   "features": "Features",
   "contact": "Contact",
-
   "about_title": "A solution built for what matters",
   "about_desc": "We designed this platform to meet real needs in the field. Simple to use, powerful by nature, and accessible from anywhere in the world.",
-
   "about_card_01": "Sign up in 2 minutes",
   "about_card_02": "Intuitive interface",
   "about_card_03": "Support 7 days a week",
   "about_card_04": "Continuous updates",
-
   "features_title": "Everything you need",
   "features_desc": "Powerful tools combined in one elegant platform.",
-
   "feature_1_title": "Ultra fast",
   "feature_1_desc": "Optimized performance for a smooth and responsive experience at all times.",
   "feature_2_title": "Secure",
@@ -194,10 +180,33 @@
   "feature_3_desc": "Available in multiple languages to reach a global audience without barriers.",
   "feature_4_title": "Analytics",
   "feature_4_desc": "Real-time dashboards to manage your activity with precision.",
-
   "contact_title": "Let’s talk",
   "contact_desc": "A question, an idea, or a project? Our team will get back to you quickly.",
   "contact_cta": "Contact us",
-
-  "footer_rights": "All rights reserved"
+  "footer_rights": "All rights reserved",
+  "association_name": "Association name",
+  "association_name_ph": "E.g. Xeer Ciise Association",
+  "association_phone": "Association phone",
+  "representative_type": "Representative type",
+  "representative_type_ph": "-- Choose a type --",
+  "representative_president": "President",
+  "representative_secretary_general": "Secretary general",
+  "representative_vice_president": "Vice-president",
+  "representative_name": "Representative name",
+  "representative_name_ph": "Representative full name",
+  "representative_phone": "Representative phone",
+  "representative_address": "Representative address",
+  "representative_address_ph": "Full address",
+  "representative_email": "Representative email",
+  "association_status": "Association status",
+  "association_status_ph": "E.g. Registered association",
+  "president_id_doc": "Association president ID document",
+  "president_id_doc_hint": "Image or PDF, kept server-side without a public URL.",
+  "confirm_password": "Confirm password",
+  "passwords_mismatch": "Passwords do not match.",
+  "country_required": "Country is required.",
+  "representative_type_required": "Representative type is required.",
+  "representative_fields_required": "All representative fields are required.",
+  "president_id_doc_required": "President ID document is required.",
+  "association_document_reference": "President document reference"
 }

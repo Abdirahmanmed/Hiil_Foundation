@@ -7,7 +7,6 @@
   "create_account": "إنشاء حساب",
   "login": "تسجيل الدخول",
   "logout": "تسجيل الخروج",
-
   "register_title": "التسجيل",
   "register_subtitle": "إنشاء حساب + مستندات ثم OTP عبر البريد.",
   "full_name": "الاسم الكامل",
@@ -22,7 +21,6 @@
   "accept_terms_hint": "مثال: بعد التأكيد يتم الالتزام بقواعد الخدمة.",
   "submit_register": "إنشاء حسابي",
   "back": "رجوع",
-
   "otp_title": "التحقق عبر OTP",
   "otp_desc": "تم إرسال رمز إلى بريدك الإلكتروني.",
   "verify": "تحقق",
@@ -37,7 +35,6 @@
   "email_required": "البريد الإلكتروني مطلوب",
   "otp_code_6_digits": "يجب أن يحتوي الرمز على 6 أرقام",
   "otp_footer": "إن لم يصلك شيء، تحقق من البريد غير الهام.",
-
   "client_create_sub": "إنشاء معاملة",
   "client_sub_desc": "محفظة (جيبوتي) أو تحويل بنكي.",
   "currency": "العملة",
@@ -53,14 +50,12 @@
   "my_subs": "معاملاتي",
   "accept_conditions": "قبول الشروط",
   "consent_ok": "تم قبول الموافقة",
-
   "login_subtitle": "دخول عميل أو مدير.",
   "login_success": "تم تسجيل الدخول بنجاح ✅",
   "login_error": "خطأ في تسجيل الدخول",
   "fill_required": "يرجى ملء الحقول المطلوبة.",
   "required": "إجباري",
   "login_hint": "إذا سجلت حديثًا، تحقق من OTP ثم قم بتسجيل الدخول.",
-
   "sub_created": "تم إنشاء المعاملة ✅",
   "sub_create_error": "خطأ في الإنشاء",
   "consent_accepted": "تم قبول الموافقة ✅",
@@ -75,7 +70,6 @@
   "load_error": "خطأ في التحميل.",
   "no_subs": "لا توجد معاملات.",
   "total": "الإجمالي",
-
   "admin_overview": "نظرة عامة",
   "admin_clients": "العملاء",
   "admin_subscriptions": "المعاملات",
@@ -137,11 +131,10 @@
   "admin_sub_status_updated": "تم تحديث حالة المعاملة ✅",
   "admin_consent_forced": "تم فرض الموافقة ✅",
   "error_generic": "خطأ",
-
   "account_type": "نوع الحساب",
   "account_type_client": "عميل عضو",
   "account_type_association": "جمعية",
-  "association_hint": "الجمعية: معلومات الشركة + جهات الاتصال. بدون مستندات.",
+  "association_hint": "الجمعية: بيانات الجمعية + الممثل + وثيقة هوية الرئيس.",
   "client_hint": "العميل العضو: نموذج كامل + مستندات + صورة شخصية.",
   "company_name": "اسم الشركة",
   "company_name_ph": "مثال: جمعية Xeer Ciise",
@@ -152,11 +145,9 @@
   "commune_ph": "مثال: Ras-Dika / Balbala",
   "optional": "اختياري",
   "invite_community": "ادعُ مجتمعي",
-
   "role_adherent": "عضو",
   "role_association": "جمعية",
   "role_unknown": "مستخدم",
-
   "invite_title": "ادعُ مجتمعي",
   "invite_card_title": "ادعُ أصدقاءك 🚀",
   "invite_desc": "شارك عبر واتساب أو SMS أو انسخ رابطًا فريدًا.",
@@ -170,22 +161,17 @@
   "invite_dashboard": "الذهاب إلى لوحة التحكم →",
   "invite_tip": "نصيحة: كلما دعوت أكثر، كبر مجتمعك أسرع.",
   "invite_message": "انضم إليّ في هذه المنصة ✅\nسجّل هنا:",
-
   "about": "حول",
   "features": "الميزات",
   "contact": "تواصل",
-
   "about_title": "حل مُصمّم للأهم",
   "about_desc": "صممنا هذه المنصة لتلبية الاحتياجات الواقعية. سهلة الاستخدام، قوية بطبيعتها، ومتاحة من أي مكان في العالم.",
-
   "about_card_01": "تسجيل خلال دقيقتين",
   "about_card_02": "واجهة سهلة",
   "about_card_03": "دعم 7/7",
   "about_card_04": "تحديثات مستمرة",
-
   "features_title": "كل ما تحتاجه",
   "features_desc": "أدوات قوية مجمّعة في منصة واحدة أنيقة.",
-
   "feature_1_title": "سريع جدًا",
   "feature_1_desc": "أداء مُحسّن لتجربة سلسة وسريعة الاستجابة دائمًا.",
   "feature_2_title": "آمن",
@@ -194,10 +180,33 @@
   "feature_3_desc": "متوفر بعدة لغات للوصول إلى جمهور عالمي دون حواجز.",
   "feature_4_title": "تحليلات",
   "feature_4_desc": "لوحات تحكم لحظية لإدارة نشاطك بدقة.",
-
   "contact_title": "لنتحدث",
   "contact_desc": "سؤال، فكرة أو مشروع؟ فريقنا سيرد عليك بسرعة.",
   "contact_cta": "تواصل معنا",
-
-  "footer_rights": "جميع الحقوق محفوظة"
+  "footer_rights": "جميع الحقوق محفوظة",
+  "association_name": "اسم الجمعية",
+  "association_name_ph": "مثال: جمعية Xeer Ciise",
+  "association_phone": "هاتف الجمعية",
+  "representative_type": "نوع الممثل",
+  "representative_type_ph": "-- اختر النوع --",
+  "representative_president": "الرئيس",
+  "representative_secretary_general": "الأمين العام",
+  "representative_vice_president": "نائب الرئيس",
+  "representative_name": "اسم الممثل",
+  "representative_name_ph": "الاسم الكامل للممثل",
+  "representative_phone": "هاتف الممثل",
+  "representative_address": "عنوان الممثل",
+  "representative_address_ph": "العنوان الكامل",
+  "representative_email": "بريد الممثل الإلكتروني",
+  "association_status": "حالة الجمعية",
+  "association_status_ph": "مثال: جمعية مسجلة",
+  "president_id_doc": "وثيقة هوية رئيس الجمعية",
+  "president_id_doc_hint": "صورة أو PDF محفوظة على الخادم بدون رابط عام.",
+  "confirm_password": "تأكيد كلمة المرور",
+  "passwords_mismatch": "كلمتا المرور غير متطابقتين.",
+  "country_required": "البلد إلزامي.",
+  "representative_type_required": "نوع الممثل إلزامي.",
+  "representative_fields_required": "كل حقول الممثل إلزامية.",
+  "president_id_doc_required": "وثيقة هوية الرئيس إلزامية.",
+  "association_document_reference": "مرجع وثيقة الرئيس"
 }

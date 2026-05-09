@@ -21,7 +21,15 @@ export async function register(req, res, next) {
       city: req.body.city,
       commune: req.body.commune,
 
+      associationStatus: req.body.associationStatus,
+      representativeType: req.body.representativeType,
+      representativeName: req.body.representativeName,
+      representativePhone: req.body.representativePhone,
+      representativeAddress: req.body.representativeAddress,
+      representativeEmail: req.body.representativeEmail,
+
       password: req.body.password,
+      confirmPassword: req.body.confirmPassword,
       acceptedConditions: accepted,
     });
 
@@ -41,6 +49,16 @@ export async function register(req, res, next) {
         role: user.role,
         status: user.status,
         accountType: user.accountType,
+        companyName: user.companyName,
+        associationName: user.companyName,
+        associationPhone: user.phone,
+        associationCountry: user.country,
+        associationStatus: user.associationStatus,
+        representativeType: user.representativeType,
+        representativeName: user.representativeName,
+        representativePhone: user.representativePhone,
+        representativeAddress: user.representativeAddress,
+        representativeEmail: user.representativeEmail,
       },
     });
 
