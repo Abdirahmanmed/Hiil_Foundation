@@ -18,7 +18,7 @@ const users = [
   },
   {
     fullName: "Super Admin",
-    email: "abdirahmanneymar71@gmail.com",
+    email: "superadmin@hiilfoundation.org",
     phone: "77222222",
     role: "SUPER_ADMIN",
     password: "Super@123",
@@ -41,7 +41,20 @@ async function main() {
     });
 
     if (exists) {
-      console.log(`ℹ️ Utilisateur existe déjà : ${user.email}`);
+      if (user.role === "SUPER_ADMIN") {
+        await prisma.user.update({
+          where: { id: exists.id },
+          data: {
+            fullName: user.fullName,
+            email: user.email,
+            role: "SUPER_ADMIN",
+            status: "ACTIVE",
+          },
+        });
+        console.log(`ℹ️ Super Admin vérifié : ${user.email}`);
+      } else {
+        console.log(`ℹ️ Utilisateur existe déjà : ${user.email}`);
+      }
       continue;
     }
 

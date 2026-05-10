@@ -32,7 +32,7 @@ export async function list(req, res, next) {
 export async function approve(req, res, next) {
   try {
     const params = expenseIdParamsSchema.parse(req.params);
-    const result = await service.approveExpense({ user: req.user, id: params.id, req });
+    const result = await service.approveExpense({ userId: req.user.id, role: req.user.role, id: params.id, req });
     res.json(result);
   } catch (err) {
     next(err);

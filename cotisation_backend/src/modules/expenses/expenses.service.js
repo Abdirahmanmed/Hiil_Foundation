@@ -109,8 +109,8 @@ export async function listExpenses({ user }) {
   });
 }
 
-function assertSuperAdmin(user) {
-  if (user.role !== "SUPER_ADMIN") {
+function assertSuperAdminRole(role) {
+  if (role !== "SUPER_ADMIN") {
     const err = new Error("Action réservée au Super Admin");
     err.status = 403;
     throw err;
@@ -130,14 +130,22 @@ function ensureActionableExpense(expense) {
   }
 }
 
-export async function approveExpense({ user, id, req }) {
-  assertSuperAdmin(user);
+export async function approveExpense({ userId: currentUserId, role, id, req }) {
+  assertSuperAdminRole(role);
 
   const existing = await prisma.expense.findUnique({ where: { id } });
   ensureActionableExpense(existing);
 
-  if (!user.email) {
-    const err = new Error("Le Super Admin connecté n’a pas d’email valide.");
+  const superAdmin = await prisma.user.findUnique({
+    where: { id: currentUserId },
+    select: { id: true, email: true, role: true, fullName: true },
+  });
+
+  console.log("Expense approved by SUPER_ADMIN", { userId: currentUserId, hasEmail: Boolean(superAdmin?.email) });
+
+  const superAdminEmail = superAdmin?.email?.trim();
+  if (!superAdmin || superAdmin.role !== "SUPER_ADMIN" || !superAdminEmail || !superAdminEmail.includes("@")) {
+    const err = new Error("Votre compte Super Admin n’a pas d’email valide. Veuillez mettre à jour votre email.");
     err.status = 409;
     throw err;
   }
@@ -158,22 +166,22 @@ export async function approveExpense({ user, id, req }) {
     select: publicExpenseSelect(),
   });
 
-  await sendExpenseApprovalTokenEmail({ to: user.email, expense, token });
+  await sendExpenseApprovalTokenEmail({ to: superAdminEmail, expense, token });
 
   await auditLog({
-    userId: user.id,
+    userId: currentUserId,
     action: "EXPENSE_APPROVED",
     entity: "Expense",
     entityId: id,
     req,
-    meta: { expiresAt, notifiedSuperAdminEmail: user.email },
+    meta: { expiresAt, notifiedSuperAdminEmail: superAdminEmail },
   });
 
   return { message: "Dépense approuvée. Le token a été envoyé au Super Admin connecté." };
 }
 
 export async function rejectExpense({ user, id, req }) {
-  assertSuperAdmin(user);
+  assertSuperAdminRole(user.role);
 
   const existing = await prisma.expense.findUnique({ where: { id } });
   ensureActionableExpense(existing);
