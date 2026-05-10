@@ -16,7 +16,7 @@ export const createPaymentOrderSchema = z.object({
 }).superRefine((data, ctx) => {
   if (!bankPaymentMethods.includes(data.paymentMethod)) return;
 
-  for (const field of ["bankCountry", "bankName", "bankReference"]) {
+  for (const field of ["bankName", "bankReference"]) {
     if (!data[field]) {
       ctx.addIssue({
         code: "custom",

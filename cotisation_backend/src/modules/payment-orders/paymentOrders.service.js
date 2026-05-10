@@ -76,7 +76,7 @@ export async function createPaymentOrder({ user, data, req }) {
         currency: data.currency,
         paymentCountry: data.paymentCountry,
         amount: data.amount,
-        bankCountry: data.paymentMethod === "CASH" ? null : data.bankCountry,
+        bankCountry: data.paymentMethod === "CASH" ? null : data.paymentCountry,
         bankName: data.paymentMethod === "CASH" ? null : data.bankName,
         bankReference: data.paymentMethod === "CASH" ? null : data.bankReference,
         bankAccountHolder: data.paymentMethod === "CASH" ? null : data.bankAccountHolder,
