@@ -8,7 +8,25 @@ function hashToken(token) {
 
 function includeOrder() {
   return {
-    expense: { include: { createdBy: { select: { id: true, fullName: true, companyName: true, email: true } } } },
+    expense: {
+      select: {
+        id: true,
+        createdAt: true,
+        updatedAt: true,
+        date: true,
+        type: true,
+        label: true,
+        quantity: true,
+        unitPrice: true,
+        amount: true,
+        beneficiaryName: true,
+        beneficiaryCountry: true,
+        beneficiaryCity: true,
+        status: true,
+        createdById: true,
+        createdBy: { select: { id: true, fullName: true, companyName: true, email: true } },
+      },
+    },
     createdBy: { select: { id: true, fullName: true, email: true } },
   };
 }
@@ -58,6 +76,10 @@ export async function createPaymentOrder({ user, data, req }) {
         currency: data.currency,
         paymentCountry: data.paymentCountry,
         amount: data.amount,
+        bankCountry: data.paymentMethod === "CASH" ? null : data.bankCountry,
+        bankName: data.paymentMethod === "CASH" ? null : data.bankName,
+        bankReference: data.paymentMethod === "CASH" ? null : data.bankReference,
+        bankAccountHolder: data.paymentMethod === "CASH" ? null : data.bankAccountHolder,
         referenceNumber,
         status: "CREE",
       },

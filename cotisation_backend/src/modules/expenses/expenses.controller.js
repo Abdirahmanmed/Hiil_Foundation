@@ -38,3 +38,13 @@ export async function approve(req, res, next) {
     next(err);
   }
 }
+
+export async function reject(req, res, next) {
+  try {
+    const params = expenseIdParamsSchema.parse(req.params);
+    const result = await service.rejectExpense({ user: req.user, id: params.id, req });
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
+}

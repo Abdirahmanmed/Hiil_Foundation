@@ -265,11 +265,15 @@ model PaymentOrder {
   createdBy   User   @relation(fields: [createdById], references: [id], onDelete: Restrict)
 
   tokenUsedHash   String
-  paymentMethod   PaymentMethod
-  currency        Currency
-  paymentCountry  Country
-  amount          Int
-  referenceNumber String             @unique
+  paymentMethod     PaymentMethod
+  currency          Currency
+  paymentCountry    Country
+  amount            Int
+  bankCountry       Country?
+  bankName          String?
+  bankReference     String?
+  bankAccountHolder String?
+  referenceNumber   String             @unique
   status          PaymentOrderStatus @default(CREE)
 
   @@index([expenseId])
