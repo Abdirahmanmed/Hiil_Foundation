@@ -21,3 +21,8 @@ export async function approveExpense(id) {
   const res = await http.patch(`${basePath}/${id}/approve`, {});
   return res.data;
 }
+
+export async function rejectExpense(id) {
+  const res = await http.patch(`${basePath}/${id}/reject`, {});
+  return res.data;
+}

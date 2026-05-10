@@ -9,8 +9,24 @@ function hashToken(token) {
   return crypto.createHash("sha256").update(token).digest("hex");
 }
 
-function publicExpenseInclude() {
+function publicExpenseSelect() {
   return {
+    id: true,
+    createdAt: true,
+    updatedAt: true,
+    date: true,
+    type: true,
+    label: true,
+    quantity: true,
+    unitPrice: true,
+    amount: true,
+    beneficiaryName: true,
+    beneficiaryCountry: true,
+    beneficiaryCity: true,
+    status: true,
+    createdById: true,
+    approvedByManagerAt: true,
+    superAdminNotifiedAt: true,
     createdBy: { select: { id: true, fullName: true, companyName: true, email: true } },
     paymentOrders: { select: { id: true, referenceNumber: true, status: true } },
   };
@@ -71,7 +87,7 @@ export async function createExpense({ user, data, req }) {
       status: "EN_ATTENTE",
       createdById: user.id,
     },
-    include: publicExpenseInclude(),
+    select: publicExpenseSelect(),
   });
 
   await auditLog({ userId: user.id, action: "EXPENSE_CREATE", entity: "Expense", entityId: expense.id, req, meta: { amount, type: expense.type } });
@@ -89,30 +105,39 @@ export async function listExpenses({ user }) {
   return prisma.expense.findMany({
     where,
     orderBy: { createdAt: "desc" },
-    include: publicExpenseInclude(),
+    select: publicExpenseSelect(),
   });
 }
 
-export async function approveExpense({ user, id, req }) {
-  const existing = await prisma.expense.findFirst({ where: { id, createdById: user.id } });
-  if (!existing) {
+function assertSuperAdmin(user) {
+  if (user.role !== "SUPER_ADMIN") {
+    const err = new Error("Action réservée au Super Admin");
+    err.status = 403;
+    throw err;
+  }
+}
+
+function ensureActionableExpense(expense) {
+  if (!expense) {
     const err = new Error("Dépense introuvable");
     err.status = 404;
     throw err;
   }
-  if (existing.status === "EFFECTUER") {
+  if (expense.status === "EFFECTUER") {
     const err = new Error("Cette dépense est déjà effectuée");
     err.status = 409;
     throw err;
   }
+}
 
-  const superAdmins = await prisma.user.findMany({
-    where: { role: "SUPER_ADMIN" },
-    select: { email: true },
-  });
-  const superAdminEmails = superAdmins.map((admin) => admin.email).filter(Boolean);
-  if (!superAdminEmails.length) {
-    const err = new Error("Aucun Super Admin avec email valide trouvé.");
+export async function approveExpense({ user, id, req }) {
+  assertSuperAdmin(user);
+
+  const existing = await prisma.expense.findUnique({ where: { id } });
+  ensureActionableExpense(existing);
+
+  if (!user.email) {
+    const err = new Error("Le Super Admin connecté n’a pas d’email valide.");
     err.status = 409;
     throw err;
   }
@@ -130,15 +155,43 @@ export async function approveExpense({ user, id, req }) {
       approvalTokenExpiresAt: expiresAt,
       superAdminNotifiedAt: new Date(),
     },
-    include: publicExpenseInclude(),
+    select: publicExpenseSelect(),
   });
 
-  await Promise.all(
-    superAdminEmails.map((email) => sendExpenseApprovalTokenEmail({ to: email, expense, token })),
-  );
+  await sendExpenseApprovalTokenEmail({ to: user.email, expense, token });
 
-  await auditLog({ userId: user.id, action: "EXPENSE_APPROVE", entity: "Expense", entityId: id, req, meta: { expiresAt, notifiedSuperAdmins: superAdminEmails.length } });
-  return { message: "Demande envoyée au Super Admin avec token par email" };
+  await auditLog({
+    userId: user.id,
+    action: "EXPENSE_APPROVED",
+    entity: "Expense",
+    entityId: id,
+    req,
+    meta: { expiresAt, notifiedSuperAdminEmail: user.email },
+  });
+
+  return { message: "Dépense approuvée. Le token a été envoyé au Super Admin connecté." };
+}
+
+export async function rejectExpense({ user, id, req }) {
+  assertSuperAdmin(user);
+
+  const existing = await prisma.expense.findUnique({ where: { id } });
+  ensureActionableExpense(existing);
+
+  const expense = await prisma.expense.update({
+    where: { id },
+    data: {
+      status: "REJETER",
+      approvalTokenHash: null,
+      approvalTokenExpiresAt: null,
+      superAdminNotifiedAt: null,
+    },
+    select: publicExpenseSelect(),
+  });
+
+  await auditLog({ userId: user.id, action: "EXPENSE_REJECTED", entity: "Expense", entityId: id, req });
+
+  return { message: "Dépense rejetée", expense };
 }
 
 export { hashToken };

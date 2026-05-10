@@ -228,5 +228,19 @@
   "create_expense": "Créer une dépense",
   "payment_orders": "Ordres de paiement",
   "create_payment_order": "Créer un ordre de paiement",
-  "print": "Imprimer"
+  "print": "Imprimer",
+  "approve": "Approuver",
+  "reject": "Rejeter",
+  "super_admin_token": "Token reçu du Super Admin",
+  "payment_country": "Pays de paiement",
+  "bank_country_payment_order": "Pays de la banque",
+  "bank_name_payment_order": "Nom de la banque",
+  "bank_reference": "Référence bancaire / numéro chèque",
+  "bank_account_holder": "Nom du titulaire",
+  "expense_type": "Type de dépense",
+  "expense_label": "Libellé",
+  "quantity": "Quantité",
+  "unit_price": "Prix unitaire",
+  "beneficiary_name": "Nom du bénéficiaire",
+  "beneficiary_country": "Pays du bénéficiaire"
 }

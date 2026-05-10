@@ -150,7 +150,7 @@ export async function sendExpenseApprovalTokenEmail({ to, expense, token }) {
   const lines = [
     "Bonjour,",
     "",
-    "Une dépense Hiil Foundation a été approuvée par le gestionnaire des dépenses.",
+    "Une dépense Hiil Foundation a été approuvée par le Super Admin.",
     `Référence dépense : ${expense.id}`,
     `Libellé : ${expense.label}`,
     `Montant : ${expense.amount}`,
