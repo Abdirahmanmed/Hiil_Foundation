@@ -349,23 +349,15 @@ export default function AdminDashboard() {
               />
 
               <div className="mt-5 grid gap-3 md:grid-cols-2">
-                <StatCard
-                  label={t("admin_total_users")}
-                  value={stats?.totalUsers}
-                />
-                <StatCard
-                  label={t("admin_active_users")}
-                  value={stats?.activeUsers}
-                />
-                <StatCard
-                  label={t("admin_total_subs")}
-                  value={stats?.totalSubscriptions}
-                />
-                <StatCard
-                  label={t("admin_active_subs")}
-                  value={stats?.activeSubscriptions}
-                  hint="ACTIVE + ACTIVE_MANUAL"
-                />
+                <StatCard label={t("admin_total_users")} value={stats?.totalUsers} />
+                <StatCard label={t("admin_active_users")} value={stats?.activeUsers} />
+                <StatCard label="Adhérents" value={stats?.adherentsCount} />
+                <StatCard label="Associations" value={stats?.associationsCount} />
+                <StatCard label={t("admin_total_subs")} value={stats?.totalSubscriptions} />
+                <StatCard label={t("admin_active_subs")} value={stats?.activeSubscriptions} hint="ACTIVE + ACTIVE_MANUAL" />
+                <StatCard label="Cotisations mensuelles" value={stats?.monthlySubscriptionsCount} hint={stats?.monthlyCotisation} />
+                <StatCard label="Cotisations annuelles" value={stats?.annualSubscriptionsCount} hint={stats?.annualCotisation} />
+                <StatCard label="Total montant cotisations" value={stats?.totalCotisation} />
               </div>
 
               <div className="mt-6 grid gap-4 md:grid-cols-2">

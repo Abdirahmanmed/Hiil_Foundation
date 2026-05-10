@@ -9,7 +9,7 @@ import {
 
 export async function dashboard(req, res, next) {
   try {
-    const stats = await adminService.getDashboardStats();
+    const stats = await adminService.getDashboardStats({ role: req.user.role });
     res.json({ stats });
   } catch (err) {
     next(err);

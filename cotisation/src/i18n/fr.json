@@ -242,5 +242,17 @@
   "quantity": "Quantité",
   "unit_price": "Prix unitaire",
   "beneficiary_name": "Nom du bénéficiaire",
-  "beneficiary_country": "Pays du bénéficiaire"
+  "beneficiary_country": "Pays du bénéficiaire",
+  "total_expenses": "Total dépenses",
+  "approved_expenses": "Dépenses approuvées",
+  "rejected_expenses": "Dépenses rejetées",
+  "pending_expenses": "Dépenses en attente",
+  "completed_expenses": "Dépenses effectuées",
+  "month_expenses": "Dépenses du mois",
+  "total_amount": "Montant total",
+  "month_amount": "Montant du mois",
+  "month_orders": "Ordres du mois",
+  "payment_orders_amount": "Montant ordres de paiement",
+  "latest_expenses": "Dernières dépenses",
+  "latest_payment_orders": "Derniers ordres de paiement"
 }

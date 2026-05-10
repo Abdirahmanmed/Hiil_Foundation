@@ -15,6 +15,7 @@ import subscriptionRoutes from "./modules/subscriptions/subscriptions.routes.js"
 import adminRoutes from "./modules/admin/admin.routes.js";
 import expenseRoutes from "./modules/expenses/expenses.routes.js";
 import paymentOrderRoutes from "./modules/payment-orders/paymentOrders.routes.js";
+import treasuryRoutes from "./modules/treasury/treasury.routes.js";
 
 export const app = express();
 
@@ -41,6 +42,7 @@ app.use("/api/subscriptions", subscriptionRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/expenses", expenseRoutes);
 app.use("/api/payment-orders", paymentOrderRoutes);
+app.use("/api/treasury", treasuryRoutes);
 
 // error handler (TOUJOURS EN DERNIER)
 app.use(errorHandler);
