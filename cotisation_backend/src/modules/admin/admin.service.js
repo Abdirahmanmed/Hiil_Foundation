@@ -1,18 +1,179 @@
 import prisma from "../../config/prisma.js";
 import { auditLog } from "../../utils/audit.js";
 
-export async function getDashboardStats() {
-  const [totalUsers, activeUsers, totalSubscriptions, activeSubscriptions] =
-    await Promise.all([
-      prisma.user.count(),
-      prisma.user.count({ where: { status: "ACTIVE" } }),
-      prisma.subscription.count(),
-      prisma.subscription.count({
-        where: { status: { in: ["ACTIVE", "ACTIVE_MANUAL"] } },
-      }),
-    ]);
+function getPeriodStarts() {
+  const now = new Date();
+  return {
+    monthStart: new Date(now.getFullYear(), now.getMonth(), 1),
+    yearStart: new Date(now.getFullYear(), 0, 1),
+  };
+}
 
-  return { totalUsers, activeUsers, totalSubscriptions, activeSubscriptions };
+function expensePublicSelect() {
+  return {
+    id: true,
+    createdAt: true,
+    date: true,
+    type: true,
+    label: true,
+    amount: true,
+    beneficiaryName: true,
+    beneficiaryCountry: true,
+    beneficiaryCity: true,
+    status: true,
+    createdBy: { select: { id: true, fullName: true, companyName: true, email: true } },
+  };
+}
+
+function paymentOrderPublicSelect() {
+  return {
+    id: true,
+    createdAt: true,
+    referenceNumber: true,
+    paymentMethod: true,
+    currency: true,
+    paymentCountry: true,
+    amount: true,
+    status: true,
+    expense: {
+      select: {
+        id: true,
+        label: true,
+        beneficiaryName: true,
+        beneficiaryCountry: true,
+        beneficiaryCity: true,
+        status: true,
+      },
+    },
+  };
+}
+
+function mapStatusRows(rows) {
+  return rows.map((row) => ({
+    status: row.status,
+    count: row._count.status,
+    amount: row._sum?.amount || 0,
+  }));
+}
+
+export async function getDashboardStats({ role } = {}) {
+  const { monthStart, yearStart } = getPeriodStarts();
+  const subscriptionActiveWhere = { status: { in: ["ACTIVE", "ACTIVE_MANUAL"] } };
+  const includeFinancials = role === "SUPER_ADMIN";
+
+  const [
+    totalUsers,
+    activeUsers,
+    adherentsCount,
+    associationsCount,
+    totalSubscriptions,
+    activeSubscriptions,
+    monthlySubscriptionsCount,
+    annualSubscriptionsCount,
+    monthlyCotisation,
+    annualCotisation,
+    totalCotisation,
+    latestUsers,
+    latestSubscriptions,
+  ] = await Promise.all([
+    prisma.user.count(),
+    prisma.user.count({ where: { status: "ACTIVE" } }),
+    prisma.user.count({ where: { accountType: "CLIENT_ADHERENT" } }),
+    prisma.user.count({ where: { accountType: "ASSOCIATION" } }),
+    prisma.subscription.count(),
+    prisma.subscription.count({ where: subscriptionActiveWhere }),
+    prisma.subscription.count({ where: { ...subscriptionActiveWhere, createdAt: { gte: monthStart } } }),
+    prisma.subscription.count({ where: { ...subscriptionActiveWhere, createdAt: { gte: yearStart } } }),
+    prisma.subscription.aggregate({ where: { ...subscriptionActiveWhere, createdAt: { gte: monthStart } }, _sum: { amount: true } }),
+    prisma.subscription.aggregate({ where: { ...subscriptionActiveWhere, createdAt: { gte: yearStart } }, _sum: { amount: true } }),
+    prisma.subscription.aggregate({ where: subscriptionActiveWhere, _sum: { amount: true } }),
+    prisma.user.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 5,
+      select: {
+        id: true,
+        fullName: true,
+        companyName: true,
+        email: true,
+        phone: true,
+        accountType: true,
+        role: true,
+        status: true,
+        createdAt: true,
+      },
+    }),
+    prisma.subscription.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 5,
+      select: {
+        id: true,
+        amount: true,
+        frequency: true,
+        status: true,
+        currency: true,
+        paymentMethod: true,
+        createdAt: true,
+        user: { select: { id: true, fullName: true, companyName: true, email: true } },
+      },
+    }),
+  ]);
+
+  const stats = {
+    totalUsers,
+    activeUsers,
+    adherentsCount,
+    associationsCount,
+    totalSubscriptions,
+    activeSubscriptions,
+    monthlySubscriptionsCount,
+    annualSubscriptionsCount,
+    monthlyCotisation: monthlyCotisation._sum.amount || 0,
+    annualCotisation: annualCotisation._sum.amount || 0,
+    totalCotisation: totalCotisation._sum.amount || 0,
+    latestUsers,
+    latestSubscriptions,
+  };
+
+  if (!includeFinancials) return stats;
+
+  const [
+    totalExpenses,
+    expensesByStatus,
+    pendingExpenses,
+    approvedExpenses,
+    rejectedExpenses,
+    completedExpenses,
+    latestExpenses,
+    totalPaymentOrders,
+    paymentOrdersAmount,
+    latestPaymentOrders,
+  ] = await Promise.all([
+    prisma.expense.aggregate({ _count: true, _sum: { amount: true } }),
+    prisma.expense.groupBy({ by: ["status"], _count: { status: true }, _sum: { amount: true } }),
+    prisma.expense.count({ where: { status: "EN_ATTENTE" } }),
+    prisma.expense.count({ where: { status: "APPROUVER" } }),
+    prisma.expense.count({ where: { status: "REJETER" } }),
+    prisma.expense.count({ where: { status: "EFFECTUER" } }),
+    prisma.expense.findMany({ orderBy: { createdAt: "desc" }, take: 5, select: expensePublicSelect() }),
+    prisma.paymentOrder.count(),
+    prisma.paymentOrder.aggregate({ _sum: { amount: true } }),
+    prisma.paymentOrder.findMany({ orderBy: { createdAt: "desc" }, take: 5, select: paymentOrderPublicSelect() }),
+  ]);
+
+  return {
+    ...stats,
+    totalExpenses: totalExpenses._sum.amount || 0,
+    totalExpensesCount: totalExpenses._count,
+    approvedExpenses,
+    rejectedExpenses,
+    pendingExpenses,
+    completedExpenses,
+    expensesByStatus: mapStatusRows(expensesByStatus),
+    totalPaymentOrders,
+    totalPaymentOrdersAmount: paymentOrdersAmount._sum.amount || 0,
+    latestExpenses,
+    latestPaymentOrders,
+  };
 }
 
 export async function listUsers() {

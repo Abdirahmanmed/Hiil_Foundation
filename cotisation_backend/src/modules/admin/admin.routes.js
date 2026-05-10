@@ -16,8 +16,8 @@ import {
 
 const router = Router();
 
-// 🔒 ADMIN ONLY (tout le module)
-router.use(auth, requireRole("ADMIN"));
+// 🔒 ADMIN / SUPER_ADMIN
+router.use(auth, requireRole("ADMIN", "SUPER_ADMIN"));
 
 // READ
 router.get("/dashboard", dashboard);

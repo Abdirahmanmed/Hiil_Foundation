@@ -37,37 +37,46 @@ export async function getExpenseDashboard({ user }) {
   const expenseWhere = isManager ? { createdById: user.id } : {};
 
   const now = new Date();
-  const yearStart = new Date(now.getFullYear(), 0, 1);
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const monthWhere = { ...expenseWhere, createdAt: { gte: monthStart } };
 
-  const [associationsCount, adherentsCount, monthlyCotisation, annualCotisation, totalExpenses, byStatus] =
-    await Promise.all([
-      prisma.user.count({ where: { accountType: "ASSOCIATION" } }),
-      prisma.user.count({ where: { accountType: "CLIENT_ADHERENT" } }),
-      prisma.subscription.aggregate({
-        where: { createdAt: { gte: monthStart }, status: { in: ["ACTIVE", "ACTIVE_MANUAL"] } },
-        _sum: { amount: true },
-      }),
-      prisma.subscription.aggregate({
-        where: { createdAt: { gte: yearStart }, status: { in: ["ACTIVE", "ACTIVE_MANUAL"] } },
-        _sum: { amount: true },
-      }),
-      prisma.expense.aggregate({ where: expenseWhere, _sum: { amount: true }, _count: true }),
-      prisma.expense.groupBy({ by: ["status"], where: expenseWhere, _count: { status: true }, _sum: { amount: true } }),
-    ]);
+  const [total, monthTotal, byStatus, latestExpenses] = await Promise.all([
+    prisma.expense.aggregate({ where: expenseWhere, _sum: { amount: true }, _count: true }),
+    prisma.expense.aggregate({ where: monthWhere, _sum: { amount: true }, _count: true }),
+    prisma.expense.groupBy({
+      by: ["status"],
+      where: expenseWhere,
+      _count: { status: true },
+      _sum: { amount: true },
+    }),
+    prisma.expense.findMany({
+      where: expenseWhere,
+      orderBy: { createdAt: "desc" },
+      take: 5,
+      select: publicExpenseSelect(),
+    }),
+  ]);
+
+  const statusCounts = byStatus.reduce((acc, row) => {
+    acc[row.status] = { count: row._count.status, amount: row._sum.amount || 0 };
+    return acc;
+  }, {});
 
   return {
-    associationsCount,
-    adherentsCount,
-    monthlyCotisation: monthlyCotisation._sum.amount || 0,
-    annualCotisation: annualCotisation._sum.amount || 0,
-    totalExpenses: totalExpenses._sum.amount || 0,
-    totalExpensesCount: totalExpenses._count,
+    totalExpenses: total._sum.amount || 0,
+    totalExpensesCount: total._count,
+    approvedExpenses: statusCounts.APPROUVER?.count || 0,
+    rejectedExpenses: statusCounts.REJETER?.count || 0,
+    pendingExpenses: statusCounts.EN_ATTENTE?.count || 0,
+    completedExpenses: statusCounts.EFFECTUER?.count || 0,
+    monthExpensesCount: monthTotal._count,
+    monthExpensesAmount: monthTotal._sum.amount || 0,
     expensesByStatus: byStatus.map((row) => ({
       status: row.status,
       count: row._count.status,
       amount: row._sum.amount || 0,
     })),
+    latestExpenses,
   };
 }
 
