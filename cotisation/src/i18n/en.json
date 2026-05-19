@@ -258,5 +258,17 @@
   "countries": {
     "DJIBOUTI": "Djibouti",
     "ETHIOPIE": "Ethiopia"
-  }
+  },
+  "common.brandAlt": "Hiil Foundation",
+  "common.brandName": "Hiil Foundation",
+  "common.brandTagline": "Secure transactions",
+  "common.langFr": "🇫🇷 FR",
+  "common.langEn": "🇬🇧 EN",
+  "common.langAr": "🇸🇦 AR",
+  "common.langSo": "🇸🇴 SO",
+  "common.logout": "Logout",
+  "auth.passwordPlaceholder": "********",
+  "superAdmin.roleLabel": "Super Admin",
+  "expenses.roleLabel": "Expense manager",
+  "treasury.roleLabel": "Treasury team"
 }
