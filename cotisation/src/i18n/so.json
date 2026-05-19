@@ -228,5 +228,35 @@
   "create_expense": "Créer une dépense",
   "payment_orders": "Ordres de paiement",
   "create_payment_order": "Créer un ordre de paiement",
-  "print": "Imprimer"
+  "print": "Imprimer",
+  "enumStatus": {
+    "EN_ATTENTE": "Sugaya",
+    "APPROUVER": "La ansixiyay",
+    "EFFECTUER": "La fuliyay",
+    "REJETER": "La diiday",
+    "CREE": "La abuuray",
+    "IMPRIME": "La daabacay",
+    "ACTIVE": "Firfircoon",
+    "PENDING_OTP": "OTP sugaya",
+    "SUSPENDED": "La hakiyay"
+  },
+  "paymentMethods": {
+    "VIREMENT_BANCAIRE": "Wareejin bangi",
+    "CASH": "Lacag caddaan",
+    "CHEQUE": "Jeeg"
+  },
+  "expenseTypes": {
+    "ALIMENTATION": "Cunto",
+    "CONSTRUCTION": "Dhismaha",
+    "MEDICAMENT": "Daawo"
+  },
+  "currencies": {
+    "FRANC": "Farank",
+    "DOLLAR": "Doollar",
+    "BIRR_ETHIOPIEN": "Birr Itoobiya"
+  },
+  "countries": {
+    "DJIBOUTI": "Jabuuti",
+    "ETHIOPIE": "Itoobiya"
+  }
 }
