@@ -254,5 +254,35 @@
   "month_orders": "Ordres du mois",
   "payment_orders_amount": "Montant ordres de paiement",
   "latest_expenses": "Dernières dépenses",
-  "latest_payment_orders": "Derniers ordres de paiement"
+  "latest_payment_orders": "Derniers ordres de paiement",
+  "enumStatus": {
+    "EN_ATTENTE": "En attente",
+    "APPROUVER": "Approuvée",
+    "EFFECTUER": "Effectuée",
+    "REJETER": "Rejetée",
+    "CREE": "Créé",
+    "IMPRIME": "Imprimé",
+    "ACTIVE": "Actif",
+    "PENDING_OTP": "OTP en attente",
+    "SUSPENDED": "Suspendu"
+  },
+  "paymentMethods": {
+    "VIREMENT_BANCAIRE": "Virement bancaire",
+    "CASH": "Espèces",
+    "CHEQUE": "Chèque"
+  },
+  "expenseTypes": {
+    "ALIMENTATION": "Alimentation",
+    "CONSTRUCTION": "Construction",
+    "MEDICAMENT": "Médicament"
+  },
+  "currencies": {
+    "FRANC": "Franc",
+    "DOLLAR": "Dollar",
+    "BIRR_ETHIOPIEN": "Birr éthiopien"
+  },
+  "countries": {
+    "DJIBOUTI": "Djibouti",
+    "ETHIOPIE": "Éthiopie"
+  }
 }

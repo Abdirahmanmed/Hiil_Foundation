@@ -228,5 +228,35 @@
   "create_expense": "Créer une dépense",
   "payment_orders": "Ordres de paiement",
   "create_payment_order": "Créer un ordre de paiement",
-  "print": "Imprimer"
+  "print": "Imprimer",
+  "enumStatus": {
+    "EN_ATTENTE": "Pending",
+    "APPROUVER": "Approved",
+    "EFFECTUER": "Completed",
+    "REJETER": "Rejected",
+    "CREE": "Created",
+    "IMPRIME": "Printed",
+    "ACTIVE": "Active",
+    "PENDING_OTP": "Pending OTP",
+    "SUSPENDED": "Suspended"
+  },
+  "paymentMethods": {
+    "VIREMENT_BANCAIRE": "Bank transfer",
+    "CASH": "Cash",
+    "CHEQUE": "Cheque"
+  },
+  "expenseTypes": {
+    "ALIMENTATION": "Food",
+    "CONSTRUCTION": "Construction",
+    "MEDICAMENT": "Medicine"
+  },
+  "currencies": {
+    "FRANC": "Franc",
+    "DOLLAR": "Dollar",
+    "BIRR_ETHIOPIEN": "Ethiopian birr"
+  },
+  "countries": {
+    "DJIBOUTI": "Djibouti",
+    "ETHIOPIE": "Ethiopia"
+  }
 }

@@ -228,5 +228,35 @@
   "create_expense": "Créer une dépense",
   "payment_orders": "Ordres de paiement",
   "create_payment_order": "Créer un ordre de paiement",
-  "print": "Imprimer"
+  "print": "Imprimer",
+  "enumStatus": {
+    "EN_ATTENTE": "قيد الانتظار",
+    "APPROUVER": "موافق عليه",
+    "EFFECTUER": "تم التنفيذ",
+    "REJETER": "مرفوض",
+    "CREE": "تم الإنشاء",
+    "IMPRIME": "مطبوع",
+    "ACTIVE": "نشط",
+    "PENDING_OTP": "OTP قيد الانتظار",
+    "SUSPENDED": "موقوف"
+  },
+  "paymentMethods": {
+    "VIREMENT_BANCAIRE": "تحويل بنكي",
+    "CASH": "نقداً",
+    "CHEQUE": "شيك"
+  },
+  "expenseTypes": {
+    "ALIMENTATION": "غذاء",
+    "CONSTRUCTION": "بناء",
+    "MEDICAMENT": "دواء"
+  },
+  "currencies": {
+    "FRANC": "فرنك",
+    "DOLLAR": "دولار",
+    "BIRR_ETHIOPIEN": "بر إثيوبي"
+  },
+  "countries": {
+    "DJIBOUTI": "جيبوتي",
+    "ETHIOPIE": "إثيوبيا"
+  }
 }
