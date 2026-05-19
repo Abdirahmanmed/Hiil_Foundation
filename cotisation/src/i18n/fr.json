@@ -296,5 +296,59 @@
   "auth.passwordPlaceholder": "********",
   "superAdmin.roleLabel": "Super Admin",
   "expenses.roleLabel": "Gestionnaire dépense",
-  "treasury.roleLabel": "Équipe trésorerie"
+  "treasury.roleLabel": "Équipe trésorerie",
+  "common": {
+    "dashboard": "Dashboard",
+    "loading": "Chargement...",
+    "loadingError": "Erreur de chargement",
+    "date": "Date",
+    "type": "Type",
+    "amount": "Montant",
+    "country": "Pays",
+    "city": "Ville",
+    "save": "Enregistrer",
+    "noData": "Aucune donnée"
+  },
+  "expenses": {
+    "empty": "Aucune dépense",
+    "createSuccess": "Dépense enregistrée",
+    "createError": "Erreur création dépense",
+    "managementTab": "Gestion de dépense",
+    "dashboardTitle": "Dashboard dépenses",
+    "dashboardSubtitle": "Statistiques limitées aux dépenses créées par vous.",
+    "latestExpenses": "Dernières dépenses",
+    "myExpenses": "Mes dépenses",
+    "newExpense": "Nouvelle dépense",
+    "listTab": "Liste des dépenses",
+    "label": "Libellé",
+    "quantity": "Quantité",
+    "unitPrice": "Prix unitaire",
+    "beneficiary": "Bénéficiaire",
+    "stats": {
+      "totalExpenses": "Total dépenses",
+      "approved": "Dépenses approuvées",
+      "rejected": "Dépenses rejetées",
+      "pending": "Dépenses en attente",
+      "completed": "Dépenses effectuées",
+      "monthCount": "Dépenses du mois",
+      "totalAmount": "Montant total",
+      "monthAmount": "Montant du mois"
+    }
+  },
+  "superAdmin": {
+    "dashboardTitle": "Dashboard global",
+    "dashboardSubtitle": "Vue utilisateurs, cotisations, dépenses et ordres de paiement.",
+    "allExpenses": "Toutes les dépenses"
+  },
+  "validation": {
+    "approve": "Approuver",
+    "reject": "Rejeter",
+    "expenseApproved": "Dépense approuvée",
+    "approveError": "Erreur approbation",
+    "expenseRejected": "Dépense rejetée",
+    "rejectError": "Erreur rejet"
+  },
+  "paymentOrders": {
+    "empty": "Aucun ordre"
+  }
 }
