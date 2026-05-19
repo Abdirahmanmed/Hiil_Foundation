@@ -258,5 +258,17 @@
   "countries": {
     "DJIBOUTI": "جيبوتي",
     "ETHIOPIE": "إثيوبيا"
-  }
+  },
+  "common.brandAlt": "مؤسسة هيل",
+  "common.brandName": "مؤسسة هيل",
+  "common.brandTagline": "معاملات آمنة",
+  "common.langFr": "🇫🇷 FR",
+  "common.langEn": "🇬🇧 EN",
+  "common.langAr": "🇸🇦 AR",
+  "common.langSo": "🇸🇴 SO",
+  "common.logout": "تسجيل الخروج",
+  "auth.passwordPlaceholder": "********",
+  "superAdmin.roleLabel": "مشرف عام",
+  "expenses.roleLabel": "مدير المصروفات",
+  "treasury.roleLabel": "فريق الخزينة"
 }

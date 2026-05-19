@@ -258,5 +258,17 @@
   "countries": {
     "DJIBOUTI": "Jabuuti",
     "ETHIOPIE": "Itoobiya"
-  }
+  },
+  "common.brandAlt": "Hiil Foundation",
+  "common.brandName": "Hiil Foundation",
+  "common.brandTagline": "Macaamilo ammaan ah",
+  "common.langFr": "🇫🇷 FR",
+  "common.langEn": "🇬🇧 EN",
+  "common.langAr": "🇸🇦 AR",
+  "common.langSo": "🇸🇴 SO",
+  "common.logout": "Ka bax",
+  "auth.passwordPlaceholder": "********",
+  "superAdmin.roleLabel": "Maamule sare",
+  "expenses.roleLabel": "Maareeye kharash",
+  "treasury.roleLabel": "Kooxda maaliyadda"
 }
