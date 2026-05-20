@@ -324,5 +324,78 @@
   },
   "paymentOrders": {
     "empty": "Aucun ordre"
+  },
+  "home": {
+    "actions": {
+      "sectionLabel": "Hawlaha naga",
+      "titlePrefix": "Waxa aan",
+      "titleHighlight": "qabanno",
+      "titleSuffix": "goobta",
+      "subtitle": "Barnaamijyo dhab ah oo ku salaysan baahiyaha dhabta ah ee bulshooyinka aan u adeegno.",
+      "byTheme": "Mawduuc ahaan",
+      "allThemes": "Dhammaan",
+      "projectsTitle": "Mashaariic socota & barnaamijyo hormuud ah",
+      "endLabel": "Dhamaad",
+      "mapTitle": "Khariidadda faragelinteenna",
+      "mapLegend": "Tirada mashaariicda firfircoon ee aag kasta",
+      "callTitle": "Wicitaanno mashaariic",
+      "callDescription": "Ma wadataa mashruuc la jaanqaadaya mawduucyadeenna? Soo gudbi codsigaaga. Waxaan si taxadar leh u eegnaa fayl kasta.",
+      "closeForm": "✕ Xir",
+      "openForm": "✍ Gudbi codsi",
+      "submittedTitle": "Codsiga waa la diray!",
+      "submittedDescription": "Waxaan kula soo xiriiri doonnaa 15 maalmood oo shaqo gudahood.",
+      "close": "Xir",
+      "formTitle": "Foomka codsiga",
+      "storiesTitle": "Sheekooyinka ka-faa’iideystayaasha",
+      "themes": {
+        "health": "Caafimaad",
+        "education": "Waxbarasho",
+        "poverty": "La-dagaallanka faqriga",
+        "environment": "Deegaan",
+        "emergency": "Gargaar degdeg ah",
+        "women": "Awoodsiinta haweenka"
+      },
+      "status": {
+        "inProgress": "Socda",
+        "featured": "Hoggaan"
+      },
+      "form": {
+        "projectOwnerLabel": "Magaca hoggaamiyaha mashruuca",
+        "projectOwnerPlaceholder": "Magacaaga oo buuxa",
+        "organizationLabel": "Urur / Hay'ad",
+        "organizationPlaceholder": "Magaca ururkaaga",
+        "themeLabel": "Mawduuca khuseeya",
+        "themePlaceholder": "Dooro mawduuc...",
+        "descriptionLabel": "Sharaxaadda mashruuca",
+        "descriptionPlaceholder": "Ku sharax mashruucaaga dhowr sadar: yoolalka, ka-faa’iideystayaasha, aagga faragelinta...",
+        "submit": "Gudbi codsigayga"
+      },
+      "programs": {
+        "p1": {
+          "title": "Helitaanka biyo nadiif ah — Waqooyiga miyiga",
+          "beneficiaries": "3,200 qof",
+          "end": "Dis. 2025",
+          "desc": "Rakibid 14 ceel-biyood iyo tababar guddiyo maamul oo maxalli ah 6 tuulo."
+        },
+        "p2": {
+          "title": "Dugsi dijitaal ah oo qof walba leh",
+          "beneficiaries": "850 arday",
+          "end": "Juun 2026",
+          "desc": "Qalabaynta 12 qol kombiyuutar iyo tababar 30 macallin qalabka dijitaalka."
+        },
+        "p3": {
+          "title": "Amaah-yar & ganacsi haween",
+          "beneficiaries": "420 haween",
+          "end": "Dis. 2026",
+          "desc": "Barnaamij amaah-yar oo lagu daray taageero ganacsi muddo 18 bilood ah."
+        },
+        "p4": {
+          "title": "Nafaqada carruurta ee degdegga ah",
+          "beneficiaries": "1,100 carruur",
+          "end": "Maarso 2025",
+          "desc": "Qaybin nafaqooyin dheeri ah iyo wacyigelin hooyooyin ee meelaha nugul."
+        }
+      }
+    }
   }
 }

@@ -350,5 +350,78 @@
   },
   "paymentOrders": {
     "empty": "Aucun ordre"
+  },
+  "home": {
+    "actions": {
+      "sectionLabel": "Nos actions",
+      "titlePrefix": "Ce que nous",
+      "titleHighlight": "faisons",
+      "titleSuffix": "sur le terrain",
+      "subtitle": "Des programmes concrets, ancrés dans les besoins réels des communautés que nous servons.",
+      "byTheme": "Par thématique",
+      "allThemes": "Tous",
+      "projectsTitle": "Projets en cours & Programmes phares",
+      "endLabel": "Fin",
+      "mapTitle": "Carte de nos interventions",
+      "mapLegend": "Nombre de projets actifs par zone",
+      "callTitle": "Appels à projets",
+      "callDescription": "Vous portez un projet aligné avec nos thématiques ? Soumettez votre candidature. Nous examinons chaque dossier avec attention.",
+      "closeForm": "✕ Fermer",
+      "openForm": "✍ Déposer une candidature",
+      "submittedTitle": "Candidature envoyée !",
+      "submittedDescription": "Nous reviendrons vers vous sous 15 jours ouvrables.",
+      "close": "Fermer",
+      "formTitle": "Formulaire de candidature",
+      "storiesTitle": "Histoires de bénéficiaires",
+      "themes": {
+        "health": "Santé",
+        "education": "Éducation",
+        "poverty": "Lutte contre la pauvreté",
+        "environment": "Environnement",
+        "emergency": "Aide d'urgence",
+        "women": "Autonomisation des femmes"
+      },
+      "status": {
+        "inProgress": "En cours",
+        "featured": "Phare"
+      },
+      "form": {
+        "projectOwnerLabel": "Nom du porteur de projet",
+        "projectOwnerPlaceholder": "Votre nom complet",
+        "organizationLabel": "Organisation / Structure",
+        "organizationPlaceholder": "Nom de votre organisation",
+        "themeLabel": "Thématique concernée",
+        "themePlaceholder": "Sélectionner une thématique...",
+        "descriptionLabel": "Description du projet",
+        "descriptionPlaceholder": "Décrivez votre projet en quelques lignes : objectifs, bénéficiaires visés, zone d'intervention...",
+        "submit": "Soumettre ma candidature"
+      },
+      "programs": {
+        "p1": {
+          "title": "Accès à l'eau potable — Zone rurale Nord",
+          "beneficiaries": "3 200 personnes",
+          "end": "Déc. 2025",
+          "desc": "Installation de 14 forages et formation de comités de gestion locaux dans 6 villages."
+        },
+        "p2": {
+          "title": "École numérique pour tous",
+          "beneficiaries": "850 élèves",
+          "end": "Juin 2026",
+          "desc": "Équipement de 12 salles informatiques et formation de 30 enseignants aux outils numériques."
+        },
+        "p3": {
+          "title": "Microcrédits & entrepreneuriat féminin",
+          "beneficiaries": "420 femmes",
+          "end": "Déc. 2026",
+          "desc": "Programme de microcrédit couplé à un accompagnement entrepreneurial sur 18 mois."
+        },
+        "p4": {
+          "title": "Nutrition infantile d'urgence",
+          "beneficiaries": "1 100 enfants",
+          "end": "Mars 2025",
+          "desc": "Distribution de compléments nutritionnels et sensibilisation des mères dans les zones critiques."
+        }
+      }
+    }
   }
 }
