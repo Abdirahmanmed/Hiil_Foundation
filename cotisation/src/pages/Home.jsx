@@ -156,7 +156,59 @@ const STATUS_COLORS = {
   Phare: { bg: "#fefce8", color: "#b8860b", border: "rgba(184,134,11,0.25)" },
 };
 
-function NosActions({ G }) {
+function NosActions({ G, t }) {
+  const thematiques = useMemo(
+    () => [
+      { icon: "🏥", label: t("home.actions.themes.health"), count: 12, color: "#ef4444" },
+      { icon: "📚", label: t("home.actions.themes.education"), count: 18, color: "#3b82f6" },
+      { icon: "🌾", label: t("home.actions.themes.poverty"), count: 9, color: "#f59e0b" },
+      { icon: "🌿", label: t("home.actions.themes.environment"), count: 7, color: "#22c55e" },
+      { icon: "🚨", label: t("home.actions.themes.emergency"), count: 5, color: "#f97316" },
+      { icon: "👩‍💼", label: t("home.actions.themes.women"), count: 11, color: "#a855f7" },
+    ],
+    [t]
+  );
+  const programmes = useMemo(
+    () => [
+      {
+        statusKey: "inProgress",
+        status: t("home.actions.status.inProgress"),
+        title: t("home.actions.programs.p1.title"),
+        thematique: t("home.actions.themes.environment"),
+        beneficiaires: t("home.actions.programs.p1.beneficiaries"),
+        fin: t("home.actions.programs.p1.end"),
+        desc: t("home.actions.programs.p1.desc"),
+      },
+      {
+        statusKey: "inProgress",
+        status: t("home.actions.status.inProgress"),
+        title: t("home.actions.programs.p2.title"),
+        thematique: t("home.actions.themes.education"),
+        beneficiaires: t("home.actions.programs.p2.beneficiaries"),
+        fin: t("home.actions.programs.p2.end"),
+        desc: t("home.actions.programs.p2.desc"),
+      },
+      {
+        statusKey: "featured",
+        status: t("home.actions.status.featured"),
+        title: t("home.actions.programs.p3.title"),
+        thematique: t("home.actions.themes.women"),
+        beneficiaires: t("home.actions.programs.p3.beneficiaries"),
+        fin: t("home.actions.programs.p3.end"),
+        desc: t("home.actions.programs.p3.desc"),
+      },
+      {
+        statusKey: "inProgress",
+        status: t("home.actions.status.inProgress"),
+        title: t("home.actions.programs.p4.title"),
+        thematique: t("home.actions.themes.health"),
+        beneficiaires: t("home.actions.programs.p4.beneficiaries"),
+        fin: t("home.actions.programs.p4.end"),
+        desc: t("home.actions.programs.p4.desc"),
+      },
+    ],
+    [t]
+  );
   const [activeTheme, setActiveTheme] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
@@ -168,8 +220,8 @@ function NosActions({ G }) {
   const [submitted, setSubmitted] = useState(false);
 
   const filtered = activeTheme
-    ? PROGRAMMES.filter((p) => p.thematique === activeTheme)
-    : PROGRAMMES;
+    ? programmes.filter((p) => p.thematique === activeTheme)
+    : programmes;
 
   return (
     <section
@@ -184,7 +236,7 @@ function NosActions({ G }) {
           viewport={{ once: true }}
           style={{ textAlign: "center", marginBottom: "3.5rem" }}
         >
-          <SectionLabel>Nos actions</SectionLabel>
+          <SectionLabel>{t("home.actions.sectionLabel")}</SectionLabel>
           <h2
             style={{
               fontSize: "clamp(1.9rem,3.5vw,2.8rem)",
@@ -195,7 +247,7 @@ function NosActions({ G }) {
               lineHeight: 1.1,
             }}
           >
-            Ce que nous{" "}
+            {t("home.actions.titlePrefix")}{" "}
             <span
               style={{
                 background: `linear-gradient(135deg,${G.green},#15803d)`,
@@ -204,9 +256,9 @@ function NosActions({ G }) {
                 backgroundClip: "text",
               }}
             >
-              faisons
+              {t("home.actions.titleHighlight")}
             </span>{" "}
-            sur le terrain
+            {t("home.actions.titleSuffix")}
           </h2>
           <p
             style={{
@@ -217,8 +269,7 @@ function NosActions({ G }) {
               lineHeight: 1.75,
             }}
           >
-            Des programmes concrets, ancrés dans les besoins réels des
-            communautés que nous servons.
+            {t("home.actions.subtitle")}
           </p>
         </motion.div>
 
@@ -249,7 +300,7 @@ function NosActions({ G }) {
                 display: "inline-block",
               }}
             />
-            Par thématique
+            {t("home.actions.byTheme")}
           </h3>
           <div style={{ display: "flex", gap: "0.65rem", flexWrap: "wrap" }}>
             <button
@@ -266,9 +317,9 @@ function NosActions({ G }) {
                 transition: "all 0.2s",
               }}
             >
-              Tous ({PROGRAMMES.length})
+              {t("home.actions.allThemes")} ({programmes.length})
             </button>
-            {THEMATIQUES.map((th) => {
+            {thematiques.map((th) => {
               const isActive = activeTheme === th.label;
               return (
                 <button
@@ -321,7 +372,7 @@ function NosActions({ G }) {
                 display: "inline-block",
               }}
             />
-            Projets en cours & Programmes phares
+            {t("home.actions.projectsTitle")}
           </h3>
           <div
             style={{
@@ -333,7 +384,9 @@ function NosActions({ G }) {
             <AnimatePresence>
               {filtered.map((prog, i) => {
                 const sc =
-                  STATUS_COLORS[prog.status] || STATUS_COLORS["En cours"];
+                  prog.statusKey === "featured"
+                    ? STATUS_COLORS["Phare"]
+                    : STATUS_COLORS["En cours"];
                 return (
                   <motion.div
                     key={prog.title}
@@ -375,7 +428,7 @@ function NosActions({ G }) {
                           whiteSpace: "nowrap",
                         }}
                       >
-                        {prog.status === "Phare" ? "⭐ " : "🔵 "}
+                        {prog.statusKey === "featured" ? "⭐ " : "🔵 "}
                         {prog.status}
                       </span>
                       <span
@@ -385,7 +438,7 @@ function NosActions({ G }) {
                           color: G.slateLight,
                         }}
                       >
-                        Fin : {prog.fin}
+                        {t("home.actions.endLabel")} : {prog.fin}
                       </span>
                     </div>
                     <h4
@@ -477,7 +530,7 @@ function NosActions({ G }) {
                 display: "inline-block",
               }}
             />
-            Carte de nos interventions
+            {t("home.actions.mapTitle")}
           </h3>
           <div
             style={{
@@ -614,7 +667,7 @@ function NosActions({ G }) {
                 color: G.slate,
               }}
             >
-              🟢 Nombre de projets actifs par zone
+              🟢 {t("home.actions.mapLegend")}
             </div>
           </div>
         </motion.div>
@@ -651,7 +704,7 @@ function NosActions({ G }) {
                   gap: "0.5rem",
                 }}
               >
-                📣 Appels à projets
+                📣 {t("home.actions.callTitle")}
               </h3>
               <p
                 style={{
@@ -662,8 +715,7 @@ function NosActions({ G }) {
                   maxWidth: 480,
                 }}
               >
-                Vous portez un projet aligné avec nos thématiques ? Soumettez
-                votre candidature. Nous examinons chaque dossier avec attention.
+                {t("home.actions.callDescription")}
               </p>
             </div>
             <button
@@ -682,7 +734,9 @@ function NosActions({ G }) {
                 transition: "all 0.2s",
               }}
             >
-              {showForm ? "✕ Fermer" : "✍ Déposer une candidature"}
+              {showForm
+                ? t("home.actions.closeForm")
+                : t("home.actions.openForm")}
             </button>
           </div>
 
@@ -722,10 +776,10 @@ function NosActions({ G }) {
                           marginBottom: "0.5rem",
                         }}
                       >
-                        Candidature envoyée !
+                        {t("home.actions.submittedTitle")}
                       </h4>
                       <p style={{ color: G.slateMid, fontSize: "0.9rem" }}>
-                        Nous reviendrons vers vous sous 15 jours ouvrables.
+                        {t("home.actions.submittedDescription")}
                       </p>
                       <button
                         onClick={() => {
@@ -750,7 +804,7 @@ function NosActions({ G }) {
                           fontSize: "0.85rem",
                         }}
                       >
-                        Fermer
+                        {t("home.actions.close")}
                       </button>
                     </motion.div>
                   ) : (
@@ -763,7 +817,7 @@ function NosActions({ G }) {
                           marginBottom: "1.5rem",
                         }}
                       >
-                        Formulaire de candidature
+                        {t("home.actions.formTitle")}
                       </h4>
                       <div
                         style={{
@@ -776,13 +830,17 @@ function NosActions({ G }) {
                         {[
                           {
                             key: "nom",
-                            label: "Nom du porteur de projet",
-                            placeholder: "Votre nom complet",
+                            label: t("home.actions.form.projectOwnerLabel"),
+                            placeholder: t(
+                              "home.actions.form.projectOwnerPlaceholder"
+                            ),
                           },
                           {
                             key: "org",
-                            label: "Organisation / Structure",
-                            placeholder: "Nom de votre organisation",
+                            label: t("home.actions.form.organizationLabel"),
+                            placeholder: t(
+                              "home.actions.form.organizationPlaceholder"
+                            ),
                           },
                         ].map(({ key, label, placeholder }) => (
                           <div key={key}>
@@ -831,7 +889,7 @@ function NosActions({ G }) {
                             marginBottom: "0.35rem",
                           }}
                         >
-                          Thématique concernée
+                          {t("home.actions.form.themeLabel")}
                         </label>
                         <select
                           value={formData.theme}
@@ -850,11 +908,11 @@ function NosActions({ G }) {
                           }}
                         >
                           <option value="">
-                            Sélectionner une thématique...
+                            {t("home.actions.form.themePlaceholder")}
                           </option>
-                          {THEMATIQUES.map((t) => (
-                            <option key={t.label}>
-                              {t.icon} {t.label}
+                          {thematiques.map((th) => (
+                            <option key={th.label}>
+                              {th.icon} {th.label}
                             </option>
                           ))}
                         </select>
@@ -869,7 +927,7 @@ function NosActions({ G }) {
                             marginBottom: "0.35rem",
                           }}
                         >
-                          Description du projet
+                          {t("home.actions.form.descriptionLabel")}
                         </label>
                         <textarea
                           rows={4}
@@ -877,7 +935,9 @@ function NosActions({ G }) {
                           onChange={(e) =>
                             setFormData({ ...formData, desc: e.target.value })
                           }
-                          placeholder="Décrivez votre projet en quelques lignes : objectifs, bénéficiaires visés, zone d'intervention..."
+                          placeholder={t(
+                            "home.actions.form.descriptionPlaceholder"
+                          )}
                           style={{
                             width: "100%",
                             padding: "0.7rem 0.9rem",
@@ -909,7 +969,7 @@ function NosActions({ G }) {
                           boxShadow: "0 8px 24px -8px rgba(22,163,74,0.4)",
                         }}
                       >
-                        Soumettre ma candidature →
+                        {t("home.actions.form.submit")} →
                       </button>
                     </>
                   )}
@@ -945,7 +1005,7 @@ function NosActions({ G }) {
                 display: "inline-block",
               }}
             />
-            Histoires de bénéficiaires
+            {t("home.actions.storiesTitle")}
           </h3>
           <div
             style={{
@@ -3388,7 +3448,7 @@ export default function Home() {
       <QuiSommesNous G={G} />
 
       {/* ══ NOS ACTIONS ══ */}
-      <NosActions G={G} />
+      <NosActions G={G} t={t} />
 
       {/* ══ NOTRE IMPACT ══ */}
      

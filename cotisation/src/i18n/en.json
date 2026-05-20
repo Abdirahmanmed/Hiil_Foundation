@@ -324,5 +324,78 @@
   },
   "paymentOrders": {
     "empty": "Aucun ordre"
+  },
+  "home": {
+    "actions": {
+      "sectionLabel": "Our actions",
+      "titlePrefix": "What we",
+      "titleHighlight": "do",
+      "titleSuffix": "in the field",
+      "subtitle": "Concrete programs rooted in the real needs of the communities we serve.",
+      "byTheme": "By theme",
+      "allThemes": "All",
+      "projectsTitle": "Ongoing projects & flagship programs",
+      "endLabel": "End",
+      "mapTitle": "Map of our interventions",
+      "mapLegend": "Number of active projects by area",
+      "callTitle": "Calls for projects",
+      "callDescription": "Do you lead a project aligned with our themes? Submit your application. We review each file carefully.",
+      "closeForm": "✕ Close",
+      "openForm": "✍ Submit an application",
+      "submittedTitle": "Application sent!",
+      "submittedDescription": "We will get back to you within 15 business days.",
+      "close": "Close",
+      "formTitle": "Application form",
+      "storiesTitle": "Beneficiary stories",
+      "themes": {
+        "health": "Health",
+        "education": "Education",
+        "poverty": "Poverty reduction",
+        "environment": "Environment",
+        "emergency": "Emergency aid",
+        "women": "Women empowerment"
+      },
+      "status": {
+        "inProgress": "In progress",
+        "featured": "Flagship"
+      },
+      "form": {
+        "projectOwnerLabel": "Project lead name",
+        "projectOwnerPlaceholder": "Your full name",
+        "organizationLabel": "Organization / Structure",
+        "organizationPlaceholder": "Your organization name",
+        "themeLabel": "Related theme",
+        "themePlaceholder": "Select a theme...",
+        "descriptionLabel": "Project description",
+        "descriptionPlaceholder": "Describe your project in a few lines: goals, target beneficiaries, intervention area...",
+        "submit": "Submit my application"
+      },
+      "programs": {
+        "p1": {
+          "title": "Access to drinking water — North rural area",
+          "beneficiaries": "3,200 people",
+          "end": "Dec. 2025",
+          "desc": "Installation of 14 boreholes and training of local management committees in 6 villages."
+        },
+        "p2": {
+          "title": "Digital school for all",
+          "beneficiaries": "850 students",
+          "end": "Jun. 2026",
+          "desc": "Equipment of 12 computer rooms and training of 30 teachers in digital tools."
+        },
+        "p3": {
+          "title": "Microcredit & women entrepreneurship",
+          "beneficiaries": "420 women",
+          "end": "Dec. 2026",
+          "desc": "Microcredit program combined with 18 months of entrepreneurship support."
+        },
+        "p4": {
+          "title": "Emergency child nutrition",
+          "beneficiaries": "1,100 children",
+          "end": "Mar. 2025",
+          "desc": "Distribution of nutritional supplements and awareness sessions for mothers in critical areas."
+        }
+      }
+    }
   }
 }

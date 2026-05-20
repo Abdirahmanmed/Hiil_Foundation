@@ -324,5 +324,78 @@
   },
   "paymentOrders": {
     "empty": "Aucun ordre"
+  },
+  "home": {
+    "actions": {
+      "sectionLabel": "أنشطتنا",
+      "titlePrefix": "ما الذي",
+      "titleHighlight": "نقوم به",
+      "titleSuffix": "على أرض الواقع",
+      "subtitle": "برامج عملية ترتكز على الاحتياجات الحقيقية للمجتمعات التي نخدمها.",
+      "byTheme": "حسب المجال",
+      "allThemes": "الكل",
+      "projectsTitle": "المشاريع الجارية والبرامج الرائدة",
+      "endLabel": "النهاية",
+      "mapTitle": "خريطة تدخلاتنا",
+      "mapLegend": "عدد المشاريع النشطة حسب المنطقة",
+      "callTitle": "دعوات المشاريع",
+      "callDescription": "هل لديك مشروع متوافق مع مجالاتنا؟ قدّم طلبك. نراجع كل ملف بعناية.",
+      "closeForm": "✕ إغلاق",
+      "openForm": "✍ تقديم طلب",
+      "submittedTitle": "تم إرسال الطلب!",
+      "submittedDescription": "سنعود إليك خلال 15 يوم عمل.",
+      "close": "إغلاق",
+      "formTitle": "نموذج التقديم",
+      "storiesTitle": "قصص المستفيدين",
+      "themes": {
+        "health": "الصحة",
+        "education": "التعليم",
+        "poverty": "مكافحة الفقر",
+        "environment": "البيئة",
+        "emergency": "مساعدة طارئة",
+        "women": "تمكين المرأة"
+      },
+      "status": {
+        "inProgress": "قيد التنفيذ",
+        "featured": "رائد"
+      },
+      "form": {
+        "projectOwnerLabel": "اسم صاحب المشروع",
+        "projectOwnerPlaceholder": "اسمك الكامل",
+        "organizationLabel": "المنظمة / الهيكل",
+        "organizationPlaceholder": "اسم منظمتك",
+        "themeLabel": "المجال المعني",
+        "themePlaceholder": "اختر مجالًا...",
+        "descriptionLabel": "وصف المشروع",
+        "descriptionPlaceholder": "صف مشروعك في بضعة أسطر: الأهداف، الفئات المستفيدة، منطقة التدخل...",
+        "submit": "إرسال طلبي"
+      },
+      "programs": {
+        "p1": {
+          "title": "الوصول إلى مياه الشرب — المنطقة الريفية الشمالية",
+          "beneficiaries": "3,200 شخص",
+          "end": "ديسمبر 2025",
+          "desc": "تركيب 14 بئرًا وتدريب لجان إدارة محلية في 6 قرى."
+        },
+        "p2": {
+          "title": "مدرسة رقمية للجميع",
+          "beneficiaries": "850 طالبًا",
+          "end": "يونيو 2026",
+          "desc": "تجهيز 12 قاعة حاسوب وتدريب 30 معلمًا على الأدوات الرقمية."
+        },
+        "p3": {
+          "title": "التمويل الأصغر وريادة الأعمال النسائية",
+          "beneficiaries": "420 امرأة",
+          "end": "ديسمبر 2026",
+          "desc": "برنامج تمويل أصغر مع مواكبة ريادية لمدة 18 شهرًا."
+        },
+        "p4": {
+          "title": "تغذية الأطفال الطارئة",
+          "beneficiaries": "1,100 طفل",
+          "end": "مارس 2025",
+          "desc": "توزيع مكملات غذائية وتوعية الأمهات في المناطق الحرجة."
+        }
+      }
+    }
   }
 }
