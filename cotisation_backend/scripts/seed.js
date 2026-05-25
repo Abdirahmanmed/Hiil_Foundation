@@ -3,29 +3,29 @@ import { hashPassword } from "../src/utils/hash.js";
 
 const users = [
   {
-    fullName: "Administrateur Principal",
-    email: "admin@cotisations.com",
+    fullName: "Administrateur",
+    email: "adaweo1@yahoo.fr",
     phone: "77000000",
     role: "ADMIN",
     password: "Admin@123",
   },
   {
     fullName: "Gestionnaire de Dépense",
-    email: "gestionnaire@hiilfoundation.org",
+    email: "adaweo2@yahoo.fr",
     phone: "77111111",
     role: "GESTIONNAIRE_DEPENSE",
     password: "Gestion@123",
   },
   {
-    fullName: "Super Admin",
-    email: "superadmin@hiilfoundation.org",
+    fullName: "Ougass",
+    email: "adaweo3@yahoo.fr",
     phone: "77222222",
     role: "SUPER_ADMIN",
     password: "Super@123",
   },
   {
-    fullName: "Équipe Trésorerie",
-    email: "tresorerie@hiilfoundation.org",
+    fullName: "Trésorerie",
+    email: "adaweo4@yahoo.fr",
     phone: "77333333",
     role: "EQUIPE_TRESORERIE",
     password: "Tresor@123",
