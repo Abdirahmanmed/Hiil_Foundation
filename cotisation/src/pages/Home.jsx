@@ -2480,73 +2480,298 @@ function Actualites({ G }) {
   ];
 
   return (
-    <section id="actualites" style={{ background: G.offWhite, padding: "6rem 1.5rem" }}>
+    <section
+      id="actualites"
+      style={{ background: G.offWhite, padding: "6rem 1.5rem" }}
+    >
       <div style={{ maxWidth: 1200, margin: "0 auto" }}>
-        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} style={{ textAlign: "center", marginBottom: "3.5rem" }}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          style={{ textAlign: "center", marginBottom: "3.5rem" }}
+        >
           <SectionLabel>Actualités</SectionLabel>
-          <h2 style={{ fontSize: "clamp(1.9rem,3.5vw,2.8rem)", fontWeight: 900, letterSpacing: "-0.03em", color: G.slate, margin: "0.75rem 0 0.75rem", lineHeight: 1.1 }}>
+          <h2
+            style={{
+              fontSize: "clamp(1.9rem,3.5vw,2.8rem)",
+              fontWeight: 900,
+              letterSpacing: "-0.03em",
+              color: G.slate,
+              margin: "0.75rem 0 0.75rem",
+              lineHeight: 1.1,
+            }}
+          >
             Restez{" "}
-            <span style={{ background: `linear-gradient(135deg,${G.green},#15803d)`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>informés</span>
+            <span
+              style={{
+                background: `linear-gradient(135deg,${G.green},#15803d)`,
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+              }}
+            >
+              informés
+            </span>
           </h2>
-          <p style={{ color: G.slateMid, maxWidth: 520, margin: "0 auto", fontSize: "0.97rem", lineHeight: 1.75 }}>
-            Suivez nos actualités, événements et accédez aux ressources presse de notre organisation.
+          <p
+            style={{
+              color: G.slateMid,
+              maxWidth: 520,
+              margin: "0 auto",
+              fontSize: "0.97rem",
+              lineHeight: 1.75,
+            }}
+          >
+            Suivez nos actualités, événements et accédez aux ressources presse
+            de notre organisation.
           </p>
         </motion.div>
 
         {/* Tabs */}
-        <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginBottom: "2rem" }}>
+        <div
+          style={{
+            display: "flex",
+            gap: "0.5rem",
+            flexWrap: "wrap",
+            marginBottom: "2rem",
+          }}
+        >
           {TABS.map((tab) => (
-            <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-              style={{ padding: "0.55rem 1.1rem", borderRadius: "99px", border: `1px solid ${activeTab === tab.id ? G.greenBorder : G.border}`, background: activeTab === tab.id ? G.greenLight : G.offWhite, color: activeTab === tab.id ? G.green : G.slateMid, fontWeight: 700, fontSize: "0.82rem", cursor: "pointer", transition: "all 0.2s" }}>
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              style={{
+                padding: "0.55rem 1.1rem",
+                borderRadius: "99px",
+                border: `1px solid ${activeTab === tab.id ? G.greenBorder : G.border}`,
+                background: activeTab === tab.id ? G.greenLight : G.offWhite,
+                color: activeTab === tab.id ? G.green : G.slateMid,
+                fontWeight: 700,
+                fontSize: "0.82rem",
+                cursor: "pointer",
+                transition: "all 0.2s",
+              }}
+            >
               {tab.label}
             </button>
           ))}
         </div>
 
         <AnimatePresence mode="wait">
-          <motion.div key={activeTab} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.25 }}>
-
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+          >
             {/* Blog */}
             {activeTab === "blog" && (
               <div>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))", gap: "1.1rem" }}>
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))",
+                    gap: "1.1rem",
+                  }}
+                >
                   {ARTICLES.map((a) => (
-                    <div key={a.title} style={{ borderRadius: "1.25rem", border: `1px solid ${G.border}`, background: G.white, overflow: "hidden", boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
-                      <div style={{ height: 140, background: `linear-gradient(135deg,${a.catBg},${G.offWhite})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "3rem" }}>{a.emoji}</div>
+                    <div
+                      key={a.title}
+                      style={{
+                        borderRadius: "1.25rem",
+                        border: `1px solid ${G.border}`,
+                        background: G.white,
+                        overflow: "hidden",
+                        boxShadow: "0 2px 12px rgba(0,0,0,0.04)",
+                      }}
+                    >
+                      <div
+                        style={{
+                          height: 140,
+                          background: `linear-gradient(135deg,${a.catBg},${G.offWhite})`,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontSize: "3rem",
+                        }}
+                      >
+                        {a.emoji}
+                      </div>
                       <div style={{ padding: "1.25rem" }}>
-                        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", marginBottom: "0.6rem" }}>
-                          <span style={{ fontSize: "0.68rem", fontWeight: 800, padding: "0.2rem 0.65rem", borderRadius: "99px", background: a.catBg, color: a.catColor, border: `1px solid ${a.catBorder}` }}>{a.categorie}</span>
-                          <span style={{ fontSize: "0.68rem", color: G.slateLight }}>{a.date}</span>
+                        <div
+                          style={{
+                            display: "flex",
+                            gap: "0.5rem",
+                            alignItems: "center",
+                            marginBottom: "0.6rem",
+                          }}
+                        >
+                          <span
+                            style={{
+                              fontSize: "0.68rem",
+                              fontWeight: 800,
+                              padding: "0.2rem 0.65rem",
+                              borderRadius: "99px",
+                              background: a.catBg,
+                              color: a.catColor,
+                              border: `1px solid ${a.catBorder}`,
+                            }}
+                          >
+                            {a.categorie}
+                          </span>
+                          <span
+                            style={{ fontSize: "0.68rem", color: G.slateLight }}
+                          >
+                            {a.date}
+                          </span>
                         </div>
-                        <h4 style={{ fontSize: "0.97rem", fontWeight: 800, color: G.slate, marginBottom: "0.4rem", lineHeight: 1.35 }}>{a.title}</h4>
-                        <p style={{ fontSize: "0.82rem", color: G.slateMid, lineHeight: 1.65, marginBottom: "0.9rem" }}>{a.desc}</p>
-                        <button style={{ padding: "0.6rem 1.2rem", borderRadius: "0.75rem", background: G.greenLight, color: G.green, border: `1px solid ${G.greenBorder}`, fontWeight: 700, fontSize: "0.8rem", cursor: "pointer" }}>Lire l'article →</button>
+                        <h4
+                          style={{
+                            fontSize: "0.97rem",
+                            fontWeight: 800,
+                            color: G.slate,
+                            marginBottom: "0.4rem",
+                            lineHeight: 1.35,
+                          }}
+                        >
+                          {a.title}
+                        </h4>
+                        <p
+                          style={{
+                            fontSize: "0.82rem",
+                            color: G.slateMid,
+                            lineHeight: 1.65,
+                            marginBottom: "0.9rem",
+                          }}
+                        >
+                          {a.desc}
+                        </p>
+                        <button
+                          style={{
+                            padding: "0.6rem 1.2rem",
+                            borderRadius: "0.75rem",
+                            background: G.greenLight,
+                            color: G.green,
+                            border: `1px solid ${G.greenBorder}`,
+                            fontWeight: 700,
+                            fontSize: "0.8rem",
+                            cursor: "pointer",
+                          }}
+                        >
+                          Lire l'article →
+                        </button>
                       </div>
                     </div>
                   ))}
                 </div>
                 <div style={{ textAlign: "center", marginTop: "1.75rem" }}>
-                  <button style={{ padding: "0.65rem 1.5rem", borderRadius: "0.75rem", background: G.greenLight, color: G.green, border: `1px solid ${G.greenBorder}`, fontWeight: 700, fontSize: "0.85rem", cursor: "pointer" }}>Voir tous les articles →</button>
+                  <button
+                    style={{
+                      padding: "0.65rem 1.5rem",
+                      borderRadius: "0.75rem",
+                      background: G.greenLight,
+                      color: G.green,
+                      border: `1px solid ${G.greenBorder}`,
+                      fontWeight: 700,
+                      fontSize: "0.85rem",
+                      cursor: "pointer",
+                    }}
+                  >
+                    Voir tous les articles →
+                  </button>
                 </div>
               </div>
             )}
 
             {/* Communiqués */}
             {activeTab === "presse" && (
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "0.75rem",
+                }}
+              >
                 {COMMUNIQUES.map((c) => (
-                  <div key={c.title} style={{ borderRadius: "1.25rem", border: `1px solid ${G.border}`, background: G.white, padding: "1.25rem 1.5rem", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap", boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+                  <div
+                    key={c.title}
+                    style={{
+                      borderRadius: "1.25rem",
+                      border: `1px solid ${G.border}`,
+                      background: G.white,
+                      padding: "1.25rem 1.5rem",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      gap: "1rem",
+                      flexWrap: "wrap",
+                      boxShadow: "0 2px 12px rgba(0,0,0,0.04)",
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "1rem",
+                      }}
+                    >
                       <div style={{ fontSize: "1.5rem" }}>📄</div>
                       <div>
-                        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", marginBottom: "0.25rem" }}>
-                          <span style={{ fontSize: "0.68rem", fontWeight: 800, padding: "0.2rem 0.65rem", borderRadius: "99px", background: G.greenLight, color: G.green, border: `1px solid ${G.greenBorder}` }}>{c.tag}</span>
-                          <span style={{ fontSize: "0.68rem", color: G.slateLight }}>{c.date}</span>
+                        <div
+                          style={{
+                            display: "flex",
+                            gap: "0.5rem",
+                            alignItems: "center",
+                            marginBottom: "0.25rem",
+                          }}
+                        >
+                          <span
+                            style={{
+                              fontSize: "0.68rem",
+                              fontWeight: 800,
+                              padding: "0.2rem 0.65rem",
+                              borderRadius: "99px",
+                              background: G.greenLight,
+                              color: G.green,
+                              border: `1px solid ${G.greenBorder}`,
+                            }}
+                          >
+                            {c.tag}
+                          </span>
+                          <span
+                            style={{ fontSize: "0.68rem", color: G.slateLight }}
+                          >
+                            {c.date}
+                          </span>
                         </div>
-                        <div style={{ fontSize: "0.9rem", fontWeight: 800, color: G.slate }}>{c.title}</div>
+                        <div
+                          style={{
+                            fontSize: "0.9rem",
+                            fontWeight: 800,
+                            color: G.slate,
+                          }}
+                        >
+                          {c.title}
+                        </div>
                       </div>
                     </div>
-                    <button style={{ padding: "0.55rem 1.1rem", borderRadius: "0.75rem", background: G.greenLight, color: G.green, border: `1px solid ${G.greenBorder}`, fontWeight: 700, fontSize: "0.8rem", cursor: "pointer", whiteSpace: "nowrap" }}>Télécharger PDF</button>
+                    <button
+                      style={{
+                        padding: "0.55rem 1.1rem",
+                        borderRadius: "0.75rem",
+                        background: G.greenLight,
+                        color: G.green,
+                        border: `1px solid ${G.greenBorder}`,
+                        fontWeight: 700,
+                        fontSize: "0.8rem",
+                        cursor: "pointer",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      Télécharger PDF
+                    </button>
                   </div>
                 ))}
               </div>
@@ -2554,18 +2779,97 @@ function Actualites({ G }) {
 
             {/* Événements */}
             {activeTab === "events" && (
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))", gap: "1.1rem" }}>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))",
+                  gap: "1.1rem",
+                }}
+              >
                 {EVENEMENTS.map((ev) => (
-                  <div key={ev.title} style={{ borderRadius: "1.25rem", border: `1px solid ${G.border}`, background: G.white, padding: "1.5rem", boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
-                    <div style={{ fontSize: "2rem", marginBottom: "0.75rem" }}>{ev.emoji}</div>
-                    <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", marginBottom: "0.6rem" }}>
-                      <span style={{ fontSize: "0.68rem", fontWeight: 800, padding: "0.2rem 0.65rem", borderRadius: "99px", background: ev.avenir ? G.greenLight : "#fefce8", color: ev.avenir ? G.green : G.gold, border: `1px solid ${ev.avenir ? G.greenBorder : "rgba(184,134,11,0.2)"}` }}>{ev.avenir ? "À venir" : "Passé"}</span>
-                      <span style={{ fontSize: "0.68rem", color: G.slateLight }}>{ev.date}</span>
+                  <div
+                    key={ev.title}
+                    style={{
+                      borderRadius: "1.25rem",
+                      border: `1px solid ${G.border}`,
+                      background: G.white,
+                      padding: "1.5rem",
+                      boxShadow: "0 2px 12px rgba(0,0,0,0.04)",
+                    }}
+                  >
+                    <div style={{ fontSize: "2rem", marginBottom: "0.75rem" }}>
+                      {ev.emoji}
                     </div>
-                    <h4 style={{ fontSize: "0.95rem", fontWeight: 800, color: G.slate, marginBottom: "0.3rem", lineHeight: 1.35 }}>{ev.title}</h4>
-                    <div style={{ fontSize: "0.75rem", color: G.green, fontWeight: 700, marginBottom: "0.5rem" }}>📍 {ev.lieu}</div>
-                    <p style={{ fontSize: "0.82rem", color: G.slateMid, lineHeight: 1.6, marginBottom: "0.9rem" }}>{ev.desc}</p>
-                    <button style={{ padding: "0.55rem 1.1rem", borderRadius: "0.75rem", background: G.greenLight, color: G.green, border: `1px solid ${G.greenBorder}`, fontWeight: 700, fontSize: "0.8rem", cursor: "pointer" }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: "0.5rem",
+                        alignItems: "center",
+                        marginBottom: "0.6rem",
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontSize: "0.68rem",
+                          fontWeight: 800,
+                          padding: "0.2rem 0.65rem",
+                          borderRadius: "99px",
+                          background: ev.avenir ? G.greenLight : "#fefce8",
+                          color: ev.avenir ? G.green : G.gold,
+                          border: `1px solid ${ev.avenir ? G.greenBorder : "rgba(184,134,11,0.2)"}`,
+                        }}
+                      >
+                        {ev.avenir ? "À venir" : "Passé"}
+                      </span>
+                      <span
+                        style={{ fontSize: "0.68rem", color: G.slateLight }}
+                      >
+                        {ev.date}
+                      </span>
+                    </div>
+                    <h4
+                      style={{
+                        fontSize: "0.95rem",
+                        fontWeight: 800,
+                        color: G.slate,
+                        marginBottom: "0.3rem",
+                        lineHeight: 1.35,
+                      }}
+                    >
+                      {ev.title}
+                    </h4>
+                    <div
+                      style={{
+                        fontSize: "0.75rem",
+                        color: G.green,
+                        fontWeight: 700,
+                        marginBottom: "0.5rem",
+                      }}
+                    >
+                      📍 {ev.lieu}
+                    </div>
+                    <p
+                      style={{
+                        fontSize: "0.82rem",
+                        color: G.slateMid,
+                        lineHeight: 1.6,
+                        marginBottom: "0.9rem",
+                      }}
+                    >
+                      {ev.desc}
+                    </p>
+                    <button
+                      style={{
+                        padding: "0.55rem 1.1rem",
+                        borderRadius: "0.75rem",
+                        background: G.greenLight,
+                        color: G.green,
+                        border: `1px solid ${G.greenBorder}`,
+                        fontWeight: 700,
+                        fontSize: "0.8rem",
+                        cursor: "pointer",
+                      }}
+                    >
                       {ev.avenir ? "S'inscrire →" : "Voir le compte-rendu →"}
                     </button>
                   </div>
@@ -2575,89 +2879,422 @@ function Actualites({ G }) {
 
             {/* Newsletter */}
             {activeTab === "newsletter" && (
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: "1.5rem",
+                }}
+              >
                 <div>
-                  <h3 style={{ fontSize: "1rem", fontWeight: 800, color: G.slate, marginBottom: "1.25rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                    <span style={{ width: 4, height: 18, background: G.green, borderRadius: 99, display: "inline-block" }} />Archives Newsletter
+                  <h3
+                    style={{
+                      fontSize: "1rem",
+                      fontWeight: 800,
+                      color: G.slate,
+                      marginBottom: "1.25rem",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.5rem",
+                    }}
+                  >
+                    <span
+                      style={{
+                        width: 4,
+                        height: 18,
+                        background: G.green,
+                        borderRadius: 99,
+                        display: "inline-block",
+                      }}
+                    />
+                    Archives Newsletter
                   </h3>
-                  <div style={{ display: "flex", flexDirection: "column", gap: "0.65rem" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "0.65rem",
+                    }}
+                  >
                     {NEWSLETTER_ARCHIVES.map((n, i) => (
-                      <div key={n} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0.75rem 1rem", borderRadius: "0.875rem", border: `1px solid ${i === 0 ? G.greenBorder : G.border}`, background: i === 0 ? G.greenLight : G.white }}>
-                        <span style={{ fontSize: "0.85rem", fontWeight: i === 0 ? 800 : 600, color: i === 0 ? G.green : G.slate }}>{n}</span>
-                        <button style={{ fontSize: "0.72rem", fontWeight: 700, color: G.green, background: "none", border: "none", cursor: "pointer" }}>📄 Voir</button>
+                      <div
+                        key={n}
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          padding: "0.75rem 1rem",
+                          borderRadius: "0.875rem",
+                          border: `1px solid ${i === 0 ? G.greenBorder : G.border}`,
+                          background: i === 0 ? G.greenLight : G.white,
+                        }}
+                      >
+                        <span
+                          style={{
+                            fontSize: "0.85rem",
+                            fontWeight: i === 0 ? 800 : 600,
+                            color: i === 0 ? G.green : G.slate,
+                          }}
+                        >
+                          {n}
+                        </span>
+                        <button
+                          style={{
+                            fontSize: "0.72rem",
+                            fontWeight: 700,
+                            color: G.green,
+                            background: "none",
+                            border: "none",
+                            cursor: "pointer",
+                          }}
+                        >
+                          📄 Voir
+                        </button>
                       </div>
                     ))}
                   </div>
                 </div>
-                <div style={{ borderRadius: "1.25rem", border: `1px solid ${G.greenBorder}`, background: G.greenLight, padding: "1.75rem" }}>
-                  <div style={{ fontSize: "2rem", marginBottom: "0.75rem" }}>📬</div>
-                  <h4 style={{ fontSize: "1rem", fontWeight: 900, color: G.slate, marginBottom: "0.4rem" }}>S'abonner à la newsletter</h4>
-                  <p style={{ fontSize: "0.82rem", color: G.slateMid, lineHeight: 1.65, marginBottom: "1.1rem" }}>Actualités, rapports et événements livrés dans votre boîte mail. Désabonnement en un clic.</p>
-                  <div style={{ display: "flex", flexDirection: "column", gap: "0.65rem" }}>
-                    <div>
-                      <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: G.slate, marginBottom: "0.3rem" }}>Prénom et nom</label>
-                      <input value={newsletterName} onChange={e => setNewsletterName(e.target.value)} placeholder="Votre nom" style={{ width: "100%", padding: "0.65rem 0.85rem", borderRadius: "0.625rem", border: `1px solid ${G.border}`, fontSize: "0.85rem", background: G.white, outline: "none", boxSizing: "border-box" }} />
-                    </div>
-                    <div>
-                      <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: G.slate, marginBottom: "0.3rem" }}>Adresse email</label>
-                      <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="vous@exemple.com" style={{ width: "100%", padding: "0.65rem 0.85rem", borderRadius: "0.625rem", border: `1px solid ${G.border}`, fontSize: "0.85rem", background: G.white, outline: "none", boxSizing: "border-box" }} />
-                    </div>
-                    <button style={{ padding: "0.8rem", borderRadius: "0.875rem", background: `linear-gradient(135deg,${G.greenMid},${G.green})`, color: "white", fontWeight: 800, fontSize: "0.85rem", border: "none", cursor: "pointer" }}>S'abonner gratuitement →</button>
+                <div
+                  style={{
+                    borderRadius: "1.25rem",
+                    border: `1px solid ${G.greenBorder}`,
+                    background: G.greenLight,
+                    padding: "1.75rem",
+                  }}
+                >
+                  <div style={{ fontSize: "2rem", marginBottom: "0.75rem" }}>
+                    📬
                   </div>
-                  <p style={{ fontSize: "0.68rem", color: G.slateLight, marginTop: "0.75rem" }}>🔒 Données confidentielles. Désabonnement à tout moment.</p>
+                  <h4
+                    style={{
+                      fontSize: "1rem",
+                      fontWeight: 900,
+                      color: G.slate,
+                      marginBottom: "0.4rem",
+                    }}
+                  >
+                    S'abonner à la newsletter
+                  </h4>
+                  <p
+                    style={{
+                      fontSize: "0.82rem",
+                      color: G.slateMid,
+                      lineHeight: 1.65,
+                      marginBottom: "1.1rem",
+                    }}
+                  >
+                    Actualités, rapports et événements livrés dans votre boîte
+                    mail. Désabonnement en un clic.
+                  </p>
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "0.65rem",
+                    }}
+                  >
+                    <div>
+                      <label
+                        style={{
+                          display: "block",
+                          fontSize: "0.75rem",
+                          fontWeight: 700,
+                          color: G.slate,
+                          marginBottom: "0.3rem",
+                        }}
+                      >
+                        Prénom et nom
+                      </label>
+                      <input
+                        value={newsletterName}
+                        onChange={(e) => setNewsletterName(e.target.value)}
+                        placeholder="Votre nom"
+                        style={{
+                          width: "100%",
+                          padding: "0.65rem 0.85rem",
+                          borderRadius: "0.625rem",
+                          border: `1px solid ${G.border}`,
+                          fontSize: "0.85rem",
+                          background: G.white,
+                          outline: "none",
+                          boxSizing: "border-box",
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <label
+                        style={{
+                          display: "block",
+                          fontSize: "0.75rem",
+                          fontWeight: 700,
+                          color: G.slate,
+                          marginBottom: "0.3rem",
+                        }}
+                      >
+                        Adresse email
+                      </label>
+                      <input
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="vous@exemple.com"
+                        style={{
+                          width: "100%",
+                          padding: "0.65rem 0.85rem",
+                          borderRadius: "0.625rem",
+                          border: `1px solid ${G.border}`,
+                          fontSize: "0.85rem",
+                          background: G.white,
+                          outline: "none",
+                          boxSizing: "border-box",
+                        }}
+                      />
+                    </div>
+                    <button
+                      style={{
+                        padding: "0.8rem",
+                        borderRadius: "0.875rem",
+                        background: `linear-gradient(135deg,${G.greenMid},${G.green})`,
+                        color: "white",
+                        fontWeight: 800,
+                        fontSize: "0.85rem",
+                        border: "none",
+                        cursor: "pointer",
+                      }}
+                    >
+                      S'abonner gratuitement →
+                    </button>
+                  </div>
+                  <p
+                    style={{
+                      fontSize: "0.68rem",
+                      color: G.slateLight,
+                      marginTop: "0.75rem",
+                    }}
+                  >
+                    🔒 Données confidentielles. Désabonnement à tout moment.
+                  </p>
                 </div>
               </div>
             )}
 
             {/* Kit presse */}
             {activeTab === "kit" && (
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: "1.5rem",
+                }}
+              >
                 <div>
-                  <h3 style={{ fontSize: "1rem", fontWeight: 800, color: G.slate, marginBottom: "1.25rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                    <span style={{ width: 4, height: 18, background: G.green, borderRadius: 99, display: "inline-block" }} />Ressources téléchargeables
+                  <h3
+                    style={{
+                      fontSize: "1rem",
+                      fontWeight: 800,
+                      color: G.slate,
+                      marginBottom: "1.25rem",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.5rem",
+                    }}
+                  >
+                    <span
+                      style={{
+                        width: 4,
+                        height: 18,
+                        background: G.green,
+                        borderRadius: 99,
+                        display: "inline-block",
+                      }}
+                    />
+                    Ressources téléchargeables
                   </h3>
-                  <div style={{ display: "flex", flexDirection: "column", gap: "0.65rem" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "0.65rem",
+                    }}
+                  >
                     {[
-                      { icon: "📦", name: "Kit presse complet (ZIP)", size: "8.4 Mo" },
-                      { icon: "🖼", name: "Logos HD (PNG / SVG / EPS)", size: "2.1 Mo" },
-                      { icon: "📷", name: "Photothèque terrain (40 photos)", size: "120 Mo" },
-                      { icon: "📄", name: "Dossier de presse 2024 (PDF)", size: "1.8 Mo" },
-                      { icon: "📊", name: "Infographies résultats 2024", size: "3.2 Mo" },
+                      {
+                        icon: "📦",
+                        name: "Kit presse complet (ZIP)",
+                        size: "8.4 Mo",
+                      },
+                      {
+                        icon: "🖼",
+                        name: "Logos HD (PNG / SVG / EPS)",
+                        size: "2.1 Mo",
+                      },
+                      {
+                        icon: "📷",
+                        name: "Photothèque terrain (40 photos)",
+                        size: "120 Mo",
+                      },
+                      {
+                        icon: "📄",
+                        name: "Dossier de presse 2024 (PDF)",
+                        size: "1.8 Mo",
+                      },
+                      {
+                        icon: "📊",
+                        name: "Infographies résultats 2024",
+                        size: "3.2 Mo",
+                      },
                     ].map((d) => (
-                      <div key={d.name} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.75rem 1rem", borderRadius: "0.875rem", border: `1px solid ${G.border}`, background: G.white, gap: "1rem" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                      <div
+                        key={d.name}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          padding: "0.75rem 1rem",
+                          borderRadius: "0.875rem",
+                          border: `1px solid ${G.border}`,
+                          background: G.white,
+                          gap: "1rem",
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "0.75rem",
+                          }}
+                        >
                           <span style={{ fontSize: "1.3rem" }}>{d.icon}</span>
                           <div>
-                            <div style={{ fontSize: "0.85rem", fontWeight: 700, color: G.slate }}>{d.name}</div>
-                            <div style={{ fontSize: "0.68rem", color: G.slateLight }}>{d.size}</div>
+                            <div
+                              style={{
+                                fontSize: "0.85rem",
+                                fontWeight: 700,
+                                color: G.slate,
+                              }}
+                            >
+                              {d.name}
+                            </div>
+                            <div
+                              style={{
+                                fontSize: "0.68rem",
+                                color: G.slateLight,
+                              }}
+                            >
+                              {d.size}
+                            </div>
                           </div>
                         </div>
-                        <button style={{ padding: "0.4rem 0.9rem", borderRadius: "0.625rem", background: G.greenLight, color: G.green, border: `1px solid ${G.greenBorder}`, fontWeight: 700, fontSize: "0.75rem", cursor: "pointer" }}>↓ DL</button>
+                        <button
+                          style={{
+                            padding: "0.4rem 0.9rem",
+                            borderRadius: "0.625rem",
+                            background: G.greenLight,
+                            color: G.green,
+                            border: `1px solid ${G.greenBorder}`,
+                            fontWeight: 700,
+                            fontSize: "0.75rem",
+                            cursor: "pointer",
+                          }}
+                        >
+                          ↓ DL
+                        </button>
                       </div>
                     ))}
                   </div>
                 </div>
                 <div>
-                  <h3 style={{ fontSize: "1rem", fontWeight: 800, color: G.slate, marginBottom: "1.25rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                    <span style={{ width: 4, height: 18, background: G.green, borderRadius: 99, display: "inline-block" }} />Contact presse
+                  <h3
+                    style={{
+                      fontSize: "1rem",
+                      fontWeight: 800,
+                      color: G.slate,
+                      marginBottom: "1.25rem",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.5rem",
+                    }}
+                  >
+                    <span
+                      style={{
+                        width: 4,
+                        height: 18,
+                        background: G.green,
+                        borderRadius: 99,
+                        display: "inline-block",
+                      }}
+                    />
+                    Contact presse
                   </h3>
-                  <div style={{ borderRadius: "1.25rem", border: `1px solid ${G.border}`, background: G.white, padding: "1.5rem", marginBottom: "1rem", boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
-                    <div style={{ fontSize: "1.5rem", marginBottom: "0.6rem" }}>👤</div>
-                    <div style={{ fontSize: "0.9rem", fontWeight: 800, color: G.slate, marginBottom: "0.2rem" }}>Responsable Communication</div>
-                    <div style={{ fontSize: "0.82rem", color: G.slateMid, marginBottom: "0.75rem" }}>Service Relations Presse</div>
-                    <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem", fontSize: "0.82rem" }}>
-                      <div style={{ color: G.green, fontWeight: 700 }}>✉ presse@organisation.org</div>
-                      <div style={{ color: G.slateMid }}>📞 +253 XX XX XX XX</div>
-                      <div style={{ color: G.slateLight }}>🕐 Disponible lun–ven, 8h–17h</div>
+                  <div
+                    style={{
+                      borderRadius: "1.25rem",
+                      border: `1px solid ${G.border}`,
+                      background: G.white,
+                      padding: "1.5rem",
+                      marginBottom: "1rem",
+                      boxShadow: "0 2px 12px rgba(0,0,0,0.04)",
+                    }}
+                  >
+                    <div style={{ fontSize: "1.5rem", marginBottom: "0.6rem" }}>
+                      👤
+                    </div>
+                    <div
+                      style={{
+                        fontSize: "0.9rem",
+                        fontWeight: 800,
+                        color: G.slate,
+                        marginBottom: "0.2rem",
+                      }}
+                    >
+                      Responsable Communication
+                    </div>
+                    <div
+                      style={{
+                        fontSize: "0.82rem",
+                        color: G.slateMid,
+                        marginBottom: "0.75rem",
+                      }}
+                    >
+                      Service Relations Presse
+                    </div>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "0.4rem",
+                        fontSize: "0.82rem",
+                      }}
+                    >
+                      <div style={{ color: G.green, fontWeight: 700 }}>
+                        ✉ presse@organisation.org
+                      </div>
+                      <div style={{ color: G.slateMid }}>
+                        📞 +253 XX XX XX XX
+                      </div>
+                      <div style={{ color: G.slateLight }}>
+                        🕐 Disponible lun–ven, 8h–17h
+                      </div>
                     </div>
                   </div>
-                  <div style={{ padding: "1rem", borderRadius: "1rem", background: G.greenLight, border: `1px solid ${G.greenBorder}`, fontSize: "0.82rem", color: G.slateMid, lineHeight: 1.7 }}>
-                    <strong style={{ color: G.green }}>Accréditation :</strong> Pour toute demande d'entretien ou reportage terrain, merci de nous contacter 5 jours ouvrables à l'avance.
+                  <div
+                    style={{
+                      padding: "1rem",
+                      borderRadius: "1rem",
+                      background: G.greenLight,
+                      border: `1px solid ${G.greenBorder}`,
+                      fontSize: "0.82rem",
+                      color: G.slateMid,
+                      lineHeight: 1.7,
+                    }}
+                  >
+                    <strong style={{ color: G.green }}>Accréditation :</strong>{" "}
+                    Pour toute demande d'entretien ou reportage terrain, merci
+                    de nous contacter 5 jours ouvrables à l'avance.
                   </div>
                 </div>
               </div>
             )}
-
           </motion.div>
         </AnimatePresence>
       </div>
@@ -2666,71 +3303,275 @@ function Actualites({ G }) {
   );
 }
 function Soutenir({ G }) {
-  const [donType, setDonType] = useState("ponctuel");
+  const [donType, setDonType] = useState("instantane");
   const [selectedAmount, setSelectedAmount] = useState("50€");
   const [donSubmitted, setDonSubmitted] = useState(false);
-  const [benevoleForm, setBenevoleForm] = useState({ nom: "", email: "", competence: "", dispo: "" });
+  const [benevoleForm, setBenevoleForm] = useState({
+    nom: "",
+    email: "",
+    competence: "",
+    dispo: "",
+  });
   const [benevoleSubmitted, setBenevoleSubmitted] = useState(false);
 
   const DON_TABS = [
-    { id: "ponctuel", label: "Don ponctuel" },
-    { id: "regulier", label: "Don régulier" },
+    { id: "instantane", label: "Don instantane" },
+    { id: "bancaire", label: "Don bancaire" },
     { id: "nature", label: "Dons en nature / Legs" },
   ];
 
-  const AMOUNTS_PONCTUEL = ["10€", "25€", "50€", "100€", "250€"];
-  const AMOUNTS_REGULIER = ["5€/mois", "10€/mois", "20€/mois", "50€/mois"];
+  const AMOUNTS_Instantane = ["10€", "25€", "50€", "100€", "250€"];
+  const AMOUNTS_Bancaire = ["5€/mois", "10€/mois", "20€/mois", "50€/mois"];
 
   return (
-    <section id="soutenir" style={{ background: G.white, padding: "6rem 1.5rem" }}>
+    <section
+      id="soutenir"
+      style={{ background: G.white, padding: "6rem 1.5rem" }}
+    >
       <div style={{ maxWidth: 1200, margin: "0 auto" }}>
-
-        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} style={{ textAlign: "center", marginBottom: "3.5rem" }}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          style={{ textAlign: "center", marginBottom: "3.5rem" }}
+        >
           <SectionLabel color={G.gold}>Soutenir</SectionLabel>
-          <h2 style={{ fontSize: "clamp(1.9rem,3.5vw,2.8rem)", fontWeight: 900, letterSpacing: "-0.03em", color: G.slate, margin: "0.75rem 0 0.75rem", lineHeight: 1.1 }}>
+          <h2
+            style={{
+              fontSize: "clamp(1.9rem,3.5vw,2.8rem)",
+              fontWeight: 900,
+              letterSpacing: "-0.03em",
+              color: G.slate,
+              margin: "0.75rem 0 0.75rem",
+              lineHeight: 1.1,
+            }}
+          >
             Agissez à nos{" "}
-            <span style={{ background: `linear-gradient(135deg,${G.gold},#a16207)`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>côtés</span>
+            <span
+              style={{
+                background: `linear-gradient(135deg,${G.gold},#a16207)`,
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+              }}
+            >
+              côtés
+            </span>
           </h2>
-          <p style={{ color: G.slateMid, maxWidth: 520, margin: "0 auto", fontSize: "0.97rem", lineHeight: 1.75 }}>
-            Votre soutien — financier ou en temps — transforme des vies. Chaque geste compte, quelle que soit sa forme.
+          <p
+            style={{
+              color: G.slateMid,
+              maxWidth: 520,
+              margin: "0 auto",
+              fontSize: "0.97rem",
+              lineHeight: 1.75,
+            }}
+          >
+            Votre soutien — financier ou en temps — transforme des vies. Chaque
+            geste compte, quelle que soit sa forme.
           </p>
         </motion.div>
 
         {/* Pourquoi donner */}
-        <h3 style={{ fontSize: "1rem", fontWeight: 800, color: G.slate, marginBottom: "1.25rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-          <span style={{ width: 4, height: 18, background: G.gold, borderRadius: 99, display: "inline-block" }} />Pourquoi donner ?
+        <h3
+          style={{
+            fontSize: "1rem",
+            fontWeight: 800,
+            color: G.slate,
+            marginBottom: "1.25rem",
+            display: "flex",
+            alignItems: "center",
+            gap: "0.5rem",
+          }}
+        >
+          <span
+            style={{
+              width: 4,
+              height: 18,
+              background: G.gold,
+              borderRadius: 99,
+              display: "inline-block",
+            }}
+          />
+          Pourquoi donner ?
         </h3>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: "0.75rem", marginBottom: "3.5rem" }}>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))",
+            gap: "0.75rem",
+            marginBottom: "3.5rem",
+          }}
+        >
           {WHY_GIVE.map((w) => (
-            <motion.div key={w.title} whileHover={{ y: -2 }} style={{ padding: "1.25rem", borderRadius: "1rem", border: `1px solid ${G.border}`, background: G.offWhite, display: "flex", alignItems: "flex-start", gap: "0.75rem" }}>
-              <div style={{ width: 36, height: 36, borderRadius: "50%", background: G.greenLight, border: `1px solid ${G.greenBorder}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1rem", flexShrink: 0 }}>{w.emoji}</div>
+            <motion.div
+              key={w.title}
+              whileHover={{ y: -2 }}
+              style={{
+                padding: "1.25rem",
+                borderRadius: "1rem",
+                border: `1px solid ${G.border}`,
+                background: G.offWhite,
+                display: "flex",
+                alignItems: "flex-start",
+                gap: "0.75rem",
+              }}
+            >
+              <div
+                style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: "50%",
+                  background: G.greenLight,
+                  border: `1px solid ${G.greenBorder}`,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "1rem",
+                  flexShrink: 0,
+                }}
+              >
+                {w.emoji}
+              </div>
               <div>
-                <div style={{ fontSize: "0.88rem", fontWeight: 800, color: G.slate, marginBottom: "0.2rem" }}>{w.title}</div>
-                <div style={{ fontSize: "0.78rem", color: G.slateMid, lineHeight: 1.6 }}>{w.desc}</div>
+                <div
+                  style={{
+                    fontSize: "0.88rem",
+                    fontWeight: 800,
+                    color: G.slate,
+                    marginBottom: "0.2rem",
+                  }}
+                >
+                  {w.title}
+                </div>
+                <div
+                  style={{
+                    fontSize: "0.78rem",
+                    color: G.slateMid,
+                    lineHeight: 1.6,
+                  }}
+                >
+                  {w.desc}
+                </div>
               </div>
             </motion.div>
           ))}
         </div>
 
         {/* Formulaire de don */}
-        <h3 style={{ fontSize: "1rem", fontWeight: 800, color: G.slate, marginBottom: "1.25rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-          <span style={{ width: 4, height: 18, background: G.gold, borderRadius: 99, display: "inline-block" }} />Faire un don
+        <h3
+          style={{
+            fontSize: "1rem",
+            fontWeight: 800,
+            color: G.slate,
+            marginBottom: "1.25rem",
+            display: "flex",
+            alignItems: "center",
+            gap: "0.5rem",
+          }}
+        >
+          <span
+            style={{
+              width: 4,
+              height: 18,
+              background: G.gold,
+              borderRadius: 99,
+              display: "inline-block",
+            }}
+          />
+          Faire un don
         </h3>
-        <div style={{ display: "grid", gridTemplateColumns: "1.1fr 0.9fr", gap: "1.5rem", marginBottom: "3.5rem", alignItems: "start" }}>
-          <div style={{ borderRadius: "1.5rem", border: `1px solid rgba(184,134,11,0.25)`, background: G.white, padding: "2rem", boxShadow: "0 4px 24px rgba(0,0,0,0.05)" }}>
+        <div
+          className="soutenir-grid"
+           style={{
+               display: "grid",
+               gridTemplateColumns: "1.1fr 0.9fr",
+                gap: "1.5rem",
+                marginBottom: "3.5rem",
+                alignItems: "start",
+           }}
+        >
+          <div
+            style={{
+              borderRadius: "1.5rem",
+              border: `1px solid rgba(184,134,11,0.25)`,
+              background: G.white,
+              padding: "2rem",
+              boxShadow: "0 4px 24px rgba(0,0,0,0.05)",
+            }}
+          >
             {donSubmitted ? (
-              <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} style={{ textAlign: "center", padding: "2rem" }}>
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                style={{ textAlign: "center", padding: "2rem" }}
+              >
                 <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>💚</div>
-                <h4 style={{ fontSize: "1.1rem", fontWeight: 900, color: G.slate, marginBottom: "0.5rem" }}>Merci pour votre don !</h4>
-                <p style={{ color: G.slateMid, fontSize: "0.9rem", marginBottom: "1rem" }}>Un reçu fiscal vous sera envoyé par email sous 24h.</p>
-                <button onClick={() => setDonSubmitted(false)} style={{ padding: "0.6rem 1.5rem", borderRadius: "0.75rem", background: G.greenLight, border: `1px solid ${G.greenBorder}`, color: G.green, fontWeight: 800, cursor: "pointer", fontSize: "0.85rem" }}>Faire un autre don</button>
+                <h4
+                  style={{
+                    fontSize: "1.1rem",
+                    fontWeight: 900,
+                    color: G.slate,
+                    marginBottom: "0.5rem",
+                  }}
+                >
+                  Merci pour votre don !
+                </h4>
+                <p
+                  style={{
+                    color: G.slateMid,
+                    fontSize: "0.9rem",
+                    marginBottom: "1rem",
+                  }}
+                >
+                  Un reçu fiscal vous sera envoyé par email sous 24h.
+                </p>
+                <button
+                  onClick={() => setDonSubmitted(false)}
+                  style={{
+                    padding: "0.6rem 1.5rem",
+                    borderRadius: "0.75rem",
+                    background: G.greenLight,
+                    border: `1px solid ${G.greenBorder}`,
+                    color: G.green,
+                    fontWeight: 800,
+                    cursor: "pointer",
+                    fontSize: "0.85rem",
+                  }}
+                >
+                  Faire un autre don
+                </button>
               </motion.div>
             ) : (
               <>
-                <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1.5rem", flexWrap: "wrap" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    gap: "0.5rem",
+                    marginBottom: "1.5rem",
+                    flexWrap: "wrap",
+                  }}
+                >
                   {DON_TABS.map((tab) => (
-                    <button key={tab.id} onClick={() => { setDonType(tab.id); setSelectedAmount(""); }}
-                      style={{ padding: "0.55rem 1.1rem", borderRadius: "99px", border: `1px solid ${donType === tab.id ? G.greenBorder : G.border}`, background: donType === tab.id ? G.greenLight : G.offWhite, color: donType === tab.id ? G.green : G.slateMid, fontWeight: 700, fontSize: "0.82rem", cursor: "pointer", transition: "all 0.2s" }}>
+                    <button
+                      key={tab.id}
+                      onClick={() => {
+                        setDonType(tab.id);
+                        setSelectedAmount("");
+                      }}
+                      style={{
+                        padding: "0.55rem 1.1rem",
+                        borderRadius: "99px",
+                        border: `1px solid ${donType === tab.id ? G.greenBorder : G.border}`,
+                        background:
+                          donType === tab.id ? G.greenLight : G.offWhite,
+                        color: donType === tab.id ? G.green : G.slateMid,
+                        fontWeight: 700,
+                        fontSize: "0.82rem",
+                        cursor: "pointer",
+                        transition: "all 0.2s",
+                      }}
+                    >
                       {tab.label}
                     </button>
                   ))}
@@ -2738,22 +3579,100 @@ function Soutenir({ G }) {
 
                 {donType !== "nature" && (
                   <>
-                    <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: G.slate, marginBottom: "0.75rem" }}>Choisissez un montant</label>
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginBottom: "1rem" }}>
-                      {(donType === "ponctuel" ? AMOUNTS_PONCTUEL : AMOUNTS_REGULIER).map((a) => (
-                        <button key={a} onClick={() => setSelectedAmount(a)}
-                          style={{ padding: "0.6rem 1rem", borderRadius: "0.75rem", border: `1px solid ${selectedAmount === a ? G.greenBorder : G.border}`, background: selectedAmount === a ? G.greenLight : G.offWhite, color: selectedAmount === a ? G.green : G.slate, fontWeight: 800, fontSize: "0.9rem", cursor: "pointer", transition: "all 0.2s" }}>
+                    <label
+                      style={{
+                        display: "block",
+                        fontSize: "0.75rem",
+                        fontWeight: 700,
+                        color: G.slate,
+                        marginBottom: "0.75rem",
+                      }}
+                    >
+                      Choisissez un montant
+                    </label>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexWrap: "wrap",
+                        gap: "0.5rem",
+                        marginBottom: "1rem",
+                      }}
+                    >
+                      {(donType === "instantane"
+                        ? AMOUNTS_Instantane
+                        : AMOUNTS_Bancaire
+                      ).map((a) => (
+                        <button
+                          key={a}
+                          onClick={() => setSelectedAmount(a)}
+                          style={{
+                            padding: "0.6rem 1rem",
+                            borderRadius: "0.75rem",
+                            border: `1px solid ${selectedAmount === a ? G.greenBorder : G.border}`,
+                            background:
+                              selectedAmount === a ? G.greenLight : G.offWhite,
+                            color: selectedAmount === a ? G.green : G.slate,
+                            fontWeight: 800,
+                            fontSize: "0.9rem",
+                            cursor: "pointer",
+                            transition: "all 0.2s",
+                          }}
+                        >
                           {a}
                         </button>
                       ))}
                     </div>
                     <div style={{ marginBottom: "1rem" }}>
-                      <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: G.slate, marginBottom: "0.3rem" }}>Autre montant (€)</label>
-                      <input type="number" placeholder="Saisir un montant libre..." min="1" style={{ width: "100%", padding: "0.65rem 0.85rem", borderRadius: "0.625rem", border: `1px solid ${G.border}`, fontSize: "0.85rem", background: G.offWhite, outline: "none", boxSizing: "border-box" }} />
+                      <label
+                        style={{
+                          display: "block",
+                          fontSize: "0.75rem",
+                          fontWeight: 700,
+                          color: G.slate,
+                          marginBottom: "0.3rem",
+                        }}
+                      >
+                        Autre montant (€)
+                      </label>
+                      <input
+                        type="number"
+                        placeholder="Saisir un montant libre..."
+                        min="1"
+                        style={{
+                          width: "100%",
+                          padding: "0.65rem 0.85rem",
+                          borderRadius: "0.625rem",
+                          border: `1px solid ${G.border}`,
+                          fontSize: "0.85rem",
+                          background: G.offWhite,
+                          outline: "none",
+                          boxSizing: "border-box",
+                        }}
+                      />
                     </div>
                     <div style={{ marginBottom: "1rem" }}>
-                      <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: G.slate, marginBottom: "0.3rem" }}>Affecter à un programme (optionnel)</label>
-                      <select style={{ width: "100%", padding: "0.65rem 0.85rem", borderRadius: "0.625rem", border: `1px solid ${G.border}`, fontSize: "0.85rem", background: G.offWhite, outline: "none" }}>
+                      <label
+                        style={{
+                          display: "block",
+                          fontSize: "0.75rem",
+                          fontWeight: 700,
+                          color: G.slate,
+                          marginBottom: "0.3rem",
+                        }}
+                      >
+                        Affecter à un programme (optionnel)
+                      </label>
+                      <select
+                        style={{
+                          width: "100%",
+                          padding: "0.65rem 0.85rem",
+                          borderRadius: "0.625rem",
+                          border: `1px solid ${G.border}`,
+                          fontSize: "0.85rem",
+                          background: G.offWhite,
+                          outline: "none",
+                        }}
+                      >
                         <option>Au programme le plus urgent</option>
                         <option>Accès à l'eau potable</option>
                         <option>Éducation numérique</option>
@@ -2761,34 +3680,152 @@ function Soutenir({ G }) {
                         <option>Nutrition infantile</option>
                       </select>
                     </div>
-                    <div style={{ padding: "0.85rem", borderRadius: "0.875rem", background: G.goldLight, border: `1px solid rgba(184,134,11,0.2)`, fontSize: "0.8rem", color: G.slateMid, marginBottom: "1.2rem", lineHeight: 1.65 }}>
-                      💡 <strong style={{ color: G.gold }}>10€ =</strong> un complément nutritionnel pour un enfant pendant 1 mois.<br />
-                      💡 <strong style={{ color: G.gold }}>50€ =</strong> matériel scolaire pour 2 élèves sur toute l'année.
+                    <div
+                      style={{
+                        padding: "0.85rem",
+                        borderRadius: "0.875rem",
+                        background: G.goldLight,
+                        border: `1px solid rgba(184,134,11,0.2)`,
+                        fontSize: "0.8rem",
+                        color: G.slateMid,
+                        marginBottom: "1.2rem",
+                        lineHeight: 1.65,
+                      }}
+                    >
+                      💡 <strong style={{ color: G.gold }}>10€ =</strong> un
+                      complément nutritionnel pour un enfant pendant 1 mois.
+                      <br />
+                      💡 <strong style={{ color: G.gold }}>50€ =</strong>{" "}
+                      matériel scolaire pour 2 élèves sur toute l'année.
                     </div>
-                    <button onClick={() => setDonSubmitted(true)} style={{ width: "100%", padding: "0.9rem", borderRadius: "0.875rem", background: `linear-gradient(135deg,#d97706,${G.gold})`, color: "white", fontWeight: 800, fontSize: "0.9rem", border: "none", cursor: "pointer", boxShadow: "0 8px 24px -8px rgba(184,134,11,0.4)" }}>
+                    <button
+                      onClick={() => setDonSubmitted(true)}
+                      style={{
+                        width: "100%",
+                        padding: "0.9rem",
+                        borderRadius: "0.875rem",
+                        background: `linear-gradient(135deg,#d97706,${G.gold})`,
+                        color: "white",
+                        fontWeight: 800,
+                        fontSize: "0.9rem",
+                        border: "none",
+                        cursor: "pointer",
+                        boxShadow: "0 8px 24px -8px rgba(184,134,11,0.4)",
+                      }}
+                    >
                       🔒 Faire un don sécurisé →
                     </button>
-                    <p style={{ fontSize: "0.68rem", color: G.slateLight, textAlign: "center", marginTop: "0.6rem" }}>Paiement sécurisé · Reçu fiscal automatique · HTTPS</p>
+                    <p
+                      style={{
+                        fontSize: "0.68rem",
+                        color: G.slateLight,
+                        textAlign: "center",
+                        marginTop: "0.6rem",
+                      }}
+                    >
+                      Paiement sécurisé · Reçu fiscal automatique · HTTPS
+                    </p>
                   </>
                 )}
 
                 {donType === "nature" && (
                   <>
-                    <p style={{ fontSize: "0.88rem", color: G.slateMid, lineHeight: 1.75, marginBottom: "1rem" }}>
-                      Vous souhaitez faire un don en nature ou inclure notre organisation dans vos dispositions testamentaires ? Contactez-nous pour en discuter en toute confidentialité.
+                    <p
+                      style={{
+                        fontSize: "0.88rem",
+                        color: G.slateMid,
+                        lineHeight: 1.75,
+                        marginBottom: "1rem",
+                      }}
+                    >
+                      Vous souhaitez faire un don en nature ou inclure notre
+                      organisation dans vos dispositions testamentaires ?
+                      Contactez-nous pour en discuter en toute confidentialité.
                     </p>
-                    <div style={{ display: "flex", flexDirection: "column", gap: "0.65rem", marginBottom: "1.2rem" }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "0.65rem",
+                        marginBottom: "1.2rem",
+                      }}
+                    >
                       <div>
-                        <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: G.slate, marginBottom: "0.3rem" }}>Votre nom</label>
-                        <input placeholder="Prénom et nom" style={{ width: "100%", padding: "0.65rem 0.85rem", borderRadius: "0.625rem", border: `1px solid ${G.border}`, fontSize: "0.85rem", background: G.offWhite, outline: "none", boxSizing: "border-box" }} />
+                        <label
+                          style={{
+                            display: "block",
+                            fontSize: "0.75rem",
+                            fontWeight: 700,
+                            color: G.slate,
+                            marginBottom: "0.3rem",
+                          }}
+                        >
+                          Votre nom
+                        </label>
+                        <input
+                          placeholder="Prénom et nom"
+                          style={{
+                            width: "100%",
+                            padding: "0.65rem 0.85rem",
+                            borderRadius: "0.625rem",
+                            border: `1px solid ${G.border}`,
+                            fontSize: "0.85rem",
+                            background: G.offWhite,
+                            outline: "none",
+                            boxSizing: "border-box",
+                          }}
+                        />
                       </div>
                       <div>
-                        <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: G.slate, marginBottom: "0.3rem" }}>Email</label>
-                        <input type="email" placeholder="vous@exemple.com" style={{ width: "100%", padding: "0.65rem 0.85rem", borderRadius: "0.625rem", border: `1px solid ${G.border}`, fontSize: "0.85rem", background: G.offWhite, outline: "none", boxSizing: "border-box" }} />
+                        <label
+                          style={{
+                            display: "block",
+                            fontSize: "0.75rem",
+                            fontWeight: 700,
+                            color: G.slate,
+                            marginBottom: "0.3rem",
+                          }}
+                        >
+                          Email
+                        </label>
+                        <input
+                          type="email"
+                          placeholder="vous@exemple.com"
+                          style={{
+                            width: "100%",
+                            padding: "0.65rem 0.85rem",
+                            borderRadius: "0.625rem",
+                            border: `1px solid ${G.border}`,
+                            fontSize: "0.85rem",
+                            background: G.offWhite,
+                            outline: "none",
+                            boxSizing: "border-box",
+                          }}
+                        />
                       </div>
                       <div>
-                        <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: G.slate, marginBottom: "0.3rem" }}>Nature du don envisagé</label>
-                        <select style={{ width: "100%", padding: "0.65rem 0.85rem", borderRadius: "0.625rem", border: `1px solid ${G.border}`, fontSize: "0.85rem", background: G.offWhite, outline: "none" }}>
+                        <label
+                          style={{
+                            display: "block",
+                            fontSize: "0.75rem",
+                            fontWeight: 700,
+                            color: G.slate,
+                            marginBottom: "0.3rem",
+                          }}
+                        >
+                          Nature du don envisagé
+                        </label>
+                        <select
+                          style={{
+                            width: "100%",
+                            padding: "0.65rem 0.85rem",
+                            borderRadius: "0.625rem",
+                            border: `1px solid ${G.border}`,
+                            fontSize: "0.85rem",
+                            background: G.offWhite,
+                            outline: "none",
+                          }}
+                        >
                           <option>Don en nature (matériel)</option>
                           <option>Don en nature (denrées alimentaires)</option>
                           <option>Legs testamentaire</option>
@@ -2797,86 +3834,417 @@ function Soutenir({ G }) {
                         </select>
                       </div>
                       <div>
-                        <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: G.slate, marginBottom: "0.3rem" }}>Votre message</label>
-                        <textarea rows={3} placeholder="Décrivez votre projet de don..." style={{ width: "100%", padding: "0.65rem 0.85rem", borderRadius: "0.625rem", border: `1px solid ${G.border}`, fontSize: "0.85rem", background: G.offWhite, outline: "none", resize: "vertical", lineHeight: 1.65, boxSizing: "border-box", fontFamily: "inherit" }} />
+                        <label
+                          style={{
+                            display: "block",
+                            fontSize: "0.75rem",
+                            fontWeight: 700,
+                            color: G.slate,
+                            marginBottom: "0.3rem",
+                          }}
+                        >
+                          Votre message
+                        </label>
+                        <textarea
+                          rows={3}
+                          placeholder="Décrivez votre projet de don..."
+                          style={{
+                            width: "100%",
+                            padding: "0.65rem 0.85rem",
+                            borderRadius: "0.625rem",
+                            border: `1px solid ${G.border}`,
+                            fontSize: "0.85rem",
+                            background: G.offWhite,
+                            outline: "none",
+                            resize: "vertical",
+                            lineHeight: 1.65,
+                            boxSizing: "border-box",
+                            fontFamily: "inherit",
+                          }}
+                        />
                       </div>
                     </div>
-                    <button style={{ width: "100%", padding: "0.9rem", borderRadius: "0.875rem", background: `linear-gradient(135deg,#d97706,${G.gold})`, color: "white", fontWeight: 800, fontSize: "0.9rem", border: "none", cursor: "pointer" }}>Envoyer ma demande →</button>
+                    <button
+                      style={{
+                        width: "100%",
+                        padding: "0.9rem",
+                        borderRadius: "0.875rem",
+                        background: `linear-gradient(135deg,#d97706,${G.gold})`,
+                        color: "white",
+                        fontWeight: 800,
+                        fontSize: "0.9rem",
+                        border: "none",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Envoyer ma demande →
+                    </button>
                   </>
                 )}
               </>
             )}
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+          <div
+            style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
+          >
             {[
-              { emoji: "🤝", title: "Mécénat d'entreprise", desc: "Associez votre marque à des projets à fort impact. Déduction fiscale de 60% du don dans la limite de 0,5% du CA.", cta: "Télécharger notre offre mécénat →" },
-              { emoji: "💛", title: "Parrainage", desc: "Parrainez un enfant, une famille ou un projet entier. Recevez des nouvelles régulières de votre filleul·e.", cta: "Choisir un parrainage →", badges: ["Enfant dès 15€/mois", "Projet dès 50€/mois"] },
-              { emoji: "🌐", title: "Collecte en ligne", desc: "Créez votre propre collecte pour un anniversaire, un défi sportif ou un événement. Outils clés en main fournis.", cta: "Lancer ma collecte →" },
+              {
+                emoji: "🤝",
+                title: "Mécénat d'entreprise",
+                desc: "Associez votre marque à des projets à fort impact. Déduction fiscale de 60% du don dans la limite de 0,5% du CA.",
+                cta: "Télécharger notre offre mécénat →",
+              },
+              {
+                emoji: "💛",
+                title: "Parrainage",
+                desc: "Parrainez un enfant, une famille ou un projet entier. Recevez des nouvelles régulières de votre filleul·e.",
+                cta: "Choisir un parrainage →",
+                badges: ["Enfant dès 15€/mois", "Projet dès 50€/mois"],
+              },
+              {
+                emoji: "🌐",
+                title: "Collecte en ligne",
+                desc: "Créez votre propre collecte pour un anniversaire, un défi sportif ou un événement. Outils clés en main fournis.",
+                cta: "Lancer ma collecte →",
+              },
             ].map((c) => (
-              <motion.div key={c.title} whileHover={{ y: -2 }} style={{ borderRadius: "1.25rem", border: `1px solid ${G.border}`, background: G.white, padding: "1.5rem", boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
-                <div style={{ fontSize: "1.5rem", marginBottom: "0.6rem" }}>{c.emoji}</div>
-                <h4 style={{ fontSize: "0.97rem", fontWeight: 800, color: G.slate, marginBottom: "0.35rem" }}>{c.title}</h4>
-                <p style={{ fontSize: "0.82rem", color: G.slateMid, lineHeight: 1.65, marginBottom: c.badges ? "0.75rem" : "0.9rem" }}>{c.desc}</p>
+              <motion.div
+                key={c.title}
+                whileHover={{ y: -2 }}
+                style={{
+                  borderRadius: "1.25rem",
+                  border: `1px solid ${G.border}`,
+                  background: G.white,
+                  padding: "1.5rem",
+                  boxShadow: "0 2px 12px rgba(0,0,0,0.04)",
+                }}
+              >
+                <div style={{ fontSize: "1.5rem", marginBottom: "0.6rem" }}>
+                  {c.emoji}
+                </div>
+                <h4
+                  style={{
+                    fontSize: "0.97rem",
+                    fontWeight: 800,
+                    color: G.slate,
+                    marginBottom: "0.35rem",
+                  }}
+                >
+                  {c.title}
+                </h4>
+                <p
+                  style={{
+                    fontSize: "0.82rem",
+                    color: G.slateMid,
+                    lineHeight: 1.65,
+                    marginBottom: c.badges ? "0.75rem" : "0.9rem",
+                  }}
+                >
+                  {c.desc}
+                </p>
                 {c.badges && (
-                  <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginBottom: "0.9rem" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: "0.5rem",
+                      flexWrap: "wrap",
+                      marginBottom: "0.9rem",
+                    }}
+                  >
                     {c.badges.map((b, i) => (
-                      <span key={b} style={{ fontSize: "0.72rem", fontWeight: 800, padding: "0.2rem 0.65rem", borderRadius: "99px", background: i === 0 ? G.greenLight : "#eff6ff", color: i === 0 ? G.green : "#3b82f6", border: `1px solid ${i === 0 ? G.greenBorder : "rgba(59,130,246,0.2)"}` }}>{b}</span>
+                      <span
+                        key={b}
+                        style={{
+                          fontSize: "0.72rem",
+                          fontWeight: 800,
+                          padding: "0.2rem 0.65rem",
+                          borderRadius: "99px",
+                          background: i === 0 ? G.greenLight : "#eff6ff",
+                          color: i === 0 ? G.green : "#3b82f6",
+                          border: `1px solid ${i === 0 ? G.greenBorder : "rgba(59,130,246,0.2)"}`,
+                        }}
+                      >
+                        {b}
+                      </span>
                     ))}
                   </div>
                 )}
-                <button style={{ padding: "0.55rem 1.1rem", borderRadius: "0.75rem", background: G.greenLight, color: G.green, border: `1px solid ${G.greenBorder}`, fontWeight: 700, fontSize: "0.8rem", cursor: "pointer" }}>{c.cta}</button>
+                <button
+                  style={{
+                    padding: "0.55rem 1.1rem",
+                    borderRadius: "0.75rem",
+                    background: G.greenLight,
+                    color: G.green,
+                    border: `1px solid ${G.greenBorder}`,
+                    fontWeight: 700,
+                    fontSize: "0.8rem",
+                    cursor: "pointer",
+                  }}
+                >
+                  {c.cta}
+                </button>
               </motion.div>
             ))}
           </div>
         </div>
 
         {/* Bénévolat */}
-        <h3 style={{ fontSize: "1rem", fontWeight: 800, color: G.slate, marginBottom: "1.25rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-          <span style={{ width: 4, height: 18, background: G.gold, borderRadius: 99, display: "inline-block" }} />Bénévolat & s'impliquer
+        <h3
+          style={{
+            fontSize: "1rem",
+            fontWeight: 800,
+            color: G.slate,
+            marginBottom: "1.25rem",
+            display: "flex",
+            alignItems: "center",
+            gap: "0.5rem",
+          }}
+        >
+          <span
+            style={{
+              width: 4,
+              height: 18,
+              background: G.gold,
+              borderRadius: 99,
+              display: "inline-block",
+            }}
+          />
+          Bénévolat & s'impliquer
         </h3>
-        <div style={{ borderRadius: "1.5rem", border: `1px solid ${G.border}`, background: G.offWhite, padding: "2.5rem", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem", alignItems: "start" }}>
+        <div
+         className="benevole-grid"
+  style={{
+    borderRadius: "1.5rem",
+    border: `1px solid ${G.border}`,
+    background: G.offWhite,
+    padding: "2.5rem",
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr",
+    gap: "1.5rem",
+    alignItems: "start",
+  }}
+        >
           <div>
-            <p style={{ fontSize: "0.88rem", color: G.slateMid, lineHeight: 1.75, marginBottom: "1.25rem" }}>
-              Rejoignez nos 150+ bénévoles actifs. Que vous soyez disponible ponctuellement ou sur le long terme, il y a une place pour vous.
+            <p
+              style={{
+                fontSize: "0.88rem",
+                color: G.slateMid,
+                lineHeight: 1.75,
+                marginBottom: "1.25rem",
+              }}
+            >
+              Rejoignez nos 150+ bénévoles actifs. Que vous soyez disponible
+              ponctuellement ou sur le long terme, il y a une place pour vous.
             </p>
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "0.6rem",
+              }}
+            >
               {BENEVOLE_ROLES.map((b) => (
-                <div key={b.role} style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.65rem 0.9rem", borderRadius: "0.75rem", border: `1px solid ${G.border}`, background: G.white }}>
+                <div
+                  key={b.role}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.75rem",
+                    padding: "0.65rem 0.9rem",
+                    borderRadius: "0.75rem",
+                    border: `1px solid ${G.border}`,
+                    background: G.white,
+                  }}
+                >
                   <span style={{ fontSize: "1.1rem" }}>{b.emoji}</span>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: "0.85rem", fontWeight: 700, color: G.slate }}>{b.role}</div>
-                    <div style={{ fontSize: "0.72rem", color: G.slateLight }}>{b.dispo}</div>
+                    <div
+                      style={{
+                        fontSize: "0.85rem",
+                        fontWeight: 700,
+                        color: G.slate,
+                      }}
+                    >
+                      {b.role}
+                    </div>
+                    <div style={{ fontSize: "0.72rem", color: G.slateLight }}>
+                      {b.dispo}
+                    </div>
                   </div>
-                  <button style={{ fontSize: "0.72rem", fontWeight: 700, color: G.green, background: "none", border: "none", cursor: "pointer" }}>Candidater →</button>
+                  <button
+                    style={{
+                      fontSize: "0.72rem",
+                      fontWeight: 700,
+                      color: G.green,
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                    }}
+                  >
+                    Candidater →
+                  </button>
                 </div>
               ))}
             </div>
           </div>
 
           {benevoleSubmitted ? (
-            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} style={{ textAlign: "center", padding: "2rem", borderRadius: "1.25rem", border: `1px solid ${G.greenBorder}`, background: G.greenLight }}>
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              style={{
+                textAlign: "center",
+                padding: "2rem",
+                borderRadius: "1.25rem",
+                border: `1px solid ${G.greenBorder}`,
+                background: G.greenLight,
+              }}
+            >
               <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>🙌</div>
-              <h4 style={{ fontSize: "1rem", fontWeight: 900, color: G.slate, marginBottom: "0.5rem" }}>Candidature envoyée !</h4>
-              <p style={{ color: G.slateMid, fontSize: "0.85rem" }}>Notre équipe vous recontactera sous 7 jours ouvrables.</p>
-              <button onClick={() => { setBenevoleSubmitted(false); setBenevoleForm({ nom: "", email: "", competence: "", dispo: "" }); }} style={{ marginTop: "1rem", padding: "0.55rem 1.2rem", borderRadius: "0.75rem", background: G.white, border: `1px solid ${G.greenBorder}`, color: G.green, fontWeight: 700, cursor: "pointer", fontSize: "0.82rem" }}>Fermer</button>
+              <h4
+                style={{
+                  fontSize: "1rem",
+                  fontWeight: 900,
+                  color: G.slate,
+                  marginBottom: "0.5rem",
+                }}
+              >
+                Candidature envoyée !
+              </h4>
+              <p style={{ color: G.slateMid, fontSize: "0.85rem" }}>
+                Notre équipe vous recontactera sous 7 jours ouvrables.
+              </p>
+              <button
+                onClick={() => {
+                  setBenevoleSubmitted(false);
+                  setBenevoleForm({
+                    nom: "",
+                    email: "",
+                    competence: "",
+                    dispo: "",
+                  });
+                }}
+                style={{
+                  marginTop: "1rem",
+                  padding: "0.55rem 1.2rem",
+                  borderRadius: "0.75rem",
+                  background: G.white,
+                  border: `1px solid ${G.greenBorder}`,
+                  color: G.green,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  fontSize: "0.82rem",
+                }}
+              >
+                Fermer
+              </button>
             </motion.div>
           ) : (
-            <div style={{ borderRadius: "1.25rem", border: `1px solid ${G.greenBorder}`, background: G.greenLight, padding: "1.75rem" }}>
-              <h4 style={{ fontSize: "0.97rem", fontWeight: 900, color: G.slate, marginBottom: "1rem" }}>Je veux m'impliquer</h4>
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+            <div
+              style={{
+                borderRadius: "1.25rem",
+                border: `1px solid ${G.greenBorder}`,
+                background: G.greenLight,
+                padding: "1.75rem",
+              }}
+            >
+              <h4
+                style={{
+                  fontSize: "0.97rem",
+                  fontWeight: 900,
+                  color: G.slate,
+                  marginBottom: "1rem",
+                }}
+              >
+                Je veux m'impliquer
+              </h4>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "0.75rem",
+                }}
+              >
                 {[
-                  { key: "nom", label: "Nom complet", type: "text", placeholder: "Votre nom" },
-                  { key: "email", label: "Email", type: "email", placeholder: "vous@exemple.com" },
+                  {
+                    key: "nom",
+                    label: "Nom complet",
+                    type: "text",
+                    placeholder: "Votre nom",
+                  },
+                  {
+                    key: "email",
+                    label: "Email",
+                    type: "email",
+                    placeholder: "vous@exemple.com",
+                  },
                 ].map(({ key, label, type, placeholder }) => (
                   <div key={key}>
-                    <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: G.slate, marginBottom: "0.3rem" }}>{label}</label>
-                    <input type={type} placeholder={placeholder} value={benevoleForm[key]} onChange={e => setBenevoleForm({ ...benevoleForm, [key]: e.target.value })} style={{ width: "100%", padding: "0.65rem 0.85rem", borderRadius: "0.625rem", border: `1px solid ${G.border}`, fontSize: "0.85rem", background: G.white, outline: "none", boxSizing: "border-box" }} />
+                    <label
+                      style={{
+                        display: "block",
+                        fontSize: "0.75rem",
+                        fontWeight: 700,
+                        color: G.slate,
+                        marginBottom: "0.3rem",
+                      }}
+                    >
+                      {label}
+                    </label>
+                    <input
+                      type={type}
+                      placeholder={placeholder}
+                      value={benevoleForm[key]}
+                      onChange={(e) =>
+                        setBenevoleForm({
+                          ...benevoleForm,
+                          [key]: e.target.value,
+                        })
+                      }
+                      style={{
+                        width: "100%",
+                        padding: "0.65rem 0.85rem",
+                        borderRadius: "0.625rem",
+                        border: `1px solid ${G.border}`,
+                        fontSize: "0.85rem",
+                        background: G.white,
+                        outline: "none",
+                        boxSizing: "border-box",
+                      }}
+                    />
                   </div>
                 ))}
                 <div>
-                  <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: G.slate, marginBottom: "0.3rem" }}>Compétences ou domaine d'intérêt</label>
-                  <select value={benevoleForm.competence} onChange={e => setBenevoleForm({ ...benevoleForm, competence: e.target.value })} style={{ width: "100%", padding: "0.65rem 0.85rem", borderRadius: "0.625rem", border: `1px solid ${G.border}`, fontSize: "0.85rem", background: G.white, outline: "none" }}>
+                  <label
+                    style={{
+                      display: "block",
+                      fontSize: "0.75rem",
+                      fontWeight: 700,
+                      color: G.slate,
+                      marginBottom: "0.3rem",
+                    }}
+                  >
+                    Compétences ou domaine d'intérêt
+                  </label>
+                  <select
+                    value={benevoleForm.competence}
+                    onChange={(e) =>
+                      setBenevoleForm({
+                        ...benevoleForm,
+                        competence: e.target.value,
+                      })
+                    }
+                    style={{
+                      width: "100%",
+                      padding: "0.65rem 0.85rem",
+                      borderRadius: "0.625rem",
+                      border: `1px solid ${G.border}`,
+                      fontSize: "0.85rem",
+                      background: G.white,
+                      outline: "none",
+                    }}
+                  >
                     <option value="">Sélectionner...</option>
                     <option>Santé / Médical</option>
                     <option>Éducation</option>
@@ -2888,22 +4256,63 @@ function Soutenir({ G }) {
                   </select>
                 </div>
                 <div>
-                  <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: G.slate, marginBottom: "0.3rem" }}>Disponibilité</label>
-                  <select value={benevoleForm.dispo} onChange={e => setBenevoleForm({ ...benevoleForm, dispo: e.target.value })} style={{ width: "100%", padding: "0.65rem 0.85rem", borderRadius: "0.625rem", border: `1px solid ${G.border}`, fontSize: "0.85rem", background: G.white, outline: "none" }}>
+                  <label
+                    style={{
+                      display: "block",
+                      fontSize: "0.75rem",
+                      fontWeight: 700,
+                      color: G.slate,
+                      marginBottom: "0.3rem",
+                    }}
+                  >
+                    Disponibilité
+                  </label>
+                  <select
+                    value={benevoleForm.dispo}
+                    onChange={(e) =>
+                      setBenevoleForm({
+                        ...benevoleForm,
+                        dispo: e.target.value,
+                      })
+                    }
+                    style={{
+                      width: "100%",
+                      padding: "0.65rem 0.85rem",
+                      borderRadius: "0.625rem",
+                      border: `1px solid ${G.border}`,
+                      fontSize: "0.85rem",
+                      background: G.white,
+                      outline: "none",
+                    }}
+                  >
                     <option value="">Sélectionner...</option>
                     <option>Ponctuelle (quelques jours)</option>
                     <option>Régulière (quelques heures/semaine)</option>
                     <option>Mission longue (1 mois+)</option>
                   </select>
                 </div>
-                <button onClick={() => { if (benevoleForm.nom && benevoleForm.email) setBenevoleSubmitted(true); }} style={{ padding: "0.85rem", borderRadius: "0.875rem", background: `linear-gradient(135deg,${G.greenMid},${G.green})`, color: "white", fontWeight: 800, fontSize: "0.9rem", border: "none", cursor: "pointer" }}>
+                <button
+                  onClick={() => {
+                    if (benevoleForm.nom && benevoleForm.email)
+                      setBenevoleSubmitted(true);
+                  }}
+                  style={{
+                    padding: "0.85rem",
+                    borderRadius: "0.875rem",
+                    background: `linear-gradient(135deg,${G.greenMid},${G.green})`,
+                    color: "white",
+                    fontWeight: 800,
+                    fontSize: "0.9rem",
+                    border: "none",
+                    cursor: "pointer",
+                  }}
+                >
                   Envoyer ma candidature →
                 </button>
               </div>
             </div>
           )}
         </div>
-
       </div>
       <style>{`
         @media(max-width:768px){
@@ -2981,12 +4390,15 @@ export default function Home() {
       >
         <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 1.5rem" }}>
           <div
+            className="navbar-container"
             style={{
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
-              height: 68,
+              minHeight: 68,
               gap: "1rem",
+              flexWrap: "wrap",
+              padding: "0.5rem 0",
             }}
           >
             <Brand />
@@ -2997,10 +4409,12 @@ export default function Home() {
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: "0.25rem",
+                gap: "0.2rem",
                 flex: 1,
                 justifyContent: "center",
-                flexWrap: "nowrap",
+                overflowX: "auto",
+                scrollbarWidth: "none",
+                WebkitOverflowScrolling: "touch",
               }}
             >
               {NAV_LINKS.map(({ id, label }) => (
@@ -3008,11 +4422,13 @@ export default function Home() {
                   key={id}
                   href={`#${id}`}
                   style={{
-                    fontSize: "0.78rem",
+                    fontSize: "0.75rem",
+                    padding: "0.45rem 0.55rem",
+                    flexShrink: 0,
                     fontWeight: 600,
                     color: G.slateMid,
                     textDecoration: "none",
-                    padding: "0.4rem 0.6rem",
+                    
                     borderRadius: "0.5rem",
                     whiteSpace: "nowrap",
                     transition: "color 0.2s, background 0.2s",
@@ -3391,12 +4807,12 @@ export default function Home() {
       <NosActions G={G} />
 
       {/* ══ NOTRE IMPACT ══ */}
-     
+
       <NotreImpact G={G} />
-       {/* ══ ACTUALITÉS ══ */}
-        <Actualites G={G} />
-        {/* ══ SOUTENIR ══ */}
-        <Soutenir G={G} />
+      {/* ══ ACTUALITÉS ══ */}
+      <Actualites G={G} />
+      {/* ══ SOUTENIR ══ */}
+      <Soutenir G={G} />
 
       {/* ══ CONTACT ══ */}
       <section
