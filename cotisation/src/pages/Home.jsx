@@ -4578,7 +4578,6 @@ export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const { user } = useAuth();
 
-  // Nouveau menu principal à 7 entrées
   const NAV_LINKS = useMemo(
     () => [
       { id: "accueil", label: "Accueil" },
@@ -4629,39 +4628,36 @@ export default function Home() {
           position: "sticky",
           top: 0,
           zIndex: 100,
-          background: "rgba(255,255,255,0.93)",
+          background: "rgba(255,255,255,0.97)",
           backdropFilter: "blur(18px)",
           borderBottom: `1px solid ${G.border}`,
           boxShadow: "0 1px 12px rgba(0,0,0,0.05)",
         }}
       >
-        <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 1.5rem" }}>
+        <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 1.25rem" }}>
+          {/* ── Barre principale ── */}
           <div
-            className="navbar-container"
             style={{
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
-              minHeight: 68,
-              gap: "1rem",
-              flexWrap: "wrap",
-              padding: "0.5rem 0",
+              minHeight: 64,
+              gap: "0.75rem",
             }}
           >
+            {/* Logo */}
             <Brand />
 
-            {/* Desktop nav — 7 liens, taille réduite pour tenir */}
+            {/* Nav desktop */}
             <nav
               className="desktop-nav"
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: "0.2rem",
+                gap: "0.15rem",
                 flex: 1,
                 justifyContent: "center",
-                overflowX: "auto",
-                scrollbarWidth: "none",
-                WebkitOverflowScrolling: "touch",
+                overflow: "hidden",
               }}
             >
               {NAV_LINKS.map(({ id, label }) => (
@@ -4669,13 +4665,12 @@ export default function Home() {
                   key={id}
                   href={`#${id}`}
                   style={{
-                    fontSize: "0.75rem",
-                    padding: "0.45rem 0.55rem",
+                    fontSize: "0.78rem",
+                    padding: "0.4rem 0.6rem",
                     flexShrink: 0,
                     fontWeight: 600,
                     color: G.slateMid,
                     textDecoration: "none",
-                    
                     borderRadius: "0.5rem",
                     whiteSpace: "nowrap",
                     transition: "color 0.2s, background 0.2s",
@@ -4694,62 +4689,75 @@ export default function Home() {
               ))}
             </nav>
 
+            {/* Droite : langue + login + burger */}
             <div
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: "0.75rem",
+                gap: "0.6rem",
                 flexShrink: 0,
               }}
             >
               <LanguageSwitcher />
 
-              {!user ? (
+              {!user && (
                 <Link
                   to="/login"
+                  className="desktop-login-btn"
                   style={{
                     display: "inline-flex",
                     alignItems: "center",
-                    padding: "0.6rem 1rem",
+                    padding: "0.55rem 1rem",
                     borderRadius: "0.75rem",
                     border: `1px solid ${G.greenBorder}`,
                     background: G.greenLight,
                     color: G.green,
                     fontWeight: 800,
-                    fontSize: "0.85rem",
+                    fontSize: "0.82rem",
                     textDecoration: "none",
                     whiteSpace: "nowrap",
                   }}
                 >
                   {t("login")}
                 </Link>
-              ) : null}
+              )}
 
+              {/* Burger — mobile uniquement */}
               <button
                 onClick={() => setMenuOpen(!menuOpen)}
                 className="mobile-burger"
+                aria-label={menuOpen ? "Fermer le menu" : "Ouvrir le menu"}
                 style={{
                   display: "none",
-                  background: "none",
-                  border: "none",
-                  color: G.slate,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: 40,
+                  height: 40,
+                  borderRadius: "0.625rem",
+                  border: `1px solid ${G.border}`,
+                  background: menuOpen ? G.greenLight : G.offWhite,
+                  color: menuOpen ? G.green : G.slate,
                   cursor: "pointer",
-                  fontSize: "1.4rem",
+                  fontSize: "1.1rem",
                   lineHeight: 1,
+                  flexShrink: 0,
+                  transition: "all 0.2s",
                 }}
-                aria-label="Menu"
               >
                 {menuOpen ? "✕" : "☰"}
               </button>
             </div>
           </div>
 
-          {/* Mobile menu */}
+          {/* ── Menu mobile déroulant ── */}
           {menuOpen && (
             <div
               style={{
                 borderTop: `1px solid ${G.border}`,
-                paddingBottom: "1rem",
+                padding: "0.75rem 0 1.25rem",
+                display: "flex",
+                flexDirection: "column",
+                gap: "0.1rem",
               }}
             >
               {NAV_LINKS.map(({ id, label }) => (
@@ -4758,35 +4766,86 @@ export default function Home() {
                   href={`#${id}`}
                   onClick={() => setMenuOpen(false)}
                   style={{
-                    display: "block",
-                    padding: "0.65rem 0",
+                    display: "flex",
+                    alignItems: "center",
+                    padding: "0.7rem 0.75rem",
                     color: G.slateMid,
                     textDecoration: "none",
                     fontWeight: 600,
                     fontSize: "0.9rem",
-                    borderBottom: `1px solid ${G.border}`,
+                    borderRadius: "0.625rem",
+                    transition: "background 0.15s, color 0.15s",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = G.greenLight;
+                    e.currentTarget.style.color = G.green;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = "transparent";
+                    e.currentTarget.style.color = G.slateMid;
                   }}
                 >
                   {label}
                 </a>
               ))}
-              {!user ? (
-                <Link
-                  to="/login"
-                  onClick={() => setMenuOpen(false)}
+
+              {/* Séparateur */}
+              <div
+                style={{ height: 1, background: G.border, margin: "0.5rem 0" }}
+              />
+
+              {!user && (
+                <div
                   style={{
-                    display: "block",
-                    padding: "0.65rem 0",
-                    color: G.green,
-                    textDecoration: "none",
-                    fontWeight: 800,
-                    fontSize: "0.9rem",
-                    borderBottom: `1px solid ${G.border}`,
+                    display: "flex",
+                    gap: "0.6rem",
+                    padding: "0 0.25rem",
                   }}
                 >
-                  {t("login")}
-                </Link>
-              ) : null}
+                  <Link
+                    to="/login"
+                    onClick={() => setMenuOpen(false)}
+                    style={{
+                      flex: 1,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      padding: "0.7rem 1rem",
+                      borderRadius: "0.75rem",
+                      border: `1px solid ${G.border}`,
+                      background: G.white,
+                      color: G.slateMid,
+                      fontWeight: 700,
+                      fontSize: "0.88rem",
+                      textDecoration: "none",
+                      textAlign: "center",
+                    }}
+                  >
+                    {t("login")}
+                  </Link>
+                  <Link
+                    to="/register"
+                    onClick={() => setMenuOpen(false)}
+                    style={{
+                      flex: 1,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      padding: "0.7rem 1rem",
+                      borderRadius: "0.75rem",
+                      background: `linear-gradient(135deg, ${G.greenMid}, ${G.green})`,
+                      color: G.white,
+                      fontWeight: 800,
+                      fontSize: "0.88rem",
+                      textDecoration: "none",
+                      textAlign: "center",
+                      boxShadow: "0 4px 12px -4px rgba(22,163,74,0.4)",
+                    }}
+                  >
+                    {t("create_account")}
+                  </Link>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -5054,10 +5113,11 @@ export default function Home() {
       <NosActions G={G} t={t} />
 
       {/* ══ NOTRE IMPACT ══ */}
-
       <NotreImpact G={G} />
+
       {/* ══ ACTUALITÉS ══ */}
       <Actualites G={G} />
+
       {/* ══ SOUTENIR ══ */}
       <Soutenir G={G} />
 
@@ -5188,14 +5248,33 @@ export default function Home() {
       {/* ══ Global CSS ══ */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700;0,9..40,800;0,9..40,900&display=swap');
+
         @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
         html { scroll-behavior: smooth; }
         *, *::before, *::after { box-sizing: border-box; }
-        @media (max-width: 960px) {
-          .hero-grid    { grid-template-columns: 1fr !important; }
-          .section-grid { grid-template-columns: 1fr !important; }
-          .desktop-nav  { display: none !important; }
-          .mobile-burger { display: block !important; }
+
+        /* ── Responsive breakpoints ── */
+        @media (max-width: 768px) {
+          .desktop-nav        { display: none !important; }
+          .desktop-login-btn  { display: none !important; }
+          .mobile-burger      { display: flex !important; }
+          .hero-grid          { grid-template-columns: 1fr !important; gap: 2rem !important; }
+          .section-grid       { grid-template-columns: 1fr !important; }
+          .soutenir-grid      { grid-template-columns: 1fr !important; }
+          .benevole-grid      { grid-template-columns: 1fr !important; }
+        }
+
+        @media (min-width: 769px) {
+          .mobile-burger { display: none !important; }
+        }
+
+        /* Tablet : 769–1024px — nav visible mais compacte */
+        @media (min-width: 769px) and (max-width: 1024px) {
+          .desktop-nav a {
+            font-size: 0.72rem !important;
+            padding: 0.35rem 0.45rem !important;
+          }
         }
       `}</style>
     </div>
