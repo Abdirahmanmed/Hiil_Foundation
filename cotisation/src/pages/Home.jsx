@@ -3362,10 +3362,15 @@ function Actualites({ G }) {
     </section>
   );
 }
+// Requires: import { Link } from 'react-router-dom';
 function Soutenir({ G }) {
   const [donType, setDonType] = useState("instantane");
-  const [selectedAmount, setSelectedAmount] = useState("50€");
-  const [donSubmitted, setDonSubmitted] = useState(false);
+  const [selectedAmount, setSelectedAmount] = useState("");
+  const [donStep, setDonStep] = useState("amounts"); // "amounts" | "wallet" | "otp" | "success"
+  const [selectedWallet, setSelectedWallet] = useState("");
+  const [phone, setPhone] = useState("");
+  const [otp, setOtp] = useState("");
+  const [generatedOtp, setGeneratedOtp] = useState("");
   const [benevoleForm, setBenevoleForm] = useState({
     nom: "",
     email: "",
@@ -3375,13 +3380,50 @@ function Soutenir({ G }) {
   const [benevoleSubmitted, setBenevoleSubmitted] = useState(false);
 
   const DON_TABS = [
-    { id: "instantane", label: "Don instantane" },
+    { id: "instantane", label: "Don instantané" },
     { id: "bancaire", label: "Don bancaire" },
-    { id: "nature", label: "Dons en nature / Legs" },
+    { id: "carte", label: "Carte bancaire" },
   ];
 
-  const AMOUNTS_Instantane = ["10€", "25€", "50€", "100€", "250€"];
-  const AMOUNTS_Bancaire = ["5€/mois", "10€/mois", "20€/mois", "50€/mois"];
+  const AMOUNTS_Instantane = ["100$", "250$", "500$", "1000$", "2000$"];
+
+  const WALLETS = [
+    { id: "waafi", label: "Waafi", emoji: "📱" },
+    { id: "dmoney", label: "D-Money", emoji: "💳" },
+    { id: "cac", label: "CAC Pay", emoji: "🏦" },
+    { id: "saba", label: "Saba Pay", emoji: "💰" },
+    { id: "other", label: "Autre", emoji: "🔗" },
+  ];
+
+  const handleAmountSelect = (amount) => {
+    setSelectedAmount(amount);
+    setDonStep("wallet");
+    setSelectedWallet("");
+    setPhone("");
+  };
+
+  const handleSendOtp = () => {
+    if (selectedWallet && phone.length >= 8) {
+      const code = String(Math.floor(100000 + Math.random() * 900000));
+      setGeneratedOtp(code);
+      setDonStep("otp");
+      setOtp("");
+    }
+  };
+
+  const handleConfirmOtp = () => {
+    if (otp === generatedOtp) {
+      setDonStep("success");
+    }
+  };
+
+  const resetDon = () => {
+    setDonStep("amounts");
+    setSelectedAmount("");
+    setSelectedWallet("");
+    setPhone("");
+    setOtp("");
+  };
 
   return (
     <section
@@ -3543,13 +3585,13 @@ function Soutenir({ G }) {
         </h3>
         <div
           className="soutenir-grid"
-           style={{
-               display: "grid",
-               gridTemplateColumns: "1.1fr 0.9fr",
-                gap: "1.5rem",
-                marginBottom: "3.5rem",
-                alignItems: "start",
-           }}
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1.1fr 0.9fr",
+            gap: "1.5rem",
+            marginBottom: "3.5rem",
+            alignItems: "start",
+          }}
         >
           <div
             style={{
@@ -3560,84 +3602,131 @@ function Soutenir({ G }) {
               boxShadow: "0 4px 24px rgba(0,0,0,0.05)",
             }}
           >
-            {donSubmitted ? (
-              <motion.div
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                style={{ textAlign: "center", padding: "2rem" }}
-              >
-                <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>💚</div>
+            {/* Tabs */}
+            <div
+              style={{
+                display: "flex",
+                gap: "0.5rem",
+                marginBottom: "1.5rem",
+                flexWrap: "wrap",
+              }}
+            >
+              {DON_TABS.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => {
+                    setDonType(tab.id);
+                    resetDon();
+                  }}
+                  style={{
+                    padding: "0.55rem 1.1rem",
+                    borderRadius: "99px",
+                    border: `1px solid ${donType === tab.id ? G.greenBorder : G.border}`,
+                    background:
+                      donType === tab.id ? G.greenLight : G.offWhite,
+                    color: donType === tab.id ? G.green : G.slateMid,
+                    fontWeight: 700,
+                    fontSize: "0.82rem",
+                    cursor: "pointer",
+                    transition: "all 0.2s",
+                  }}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Don bancaire → redirect */}
+            {donType === "bancaire" && (
+              <div style={{ textAlign: "center", padding: "2rem 1rem" }}>
+                <div style={{ fontSize: "2.5rem", marginBottom: "1rem" }}>🏦</div>
                 <h4
                   style={{
-                    fontSize: "1.1rem",
+                    fontSize: "1rem",
                     fontWeight: 900,
                     color: G.slate,
                     marginBottom: "0.5rem",
                   }}
                 >
-                  Merci pour votre don !
+                  Don bancaire
                 </h4>
                 <p
                   style={{
                     color: G.slateMid,
-                    fontSize: "0.9rem",
-                    marginBottom: "1rem",
+                    fontSize: "0.88rem",
+                    lineHeight: 1.7,
+                    marginBottom: "1.25rem",
                   }}
                 >
-                  Un reçu fiscal vous sera envoyé par email sous 24h.
+                  Pour effectuer un don par virement bancaire, veuillez vous inscrire ou vous connecter à votre espace donateur.
                 </p>
-                <button
-                  onClick={() => setDonSubmitted(false)}
+                <Link
+                  to="/register"
                   style={{
-                    padding: "0.6rem 1.5rem",
-                    borderRadius: "0.75rem",
-                    background: G.greenLight,
-                    border: `1px solid ${G.greenBorder}`,
-                    color: G.green,
+                    display: "inline-block",
+                    padding: "0.85rem 2rem",
+                    borderRadius: "0.875rem",
+                    background: `linear-gradient(135deg,#d97706,${G.gold})`,
+                    color: "white",
                     fontWeight: 800,
-                    cursor: "pointer",
-                    fontSize: "0.85rem",
+                    fontSize: "0.9rem",
+                    textDecoration: "none",
+                    boxShadow: "0 8px 24px -8px rgba(184,134,11,0.4)",
                   }}
                 >
-                  Faire un autre don
-                </button>
-              </motion.div>
-            ) : (
-              <>
-                <div
-                  style={{
-                    display: "flex",
-                    gap: "0.5rem",
-                    marginBottom: "1.5rem",
-                    flexWrap: "wrap",
-                  }}
-                >
-                  {DON_TABS.map((tab) => (
-                    <button
-                      key={tab.id}
-                      onClick={() => {
-                        setDonType(tab.id);
-                        setSelectedAmount("");
-                      }}
-                      style={{
-                        padding: "0.55rem 1.1rem",
-                        borderRadius: "99px",
-                        border: `1px solid ${donType === tab.id ? G.greenBorder : G.border}`,
-                        background:
-                          donType === tab.id ? G.greenLight : G.offWhite,
-                        color: donType === tab.id ? G.green : G.slateMid,
-                        fontWeight: 700,
-                        fontSize: "0.82rem",
-                        cursor: "pointer",
-                        transition: "all 0.2s",
-                      }}
-                    >
-                      {tab.label}
-                    </button>
-                  ))}
-                </div>
+                  S'inscrire / Se connecter →
+                </Link>
+              </div>
+            )}
 
-                {donType !== "nature" && (
+            {/* Carte bancaire → redirect */}
+            {donType === "carte" && (
+              <div style={{ textAlign: "center", padding: "2rem 1rem" }}>
+                <div style={{ fontSize: "2.5rem", marginBottom: "1rem" }}>💳</div>
+                <h4
+                  style={{
+                    fontSize: "1rem",
+                    fontWeight: 900,
+                    color: G.slate,
+                    marginBottom: "0.5rem",
+                  }}
+                >
+                  Paiement par carte bancaire
+                </h4>
+                <p
+                  style={{
+                    color: G.slateMid,
+                    fontSize: "0.88rem",
+                    lineHeight: 1.7,
+                    marginBottom: "1.25rem",
+                  }}
+                >
+                  Pour effectuer un don par carte bancaire, veuillez vous inscrire ou vous connecter à votre espace donateur.
+                </p>
+                <Link
+                  to="/register"
+                  style={{
+                    display: "inline-block",
+                    padding: "0.85rem 2rem",
+                    borderRadius: "0.875rem",
+                    background: `linear-gradient(135deg,#d97706,${G.gold})`,
+                    color: "white",
+                    fontWeight: 800,
+                    fontSize: "0.9rem",
+                    textDecoration: "none",
+                    boxShadow: "0 8px 24px -8px rgba(184,134,11,0.4)",
+                  }}
+                >
+                  S'inscrire / Se connecter →
+                </Link>
+              </div>
+            )}
+
+            {/* Don instantané */}
+            {donType === "instantane" && (
+              <>
+                {/* ÉTAPE 1 : Choix du montant */}
+                {donStep === "amounts" && (
                   <>
                     <label
                       style={{
@@ -3655,16 +3744,13 @@ function Soutenir({ G }) {
                         display: "flex",
                         flexWrap: "wrap",
                         gap: "0.5rem",
-                        marginBottom: "1rem",
+                        marginBottom: "1.5rem",
                       }}
                     >
-                      {(donType === "instantane"
-                        ? AMOUNTS_Instantane
-                        : AMOUNTS_Bancaire
-                      ).map((a) => (
+                      {AMOUNTS_Instantane.map((a) => (
                         <button
                           key={a}
-                          onClick={() => setSelectedAmount(a)}
+                          onClick={() => handleAmountSelect(a)}
                           style={{
                             padding: "0.6rem 1rem",
                             borderRadius: "0.75rem",
@@ -3682,64 +3768,6 @@ function Soutenir({ G }) {
                         </button>
                       ))}
                     </div>
-                    <div style={{ marginBottom: "1rem" }}>
-                      <label
-                        style={{
-                          display: "block",
-                          fontSize: "0.75rem",
-                          fontWeight: 700,
-                          color: G.slate,
-                          marginBottom: "0.3rem",
-                        }}
-                      >
-                        Autre montant (€)
-                      </label>
-                      <input
-                        type="number"
-                        placeholder="Saisir un montant libre..."
-                        min="1"
-                        style={{
-                          width: "100%",
-                          padding: "0.65rem 0.85rem",
-                          borderRadius: "0.625rem",
-                          border: `1px solid ${G.border}`,
-                          fontSize: "0.85rem",
-                          background: G.offWhite,
-                          outline: "none",
-                          boxSizing: "border-box",
-                        }}
-                      />
-                    </div>
-                    <div style={{ marginBottom: "1rem" }}>
-                      <label
-                        style={{
-                          display: "block",
-                          fontSize: "0.75rem",
-                          fontWeight: 700,
-                          color: G.slate,
-                          marginBottom: "0.3rem",
-                        }}
-                      >
-                        Affecter à un programme (optionnel)
-                      </label>
-                      <select
-                        style={{
-                          width: "100%",
-                          padding: "0.65rem 0.85rem",
-                          borderRadius: "0.625rem",
-                          border: `1px solid ${G.border}`,
-                          fontSize: "0.85rem",
-                          background: G.offWhite,
-                          outline: "none",
-                        }}
-                      >
-                        <option>Au programme le plus urgent</option>
-                        <option>Accès à l'eau potable</option>
-                        <option>Éducation numérique</option>
-                        <option>Microcrédits femmes</option>
-                        <option>Nutrition infantile</option>
-                      </select>
-                    </div>
                     <div
                       style={{
                         padding: "0.85rem",
@@ -3748,203 +3776,363 @@ function Soutenir({ G }) {
                         border: `1px solid rgba(184,134,11,0.2)`,
                         fontSize: "0.8rem",
                         color: G.slateMid,
-                        marginBottom: "1.2rem",
                         lineHeight: 1.65,
                       }}
                     >
-                      💡 <strong style={{ color: G.gold }}>10€ =</strong> un
+                      💡 <strong style={{ color: G.gold }}>100$ =</strong> un
                       complément nutritionnel pour un enfant pendant 1 mois.
                       <br />
-                      💡 <strong style={{ color: G.gold }}>50€ =</strong>{" "}
+                      💡 <strong style={{ color: G.gold }}>250$ =</strong>{" "}
                       matériel scolaire pour 2 élèves sur toute l'année.
                     </div>
-                    <button
-                      onClick={() => setDonSubmitted(true)}
-                      style={{
-                        width: "100%",
-                        padding: "0.9rem",
-                        borderRadius: "0.875rem",
-                        background: `linear-gradient(135deg,#d97706,${G.gold})`,
-                        color: "white",
-                        fontWeight: 800,
-                        fontSize: "0.9rem",
-                        border: "none",
-                        cursor: "pointer",
-                        boxShadow: "0 8px 24px -8px rgba(184,134,11,0.4)",
-                      }}
-                    >
-                      🔒 Faire un don sécurisé →
-                    </button>
-                    <p
-                      style={{
-                        fontSize: "0.68rem",
-                        color: G.slateLight,
-                        textAlign: "center",
-                        marginTop: "0.6rem",
-                      }}
-                    >
-                      Paiement sécurisé · Reçu fiscal automatique · HTTPS
-                    </p>
                   </>
                 )}
 
-                {donType === "nature" && (
-                  <>
-                    <p
+                {/* ÉTAPE 2 : Choix wallet + téléphone */}
+                {donStep === "wallet" && (
+                  <motion.div
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                  >
+                    <button
+                      onClick={resetDon}
                       style={{
-                        fontSize: "0.88rem",
+                        background: "none",
+                        border: "none",
                         color: G.slateMid,
-                        lineHeight: 1.75,
+                        fontSize: "0.8rem",
+                        cursor: "pointer",
                         marginBottom: "1rem",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.3rem",
+                        padding: 0,
                       }}
                     >
-                      Vous souhaitez faire un don en nature ou inclure notre
-                      organisation dans vos dispositions testamentaires ?
-                      Contactez-nous pour en discuter en toute confidentialité.
-                    </p>
+                      ← Retour
+                    </button>
+
                     <div
                       style={{
                         display: "flex",
-                        flexDirection: "column",
-                        gap: "0.65rem",
-                        marginBottom: "1.2rem",
+                        alignItems: "center",
+                        gap: "0.5rem",
+                        marginBottom: "1.25rem",
+                        padding: "0.6rem 1rem",
+                        borderRadius: "0.75rem",
+                        background: G.goldLight,
+                        border: `1px solid rgba(184,134,11,0.2)`,
+                        fontSize: "0.88rem",
                       }}
                     >
-                      <div>
-                        <label
-                          style={{
-                            display: "block",
-                            fontSize: "0.75rem",
-                            fontWeight: 700,
-                            color: G.slate,
-                            marginBottom: "0.3rem",
-                          }}
-                        >
-                          Votre nom
-                        </label>
-                        <input
-                          placeholder="Prénom et nom"
-                          style={{
-                            width: "100%",
-                            padding: "0.65rem 0.85rem",
-                            borderRadius: "0.625rem",
-                            border: `1px solid ${G.border}`,
-                            fontSize: "0.85rem",
-                            background: G.offWhite,
-                            outline: "none",
-                            boxSizing: "border-box",
-                          }}
-                        />
-                      </div>
-                      <div>
-                        <label
-                          style={{
-                            display: "block",
-                            fontSize: "0.75rem",
-                            fontWeight: 700,
-                            color: G.slate,
-                            marginBottom: "0.3rem",
-                          }}
-                        >
-                          Email
-                        </label>
-                        <input
-                          type="email"
-                          placeholder="vous@exemple.com"
-                          style={{
-                            width: "100%",
-                            padding: "0.65rem 0.85rem",
-                            borderRadius: "0.625rem",
-                            border: `1px solid ${G.border}`,
-                            fontSize: "0.85rem",
-                            background: G.offWhite,
-                            outline: "none",
-                            boxSizing: "border-box",
-                          }}
-                        />
-                      </div>
-                      <div>
-                        <label
-                          style={{
-                            display: "block",
-                            fontSize: "0.75rem",
-                            fontWeight: 700,
-                            color: G.slate,
-                            marginBottom: "0.3rem",
-                          }}
-                        >
-                          Nature du don envisagé
-                        </label>
-                        <select
-                          style={{
-                            width: "100%",
-                            padding: "0.65rem 0.85rem",
-                            borderRadius: "0.625rem",
-                            border: `1px solid ${G.border}`,
-                            fontSize: "0.85rem",
-                            background: G.offWhite,
-                            outline: "none",
-                          }}
-                        >
-                          <option>Don en nature (matériel)</option>
-                          <option>Don en nature (denrées alimentaires)</option>
-                          <option>Legs testamentaire</option>
-                          <option>Assurance-vie</option>
-                          <option>Autre</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label
-                          style={{
-                            display: "block",
-                            fontSize: "0.75rem",
-                            fontWeight: 700,
-                            color: G.slate,
-                            marginBottom: "0.3rem",
-                          }}
-                        >
-                          Votre message
-                        </label>
-                        <textarea
-                          rows={3}
-                          placeholder="Décrivez votre projet de don..."
-                          style={{
-                            width: "100%",
-                            padding: "0.65rem 0.85rem",
-                            borderRadius: "0.625rem",
-                            border: `1px solid ${G.border}`,
-                            fontSize: "0.85rem",
-                            background: G.offWhite,
-                            outline: "none",
-                            resize: "vertical",
-                            lineHeight: 1.65,
-                            boxSizing: "border-box",
-                            fontFamily: "inherit",
-                          }}
-                        />
-                      </div>
+                      <span style={{ fontWeight: 800, color: G.gold }}>Montant :</span>
+                      <span style={{ fontWeight: 900, color: G.slate }}>{selectedAmount}</span>
                     </div>
+
+                    <label
+                      style={{
+                        display: "block",
+                        fontSize: "0.75rem",
+                        fontWeight: 700,
+                        color: G.slate,
+                        marginBottom: "0.65rem",
+                      }}
+                    >
+                      Choisissez votre wallet
+                    </label>
+                    <div
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: "repeat(auto-fill, minmax(100px, 1fr))",
+                        gap: "0.5rem",
+                        marginBottom: "1.25rem",
+                      }}
+                    >
+                      {WALLETS.map((w) => (
+                        <button
+                          key={w.id}
+                          onClick={() => setSelectedWallet(w.id)}
+                          style={{
+                            padding: "0.65rem 0.5rem",
+                            borderRadius: "0.75rem",
+                            border: `1px solid ${selectedWallet === w.id ? G.greenBorder : G.border}`,
+                            background:
+                              selectedWallet === w.id ? G.greenLight : G.offWhite,
+                            color: selectedWallet === w.id ? G.green : G.slate,
+                            fontWeight: 700,
+                            fontSize: "0.78rem",
+                            cursor: "pointer",
+                            transition: "all 0.2s",
+                            textAlign: "center",
+                          }}
+                        >
+                          <div style={{ fontSize: "1.3rem", marginBottom: "0.2rem" }}>
+                            {w.emoji}
+                          </div>
+                          {w.label}
+                        </button>
+                      ))}
+                    </div>
+
+                    <label
+                      style={{
+                        display: "block",
+                        fontSize: "0.75rem",
+                        fontWeight: 700,
+                        color: G.slate,
+                        marginBottom: "0.3rem",
+                      }}
+                    >
+                      Numéro de téléphone
+                    </label>
+                    <input
+                      type="tel"
+                      placeholder="ex: 77 00 00 00"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      style={{
+                        width: "100%",
+                        padding: "0.65rem 0.85rem",
+                        borderRadius: "0.625rem",
+                        border: `1px solid ${G.border}`,
+                        fontSize: "0.85rem",
+                        background: G.offWhite,
+                        outline: "none",
+                        boxSizing: "border-box",
+                        marginBottom: "1.2rem",
+                      }}
+                    />
+
                     <button
+                      onClick={handleSendOtp}
+                      disabled={!selectedWallet || phone.length < 8}
                       style={{
                         width: "100%",
                         padding: "0.9rem",
                         borderRadius: "0.875rem",
-                        background: `linear-gradient(135deg,#d97706,${G.gold})`,
-                        color: "white",
+                        background:
+                          selectedWallet && phone.length >= 8
+                            ? `linear-gradient(135deg,#d97706,${G.gold})`
+                            : G.border,
+                        color: selectedWallet && phone.length >= 8 ? "white" : G.slateMid,
                         fontWeight: 800,
                         fontSize: "0.9rem",
                         border: "none",
-                        cursor: "pointer",
+                        cursor: selectedWallet && phone.length >= 8 ? "pointer" : "not-allowed",
+                        transition: "all 0.2s",
                       }}
                     >
-                      Envoyer ma demande →
+                      Envoyer le code OTP →
                     </button>
-                  </>
+                  </motion.div>
+                )}
+
+                {/* ÉTAPE 3 : Saisie OTP */}
+                {donStep === "otp" && (
+                  <motion.div
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                  >
+                    <button
+                      onClick={() => setDonStep("wallet")}
+                      style={{
+                        background: "none",
+                        border: "none",
+                        color: G.slateMid,
+                        fontSize: "0.8rem",
+                        cursor: "pointer",
+                        marginBottom: "1rem",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.3rem",
+                        padding: 0,
+                      }}
+                    >
+                      ← Retour
+                    </button>
+
+                    <div
+                      style={{
+                        textAlign: "center",
+                        padding: "1rem",
+                        borderRadius: "0.875rem",
+                        background: G.greenLight,
+                        border: `1px solid ${G.greenBorder}`,
+                        marginBottom: "1.5rem",
+                      }}
+                    >
+                      <div style={{ fontSize: "1.75rem", marginBottom: "0.4rem" }}>📲</div>
+                      <p
+                        style={{
+                          fontSize: "0.85rem",
+                          color: G.slateMid,
+                          lineHeight: 1.65,
+                          margin: 0,
+                        }}
+                      >
+                        Un code à 6 chiffres a été envoyé au{" "}
+                        <strong style={{ color: G.slate }}>{phone}</strong>.
+                        <br />
+                        Saisissez-le ci-dessous pour confirmer votre don.
+                      </p>
+                    </div>
+
+                    <div
+                      style={{
+                        textAlign: "center",
+                        padding: "0.75rem 1rem",
+                        borderRadius: "0.75rem",
+                        background: "#fffbeb",
+                        border: "1px solid rgba(184,134,11,0.3)",
+                        marginBottom: "1rem",
+                        fontSize: "0.78rem",
+                        color: G.slateMid,
+                      }}
+                    >
+                      🧪 <strong style={{ color: G.gold }}>Mode test — votre OTP :</strong>{" "}
+                      <span style={{ fontWeight: 900, fontSize: "1.1rem", letterSpacing: "0.2em", color: G.slate }}>
+                        {generatedOtp}
+                      </span>
+                    </div>
+                    <label
+                      style={{
+                        display: "block",
+                        fontSize: "0.75rem",
+                        fontWeight: 700,
+                        color: G.slate,
+                        marginBottom: "0.3rem",
+                      }}
+                    >
+                      Code OTP (6 chiffres)
+                    </label>
+                    <input
+                      type="number"
+                      placeholder="000000"
+                      maxLength={6}
+                      value={otp}
+                      onChange={(e) => setOtp(e.target.value.slice(0, 6))}
+                      style={{
+                        width: "100%",
+                        padding: "0.75rem 0.85rem",
+                        borderRadius: "0.625rem",
+                        border: `1px solid ${G.border}`,
+                        fontSize: "1.1rem",
+                        letterSpacing: "0.4em",
+                        textAlign: "center",
+                        background: G.offWhite,
+                        outline: "none",
+                        boxSizing: "border-box",
+                        marginBottom: "1.2rem",
+                        fontWeight: 800,
+                      }}
+                    />
+
+                    <button
+                      onClick={handleConfirmOtp}
+                      disabled={otp !== generatedOtp}
+                      style={{
+                        width: "100%",
+                        padding: "0.9rem",
+                        borderRadius: "0.875rem",
+                        background:
+                          otp === generatedOtp
+                            ? `linear-gradient(135deg,#d97706,${G.gold})`
+                            : G.border,
+                        color: otp === generatedOtp ? "white" : G.slateMid,
+                        fontWeight: 800,
+                        fontSize: "0.9rem",
+                        border: "none",
+                        cursor: otp === generatedOtp ? "pointer" : "not-allowed",
+                        transition: "all 0.2s",
+                      }}
+                    >
+                      🔒 Confirmer mon don de {selectedAmount} →
+                    </button>
+
+                    <p
+                      style={{
+                        fontSize: "0.72rem",
+                        color: G.slateLight,
+                        textAlign: "center",
+                        marginTop: "0.75rem",
+                      }}
+                    >
+                      Vous n'avez pas reçu le code ?{" "}
+                      <span
+                        style={{ color: G.green, cursor: "pointer", fontWeight: 700 }}
+                        onClick={() => {
+                          const code = String(Math.floor(100000 + Math.random() * 900000));
+                          setGeneratedOtp(code);
+                          setOtp("");
+                        }}
+                      >
+                        Renvoyer
+                      </span>
+                    </p>
+                  </motion.div>
+                )}
+
+                {/* ÉTAPE 4 : Succès */}
+                {donStep === "success" && (
+                  <motion.div
+                    initial={{ scale: 0.9, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    style={{ textAlign: "center", padding: "2rem 1rem" }}
+                  >
+                    <div style={{ fontSize: "3.5rem", marginBottom: "1rem" }}>🎉</div>
+                    <h4
+                      style={{
+                        fontSize: "1.2rem",
+                        fontWeight: 900,
+                        color: G.slate,
+                        marginBottom: "0.5rem",
+                      }}
+                    >
+                      Félicitations !
+                    </h4>
+                    <p
+                      style={{
+                        color: G.slateMid,
+                        fontSize: "0.9rem",
+                        lineHeight: 1.7,
+                        marginBottom: "0.5rem",
+                      }}
+                    >
+                      Votre don de{" "}
+                      <strong style={{ color: G.slate }}>{selectedAmount}</strong> a
+                      bien été reçu. Merci pour votre générosité !
+                    </p>
+                    <p
+                      style={{
+                        color: G.slateMid,
+                        fontSize: "0.82rem",
+                        marginBottom: "1.5rem",
+                      }}
+                    >
+                      Un reçu fiscal vous sera envoyé par SMS sous 24h.
+                    </p>
+                    <button
+                      onClick={resetDon}
+                      style={{
+                        padding: "0.65rem 1.75rem",
+                        borderRadius: "0.75rem",
+                        background: G.greenLight,
+                        border: `1px solid ${G.greenBorder}`,
+                        color: G.green,
+                        fontWeight: 800,
+                        cursor: "pointer",
+                        fontSize: "0.85rem",
+                      }}
+                    >
+                      Faire un autre don
+                    </button>
+                  </motion.div>
                 )}
               </>
             )}
           </div>
 
+          {/* Colonne droite : cartes mécénat / parrainage / collecte */}
           <div
             style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
           >
@@ -3960,7 +4148,7 @@ function Soutenir({ G }) {
                 title: "Parrainage",
                 desc: "Parrainez un enfant, une famille ou un projet entier. Recevez des nouvelles régulières de votre filleul·e.",
                 cta: "Choisir un parrainage →",
-                badges: ["Enfant dès 15€/mois", "Projet dès 50€/mois"],
+                badges: ["Enfant dès 15$/mois", "Projet dès 50$/mois"],
               },
               {
                 emoji: "🌐",
@@ -4073,17 +4261,17 @@ function Soutenir({ G }) {
           Bénévolat & s'impliquer
         </h3>
         <div
-         className="benevole-grid"
-  style={{
-    borderRadius: "1.5rem",
-    border: `1px solid ${G.border}`,
-    background: G.offWhite,
-    padding: "2.5rem",
-    display: "grid",
-    gridTemplateColumns: "1fr 1fr",
-    gap: "1.5rem",
-    alignItems: "start",
-  }}
+          className="benevole-grid"
+          style={{
+            borderRadius: "1.5rem",
+            border: `1px solid ${G.border}`,
+            background: G.offWhite,
+            padding: "2.5rem",
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: "1.5rem",
+            alignItems: "start",
+          }}
         >
           <div>
             <p
@@ -4383,7 +4571,6 @@ function Soutenir({ G }) {
     </section>
   );
 }
-
 /* ─── Main ───────────────────────────────────────────────── */
 export default function Home() {
   const { t, i18n } = useTranslation();
