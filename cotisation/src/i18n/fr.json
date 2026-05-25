@@ -254,5 +254,174 @@
   "month_orders": "Ordres du mois",
   "payment_orders_amount": "Montant ordres de paiement",
   "latest_expenses": "Dernières dépenses",
-  "latest_payment_orders": "Derniers ordres de paiement"
+  "latest_payment_orders": "Derniers ordres de paiement",
+  "enumStatus": {
+    "EN_ATTENTE": "En attente",
+    "APPROUVER": "Approuvée",
+    "EFFECTUER": "Effectuée",
+    "REJETER": "Rejetée",
+    "CREE": "Créé",
+    "IMPRIME": "Imprimé",
+    "ACTIVE": "Actif",
+    "PENDING_OTP": "OTP en attente",
+    "SUSPENDED": "Suspendu"
+  },
+  "paymentMethods": {
+    "VIREMENT_BANCAIRE": "Virement bancaire",
+    "CASH": "Espèces",
+    "CHEQUE": "Chèque"
+  },
+  "expenseTypes": {
+    "ALIMENTATION": "Alimentation",
+    "CONSTRUCTION": "Construction",
+    "MEDICAMENT": "Médicament"
+  },
+  "currencies": {
+    "FRANC": "Franc",
+    "DOLLAR": "Dollar",
+    "BIRR_ETHIOPIEN": "Birr éthiopien"
+  },
+  "countries": {
+    "DJIBOUTI": "Djibouti",
+    "ETHIOPIE": "Éthiopie"
+  },
+  "common.brandAlt": "Hiil Foundation",
+  "common.brandName": "Hiil Foundation",
+  "common.brandTagline": "Transactions sécurisées",
+  "common.langFr": "🇫🇷 FR",
+  "common.langEn": "🇬🇧 EN",
+  "common.langAr": "🇸🇦 AR",
+  "common.langSo": "🇸🇴 SO",
+  "common.logout": "Déconnexion",
+  "auth.passwordPlaceholder": "********",
+  "superAdmin.roleLabel": "Super Admin",
+  "expenses.roleLabel": "Gestionnaire dépense",
+  "treasury.roleLabel": "Équipe trésorerie",
+  "common": {
+    "dashboard": "Dashboard",
+    "loading": "Chargement...",
+    "loadingError": "Erreur de chargement",
+    "date": "Date",
+    "type": "Type",
+    "amount": "Montant",
+    "country": "Pays",
+    "city": "Ville",
+    "save": "Enregistrer",
+    "noData": "Aucune donnée"
+  },
+  "expenses": {
+    "empty": "Aucune dépense",
+    "createSuccess": "Dépense enregistrée",
+    "createError": "Erreur création dépense",
+    "managementTab": "Gestion de dépense",
+    "dashboardTitle": "Dashboard dépenses",
+    "dashboardSubtitle": "Statistiques limitées aux dépenses créées par vous.",
+    "latestExpenses": "Dernières dépenses",
+    "myExpenses": "Mes dépenses",
+    "newExpense": "Nouvelle dépense",
+    "listTab": "Liste des dépenses",
+    "label": "Libellé",
+    "quantity": "Quantité",
+    "unitPrice": "Prix unitaire",
+    "beneficiary": "Bénéficiaire",
+    "stats": {
+      "totalExpenses": "Total dépenses",
+      "approved": "Dépenses approuvées",
+      "rejected": "Dépenses rejetées",
+      "pending": "Dépenses en attente",
+      "completed": "Dépenses effectuées",
+      "monthCount": "Dépenses du mois",
+      "totalAmount": "Montant total",
+      "monthAmount": "Montant du mois"
+    }
+  },
+  "superAdmin": {
+    "dashboardTitle": "Dashboard global",
+    "dashboardSubtitle": "Vue utilisateurs, cotisations, dépenses et ordres de paiement.",
+    "allExpenses": "Toutes les dépenses"
+  },
+  "validation": {
+    "approve": "Approuver",
+    "reject": "Rejeter",
+    "expenseApproved": "Dépense approuvée",
+    "approveError": "Erreur approbation",
+    "expenseRejected": "Dépense rejetée",
+    "rejectError": "Erreur rejet"
+  },
+  "paymentOrders": {
+    "empty": "Aucun ordre"
+  },
+  "home": {
+    "actions": {
+      "sectionLabel": "Nos actions",
+      "titlePrefix": "Ce que nous",
+      "titleHighlight": "faisons",
+      "titleSuffix": "sur le terrain",
+      "subtitle": "Des programmes concrets, ancrés dans les besoins réels des communautés que nous servons.",
+      "byTheme": "Par thématique",
+      "allThemes": "Tous",
+      "projectsTitle": "Projets en cours & Programmes phares",
+      "endLabel": "Fin",
+      "mapTitle": "Carte de nos interventions",
+      "mapLegend": "Nombre de projets actifs par zone",
+      "callTitle": "Appels à projets",
+      "callDescription": "Vous portez un projet aligné avec nos thématiques ? Soumettez votre candidature. Nous examinons chaque dossier avec attention.",
+      "closeForm": "✕ Fermer",
+      "openForm": "✍ Déposer une candidature",
+      "submittedTitle": "Candidature envoyée !",
+      "submittedDescription": "Nous reviendrons vers vous sous 15 jours ouvrables.",
+      "close": "Fermer",
+      "formTitle": "Formulaire de candidature",
+      "storiesTitle": "Histoires de bénéficiaires",
+      "themes": {
+        "health": "Santé",
+        "education": "Éducation",
+        "poverty": "Lutte contre la pauvreté",
+        "environment": "Environnement",
+        "emergency": "Aide d'urgence",
+        "women": "Autonomisation des femmes"
+      },
+      "status": {
+        "inProgress": "En cours",
+        "featured": "Phare"
+      },
+      "form": {
+        "projectOwnerLabel": "Nom du porteur de projet",
+        "projectOwnerPlaceholder": "Votre nom complet",
+        "organizationLabel": "Organisation / Structure",
+        "organizationPlaceholder": "Nom de votre organisation",
+        "themeLabel": "Thématique concernée",
+        "themePlaceholder": "Sélectionner une thématique...",
+        "descriptionLabel": "Description du projet",
+        "descriptionPlaceholder": "Décrivez votre projet en quelques lignes : objectifs, bénéficiaires visés, zone d'intervention...",
+        "submit": "Soumettre ma candidature"
+      },
+      "programs": {
+        "p1": {
+          "title": "Accès à l'eau potable — Zone rurale Nord",
+          "beneficiaries": "3 200 personnes",
+          "end": "Déc. 2025",
+          "desc": "Installation de 14 forages et formation de comités de gestion locaux dans 6 villages."
+        },
+        "p2": {
+          "title": "École numérique pour tous",
+          "beneficiaries": "850 élèves",
+          "end": "Juin 2026",
+          "desc": "Équipement de 12 salles informatiques et formation de 30 enseignants aux outils numériques."
+        },
+        "p3": {
+          "title": "Microcrédits & entrepreneuriat féminin",
+          "beneficiaries": "420 femmes",
+          "end": "Déc. 2026",
+          "desc": "Programme de microcrédit couplé à un accompagnement entrepreneurial sur 18 mois."
+        },
+        "p4": {
+          "title": "Nutrition infantile d'urgence",
+          "beneficiaries": "1 100 enfants",
+          "end": "Mars 2025",
+          "desc": "Distribution de compléments nutritionnels et sensibilisation des mères dans les zones critiques."
+        }
+      }
+    }
+  }
 }

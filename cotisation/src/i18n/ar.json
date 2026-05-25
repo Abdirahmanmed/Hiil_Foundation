@@ -228,5 +228,174 @@
   "create_expense": "Créer une dépense",
   "payment_orders": "Ordres de paiement",
   "create_payment_order": "Créer un ordre de paiement",
-  "print": "Imprimer"
+  "print": "Imprimer",
+  "enumStatus": {
+    "EN_ATTENTE": "قيد الانتظار",
+    "APPROUVER": "موافق عليه",
+    "EFFECTUER": "تم التنفيذ",
+    "REJETER": "مرفوض",
+    "CREE": "تم الإنشاء",
+    "IMPRIME": "مطبوع",
+    "ACTIVE": "نشط",
+    "PENDING_OTP": "OTP قيد الانتظار",
+    "SUSPENDED": "موقوف"
+  },
+  "paymentMethods": {
+    "VIREMENT_BANCAIRE": "تحويل بنكي",
+    "CASH": "نقداً",
+    "CHEQUE": "شيك"
+  },
+  "expenseTypes": {
+    "ALIMENTATION": "غذاء",
+    "CONSTRUCTION": "بناء",
+    "MEDICAMENT": "دواء"
+  },
+  "currencies": {
+    "FRANC": "فرنك",
+    "DOLLAR": "دولار",
+    "BIRR_ETHIOPIEN": "بر إثيوبي"
+  },
+  "countries": {
+    "DJIBOUTI": "جيبوتي",
+    "ETHIOPIE": "إثيوبيا"
+  },
+  "common.brandAlt": "مؤسسة هيل",
+  "common.brandName": "مؤسسة هيل",
+  "common.brandTagline": "معاملات آمنة",
+  "common.langFr": "🇫🇷 FR",
+  "common.langEn": "🇬🇧 EN",
+  "common.langAr": "🇸🇦 AR",
+  "common.langSo": "🇸🇴 SO",
+  "common.logout": "تسجيل الخروج",
+  "auth.passwordPlaceholder": "********",
+  "superAdmin.roleLabel": "مشرف عام",
+  "expenses.roleLabel": "مدير المصروفات",
+  "treasury.roleLabel": "فريق الخزينة",
+  "common": {
+    "dashboard": "Dashboard",
+    "loading": "Chargement...",
+    "loadingError": "Erreur de chargement",
+    "date": "Date",
+    "type": "Type",
+    "amount": "Montant",
+    "country": "Pays",
+    "city": "Ville",
+    "save": "Enregistrer",
+    "noData": "Aucune donnée"
+  },
+  "expenses": {
+    "empty": "Aucune dépense",
+    "createSuccess": "Dépense enregistrée",
+    "createError": "Erreur création dépense",
+    "managementTab": "Gestion de dépense",
+    "dashboardTitle": "Dashboard dépenses",
+    "dashboardSubtitle": "Statistiques limitées aux dépenses créées par vous.",
+    "latestExpenses": "Dernières dépenses",
+    "myExpenses": "Mes dépenses",
+    "newExpense": "Nouvelle dépense",
+    "listTab": "Liste des dépenses",
+    "label": "Libellé",
+    "quantity": "Quantité",
+    "unitPrice": "Prix unitaire",
+    "beneficiary": "Bénéficiaire",
+    "stats": {
+      "totalExpenses": "Total dépenses",
+      "approved": "Dépenses approuvées",
+      "rejected": "Dépenses rejetées",
+      "pending": "Dépenses en attente",
+      "completed": "Dépenses effectuées",
+      "monthCount": "Dépenses du mois",
+      "totalAmount": "Montant total",
+      "monthAmount": "Montant du mois"
+    }
+  },
+  "superAdmin": {
+    "dashboardTitle": "Dashboard global",
+    "dashboardSubtitle": "Vue utilisateurs, cotisations, dépenses et ordres de paiement.",
+    "allExpenses": "Toutes les dépenses"
+  },
+  "validation": {
+    "approve": "Approuver",
+    "reject": "Rejeter",
+    "expenseApproved": "Dépense approuvée",
+    "approveError": "Erreur approbation",
+    "expenseRejected": "Dépense rejetée",
+    "rejectError": "Erreur rejet"
+  },
+  "paymentOrders": {
+    "empty": "Aucun ordre"
+  },
+  "home": {
+    "actions": {
+      "sectionLabel": "أنشطتنا",
+      "titlePrefix": "ما الذي",
+      "titleHighlight": "نقوم به",
+      "titleSuffix": "على أرض الواقع",
+      "subtitle": "برامج عملية ترتكز على الاحتياجات الحقيقية للمجتمعات التي نخدمها.",
+      "byTheme": "حسب المجال",
+      "allThemes": "الكل",
+      "projectsTitle": "المشاريع الجارية والبرامج الرائدة",
+      "endLabel": "النهاية",
+      "mapTitle": "خريطة تدخلاتنا",
+      "mapLegend": "عدد المشاريع النشطة حسب المنطقة",
+      "callTitle": "دعوات المشاريع",
+      "callDescription": "هل لديك مشروع متوافق مع مجالاتنا؟ قدّم طلبك. نراجع كل ملف بعناية.",
+      "closeForm": "✕ إغلاق",
+      "openForm": "✍ تقديم طلب",
+      "submittedTitle": "تم إرسال الطلب!",
+      "submittedDescription": "سنعود إليك خلال 15 يوم عمل.",
+      "close": "إغلاق",
+      "formTitle": "نموذج التقديم",
+      "storiesTitle": "قصص المستفيدين",
+      "themes": {
+        "health": "الصحة",
+        "education": "التعليم",
+        "poverty": "مكافحة الفقر",
+        "environment": "البيئة",
+        "emergency": "مساعدة طارئة",
+        "women": "تمكين المرأة"
+      },
+      "status": {
+        "inProgress": "قيد التنفيذ",
+        "featured": "رائد"
+      },
+      "form": {
+        "projectOwnerLabel": "اسم صاحب المشروع",
+        "projectOwnerPlaceholder": "اسمك الكامل",
+        "organizationLabel": "المنظمة / الهيكل",
+        "organizationPlaceholder": "اسم منظمتك",
+        "themeLabel": "المجال المعني",
+        "themePlaceholder": "اختر مجالًا...",
+        "descriptionLabel": "وصف المشروع",
+        "descriptionPlaceholder": "صف مشروعك في بضعة أسطر: الأهداف، الفئات المستفيدة، منطقة التدخل...",
+        "submit": "إرسال طلبي"
+      },
+      "programs": {
+        "p1": {
+          "title": "الوصول إلى مياه الشرب — المنطقة الريفية الشمالية",
+          "beneficiaries": "3,200 شخص",
+          "end": "ديسمبر 2025",
+          "desc": "تركيب 14 بئرًا وتدريب لجان إدارة محلية في 6 قرى."
+        },
+        "p2": {
+          "title": "مدرسة رقمية للجميع",
+          "beneficiaries": "850 طالبًا",
+          "end": "يونيو 2026",
+          "desc": "تجهيز 12 قاعة حاسوب وتدريب 30 معلمًا على الأدوات الرقمية."
+        },
+        "p3": {
+          "title": "التمويل الأصغر وريادة الأعمال النسائية",
+          "beneficiaries": "420 امرأة",
+          "end": "ديسمبر 2026",
+          "desc": "برنامج تمويل أصغر مع مواكبة ريادية لمدة 18 شهرًا."
+        },
+        "p4": {
+          "title": "تغذية الأطفال الطارئة",
+          "beneficiaries": "1,100 طفل",
+          "end": "مارس 2025",
+          "desc": "توزيع مكملات غذائية وتوعية الأمهات في المناطق الحرجة."
+        }
+      }
+    }
+  }
 }

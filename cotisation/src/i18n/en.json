@@ -228,5 +228,174 @@
   "create_expense": "Créer une dépense",
   "payment_orders": "Ordres de paiement",
   "create_payment_order": "Créer un ordre de paiement",
-  "print": "Imprimer"
+  "print": "Imprimer",
+  "enumStatus": {
+    "EN_ATTENTE": "Pending",
+    "APPROUVER": "Approved",
+    "EFFECTUER": "Completed",
+    "REJETER": "Rejected",
+    "CREE": "Created",
+    "IMPRIME": "Printed",
+    "ACTIVE": "Active",
+    "PENDING_OTP": "Pending OTP",
+    "SUSPENDED": "Suspended"
+  },
+  "paymentMethods": {
+    "VIREMENT_BANCAIRE": "Bank transfer",
+    "CASH": "Cash",
+    "CHEQUE": "Cheque"
+  },
+  "expenseTypes": {
+    "ALIMENTATION": "Food",
+    "CONSTRUCTION": "Construction",
+    "MEDICAMENT": "Medicine"
+  },
+  "currencies": {
+    "FRANC": "Franc",
+    "DOLLAR": "Dollar",
+    "BIRR_ETHIOPIEN": "Ethiopian birr"
+  },
+  "countries": {
+    "DJIBOUTI": "Djibouti",
+    "ETHIOPIE": "Ethiopia"
+  },
+  "common.brandAlt": "Hiil Foundation",
+  "common.brandName": "Hiil Foundation",
+  "common.brandTagline": "Secure transactions",
+  "common.langFr": "🇫🇷 FR",
+  "common.langEn": "🇬🇧 EN",
+  "common.langAr": "🇸🇦 AR",
+  "common.langSo": "🇸🇴 SO",
+  "common.logout": "Logout",
+  "auth.passwordPlaceholder": "********",
+  "superAdmin.roleLabel": "Super Admin",
+  "expenses.roleLabel": "Expense manager",
+  "treasury.roleLabel": "Treasury team",
+  "common": {
+    "dashboard": "Dashboard",
+    "loading": "Chargement...",
+    "loadingError": "Erreur de chargement",
+    "date": "Date",
+    "type": "Type",
+    "amount": "Montant",
+    "country": "Pays",
+    "city": "Ville",
+    "save": "Enregistrer",
+    "noData": "Aucune donnée"
+  },
+  "expenses": {
+    "empty": "Aucune dépense",
+    "createSuccess": "Dépense enregistrée",
+    "createError": "Erreur création dépense",
+    "managementTab": "Gestion de dépense",
+    "dashboardTitle": "Dashboard dépenses",
+    "dashboardSubtitle": "Statistiques limitées aux dépenses créées par vous.",
+    "latestExpenses": "Dernières dépenses",
+    "myExpenses": "Mes dépenses",
+    "newExpense": "Nouvelle dépense",
+    "listTab": "Liste des dépenses",
+    "label": "Libellé",
+    "quantity": "Quantité",
+    "unitPrice": "Prix unitaire",
+    "beneficiary": "Bénéficiaire",
+    "stats": {
+      "totalExpenses": "Total dépenses",
+      "approved": "Dépenses approuvées",
+      "rejected": "Dépenses rejetées",
+      "pending": "Dépenses en attente",
+      "completed": "Dépenses effectuées",
+      "monthCount": "Dépenses du mois",
+      "totalAmount": "Montant total",
+      "monthAmount": "Montant du mois"
+    }
+  },
+  "superAdmin": {
+    "dashboardTitle": "Dashboard global",
+    "dashboardSubtitle": "Vue utilisateurs, cotisations, dépenses et ordres de paiement.",
+    "allExpenses": "Toutes les dépenses"
+  },
+  "validation": {
+    "approve": "Approuver",
+    "reject": "Rejeter",
+    "expenseApproved": "Dépense approuvée",
+    "approveError": "Erreur approbation",
+    "expenseRejected": "Dépense rejetée",
+    "rejectError": "Erreur rejet"
+  },
+  "paymentOrders": {
+    "empty": "Aucun ordre"
+  },
+  "home": {
+    "actions": {
+      "sectionLabel": "Our actions",
+      "titlePrefix": "What we",
+      "titleHighlight": "do",
+      "titleSuffix": "in the field",
+      "subtitle": "Concrete programs rooted in the real needs of the communities we serve.",
+      "byTheme": "By theme",
+      "allThemes": "All",
+      "projectsTitle": "Ongoing projects & flagship programs",
+      "endLabel": "End",
+      "mapTitle": "Map of our interventions",
+      "mapLegend": "Number of active projects by area",
+      "callTitle": "Calls for projects",
+      "callDescription": "Do you lead a project aligned with our themes? Submit your application. We review each file carefully.",
+      "closeForm": "✕ Close",
+      "openForm": "✍ Submit an application",
+      "submittedTitle": "Application sent!",
+      "submittedDescription": "We will get back to you within 15 business days.",
+      "close": "Close",
+      "formTitle": "Application form",
+      "storiesTitle": "Beneficiary stories",
+      "themes": {
+        "health": "Health",
+        "education": "Education",
+        "poverty": "Poverty reduction",
+        "environment": "Environment",
+        "emergency": "Emergency aid",
+        "women": "Women empowerment"
+      },
+      "status": {
+        "inProgress": "In progress",
+        "featured": "Flagship"
+      },
+      "form": {
+        "projectOwnerLabel": "Project lead name",
+        "projectOwnerPlaceholder": "Your full name",
+        "organizationLabel": "Organization / Structure",
+        "organizationPlaceholder": "Your organization name",
+        "themeLabel": "Related theme",
+        "themePlaceholder": "Select a theme...",
+        "descriptionLabel": "Project description",
+        "descriptionPlaceholder": "Describe your project in a few lines: goals, target beneficiaries, intervention area...",
+        "submit": "Submit my application"
+      },
+      "programs": {
+        "p1": {
+          "title": "Access to drinking water — North rural area",
+          "beneficiaries": "3,200 people",
+          "end": "Dec. 2025",
+          "desc": "Installation of 14 boreholes and training of local management committees in 6 villages."
+        },
+        "p2": {
+          "title": "Digital school for all",
+          "beneficiaries": "850 students",
+          "end": "Jun. 2026",
+          "desc": "Equipment of 12 computer rooms and training of 30 teachers in digital tools."
+        },
+        "p3": {
+          "title": "Microcredit & women entrepreneurship",
+          "beneficiaries": "420 women",
+          "end": "Dec. 2026",
+          "desc": "Microcredit program combined with 18 months of entrepreneurship support."
+        },
+        "p4": {
+          "title": "Emergency child nutrition",
+          "beneficiaries": "1,100 children",
+          "end": "Mar. 2025",
+          "desc": "Distribution of nutritional supplements and awareness sessions for mothers in critical areas."
+        }
+      }
+    }
+  }
 }
