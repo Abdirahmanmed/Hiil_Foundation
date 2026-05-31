@@ -1,7 +1,7 @@
 import prisma from "../../config/prisma.js";
 import { env } from "../../config/env.js";
 import { generateOtpCode } from "../../utils/otp.js";
-import { hashOtp, verifyPassword } from "../../utils/hash.js";
+import { hashOtp } from "../../utils/hash.js";
 import { sendOtpMail } from "../../services/mail.service.js";
 
 export const sendEmailOtp = async ({ email }) => {
@@ -62,6 +62,12 @@ export const verifyEmailOtp = async ({ email, code }) => {
   if (!user) throw new Error("Utilisateur introuvable");
 
   const userId = user.id;
+
+  if (user.otpLockedUntil && user.otpLockedUntil > new Date()) {
+    const err = new Error("OTP temporairement bloque. Reessayez plus tard.");
+    err.status = 423;
+    throw err;
+  }
 
   const otp = await prisma.otp.findFirst({
     where: {

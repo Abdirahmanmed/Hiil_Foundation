@@ -38,8 +38,10 @@ export async function register(req, res, next) {
       req,
     });
 
+    await sendEmailOtp({ email: user.email });
+
     res.status(201).json({
-      message: "Inscription OK. OTP en cours d’envoi par email.",
+      message: "Inscription OK. OTP envoye par email.",
       user: {
         id: user.id,
         fullName: user.fullName,
@@ -61,9 +63,6 @@ export async function register(req, res, next) {
       },
     });
 
-    sendEmailOtp({ email: user.email }).catch((e) => {
-      console.error("OTP send failed:", e?.message || e);
-    });
   } catch (err) {
     if (String(err?.code) === "P2002") {
       return res

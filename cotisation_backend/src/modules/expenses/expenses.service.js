@@ -150,8 +150,6 @@ export async function approveExpense({ userId: currentUserId, role, id, req }) {
     select: { id: true, email: true, role: true, fullName: true },
   });
 
-  console.log("Expense approved by SUPER_ADMIN", { userId: currentUserId, hasEmail: Boolean(superAdmin?.email) });
-
   const superAdminEmail = superAdmin?.email?.trim();
   if (!superAdmin || superAdmin.role !== "SUPER_ADMIN" || !superAdminEmail || !superAdminEmail.includes("@")) {
     const err = new Error("Votre compte Super Admin n’a pas d’email valide. Veuillez mettre à jour votre email.");

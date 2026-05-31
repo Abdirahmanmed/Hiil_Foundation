@@ -16,3 +16,8 @@ export async function getPaymentOrderPrint(id) {
   const res = await http.get(`${basePath}/${id}/print`);
   return res.data;
 }
+
+export async function markPaymentOrderPrinted(id) {
+  const res = await http.post(`${basePath}/${id}/print`, {});
+  return res.data;
+}

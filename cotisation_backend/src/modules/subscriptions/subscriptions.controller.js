@@ -5,8 +5,6 @@ import {
 } from "./subscriptions.schemas.js";
 
 export const createSubscription = async (req, res, next) => {
-  console.log("AUTH HEADER:", req.headers.authorization);
-  console.log("REQ.USER:", req.user);
   try {
     const data = createSubscriptionSchema.parse(req.body);
     const userId = req.user.id;
