@@ -126,7 +126,6 @@ export async function sendOtpMail({ email, code }) {
       text: `Votre code OTP est : ${code}\nValable ${env.OTP_TTL_MINUTES} minutes.`,
     });
 
-    console.log("✅ OTP email sent:", info.messageId);
     return info;
   } catch (err) {
     logSmtpError("OTP", err);
@@ -137,7 +136,7 @@ export async function sendOtpMail({ email, code }) {
 export async function verifyMailer() {
   try {
     await transporter.verify();
-    console.log(`✅ SMTP ready (${env.EMAIL_HOST}:${env.EMAIL_PORT}, ${smtpSecureLabel()}, IPv4 forced)`);
+    console.log(`SMTP ready (${env.EMAIL_HOST}:${env.EMAIL_PORT}, ${smtpSecureLabel()}, IPv4 forced)`);
   } catch (err) {
     logSmtpError("SMTP verify", err);
   }
@@ -169,7 +168,6 @@ export async function sendExpenseApprovalTokenEmail({ to, expense, token }) {
       subject: "Token d’approbation de dépense - Hiil Foundation",
       text: lines.join("\n"),
     });
-    console.log("✅ Expense approval token email sent:", info.messageId);
     return info;
   } catch (err) {
     logSmtpError("Expense approval token", err);

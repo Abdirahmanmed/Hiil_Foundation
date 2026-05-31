@@ -148,8 +148,8 @@ export default function AdminDashboard() {
   });
 
   const stats = qStats.data?.stats;
-  const users = qUsers.data?.users || [];
-  const subs = qSubs.data?.subscriptions || [];
+  const users = useMemo(() => qUsers.data?.users || [], [qUsers.data?.users]);
+  const subs = useMemo(() => qSubs.data?.subscriptions || [], [qSubs.data?.subscriptions]);
 
   // Derived data
   const usersFiltered = useMemo(() => {

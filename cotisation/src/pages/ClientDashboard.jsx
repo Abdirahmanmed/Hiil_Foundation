@@ -274,8 +274,8 @@ export default function ClientDashboard() {
                       value={mode}
                       onChange={(e) => setMode(e.target.value)}
                     >
-                      <option value="AUTOMATIC">AUTOMATIC</option>
-                      <option value="MANUAL">MANUAL</option>
+                      <option value="AUTOMATIC">{t("paymentModes.AUTOMATIC")}</option>
+                      <option value="MANUAL">{t("paymentModes.MANUAL")}</option>
                     </Select>
 
                     <Input
@@ -321,10 +321,10 @@ export default function ClientDashboard() {
                     value={frequency}
                     onChange={(e) => setFrequency(e.target.value)}
                   >
-                    <option value="MONTHLY">MONTHLY</option>
-                    <option value="QUARTERLY">QUARTERLY</option>
-                    <option value="SEMIANNUAL">SEMIANNUAL</option>
-                    <option value="ANNUAL">ANNUAL</option>
+                    <option value="MONTHLY">{t("frequencies.MONTHLY")}</option>
+                    <option value="QUARTERLY">{t("frequencies.QUARTERLY")}</option>
+                    <option value="SEMIANNUAL">{t("frequencies.SEMIANNUAL")}</option>
+                    <option value="ANNUAL">{t("frequencies.ANNUAL")}</option>
                   </Select>
                 </div>
 

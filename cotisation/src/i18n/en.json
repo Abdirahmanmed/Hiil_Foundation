@@ -397,5 +397,15 @@
         }
       }
     }
+  },
+  "paymentModes": {
+    "AUTOMATIC": "Automatic",
+    "MANUAL": "Manual"
+  },
+  "frequencies": {
+    "MONTHLY": "Monthly",
+    "QUARTERLY": "Quarterly",
+    "SEMIANNUAL": "Semiannual",
+    "ANNUAL": "Annual"
   }
 }

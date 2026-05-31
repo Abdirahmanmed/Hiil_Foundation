@@ -1,18 +1,19 @@
+import { lazy, Suspense, useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import Shell from "./components/Shell";
-import Home from "./pages/Home";
-import Register from "./pages/Register";
-import Login from "./pages/Login";
-import OtpVerify from "./pages/OtpVerify";
-import ClientDashboard from "./pages/ClientDashboard";
-import AdminDashboard from "./pages/AdminDashboard";
-import ExpenseManagerDashboard from "./pages/ExpenseManagerDashboard";
-import SuperAdminDashboard from "./pages/SuperAdminDashboard";
-import TreasuryDashboard from "./pages/TreasuryDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
-import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import InviteCommunity from "./pages/InviteCommunity";
+
+const Home = lazy(() => import("./pages/Home"));
+const Register = lazy(() => import("./pages/Register"));
+const Login = lazy(() => import("./pages/Login"));
+const OtpVerify = lazy(() => import("./pages/OtpVerify"));
+const ClientDashboard = lazy(() => import("./pages/ClientDashboard"));
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const ExpenseManagerDashboard = lazy(() => import("./pages/ExpenseManagerDashboard"));
+const SuperAdminDashboard = lazy(() => import("./pages/SuperAdminDashboard"));
+const TreasuryDashboard = lazy(() => import("./pages/TreasuryDashboard"));
+const InviteCommunity = lazy(() => import("./pages/InviteCommunity"));
 
 function RTLHandler() {
   const { i18n } = useTranslation();
@@ -31,11 +32,12 @@ export default function App() {
     <>
       <RTLHandler />
       <Shell>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/otp" element={<OtpVerify />} />
-          <Route path="/login" element={<Login />} />
+        <Suspense fallback={<div className="p-6 text-sm text-slate-500">Chargement...</div>}>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/otp" element={<OtpVerify />} />
+            <Route path="/login" element={<Login />} />
 
           <Route
             path="/client"
@@ -90,7 +92,8 @@ export default function App() {
               </ProtectedRoute>
             }
           />
-        </Routes>
+          </Routes>
+        </Suspense>
       </Shell>
     </>
   );

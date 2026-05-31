@@ -38,6 +38,18 @@ const floaty = {
   },
 };
 
+const generateSixDigitCode = () => {
+  const cryptoApi = globalThis.crypto;
+
+  if (cryptoApi?.getRandomValues) {
+    const values = new Uint32Array(1);
+    cryptoApi.getRandomValues(values);
+    return String(100000 + (values[0] % 900000));
+  }
+
+  return String(100000 + (Date.now() % 900000));
+};
+
 /* ─── SectionLabel ───────────────────────────────────────── */
 function SectionLabel({ children, color = G.green }) {
   const bg = color === G.green ? G.greenLight : G.goldLight;
@@ -3404,7 +3416,7 @@ function Soutenir({ G }) {
 
   const handleSendOtp = () => {
     if (selectedWallet && phone.length >= 8) {
-      const code = String(Math.floor(100000 + Math.random() * 900000));
+      const code = generateSixDigitCode();
       setGeneratedOtp(code);
       setDonStep("otp");
       setOtp("");
@@ -4061,7 +4073,7 @@ function Soutenir({ G }) {
                       <span
                         style={{ color: G.green, cursor: "pointer", fontWeight: 700 }}
                         onClick={() => {
-                          const code = String(Math.floor(100000 + Math.random() * 900000));
+                          const code = generateSixDigitCode();
                           setGeneratedOtp(code);
                           setOtp("");
                         }}
@@ -5163,7 +5175,7 @@ export default function Home() {
               {t("contact_desc")}
             </p>
             <a
-              href="mailto:contact@example.com"
+              href="mailto:contact@hiilfoundation.org"
               style={{
                 display: "inline-block",
                 padding: "0.9rem 2.5rem",

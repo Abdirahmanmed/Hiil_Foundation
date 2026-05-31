@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { upload } from "../../utils/upload.js";
+import { upload, validateUploadedFiles } from "../../utils/upload.js";
 import { auth } from "../../middlewares/auth.js";
 import { register, login, me } from "./auth.controller.js";
 
@@ -14,6 +14,7 @@ router.post(
     { name: "presidentIdDoc", maxCount: 1 },
     { name: "associationStatusDoc", maxCount: 1 },
   ]),
+  validateUploadedFiles,
   register,
 );
 

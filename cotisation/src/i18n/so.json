@@ -397,5 +397,15 @@
         }
       }
     }
+  },
+  "paymentModes": {
+    "AUTOMATIC": "Toos ah",
+    "MANUAL": "Gacanta"
+  },
+  "frequencies": {
+    "MONTHLY": "Bil kasta",
+    "QUARTERLY": "Saddex bilood kasta",
+    "SEMIANNUAL": "Lix bilood kasta",
+    "ANNUAL": "Sanadle"
   }
 }
