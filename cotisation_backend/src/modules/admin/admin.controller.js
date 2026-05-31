@@ -56,6 +56,7 @@ export async function setUserRole(req, res, next) {
     const body = setUserRoleSchema.parse(req.body);
     const updated = await adminService.setUserRole({
       adminId: req.user.id,
+      adminRole: req.user.role,
       userId: req.params.userId,
       role: body.role,
       req,

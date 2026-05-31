@@ -1,34 +1,42 @@
 import prisma from "../src/config/prisma.js";
 import { hashPassword } from "../src/utils/hash.js";
 
+function requiredEnv(name) {
+  const value = process.env[name];
+  if (!value) {
+    throw new Error(`Variable d'environnement manquante pour le seed : ${name}`);
+  }
+  return value;
+}
+
 const users = [
   {
     fullName: "Administrateur",
-    email: "adaweo1@yahoo.fr",
-    phone: "77000000",
+    email: requiredEnv("SEED_ADMIN_EMAIL"),
+    phone: process.env.SEED_ADMIN_PHONE || "77000000",
     role: "ADMIN",
-    password: "Admin@123",
+    password: requiredEnv("SEED_ADMIN_PASSWORD"),
   },
   {
-    fullName: "Gestionnaire de Dépense",
-    email: "adaweo2@yahoo.fr",
-    phone: "77111111",
+    fullName: "Gestionnaire de Depense",
+    email: requiredEnv("SEED_EXPENSE_MANAGER_EMAIL"),
+    phone: process.env.SEED_EXPENSE_MANAGER_PHONE || "77111111",
     role: "GESTIONNAIRE_DEPENSE",
-    password: "Gestion@123",
+    password: requiredEnv("SEED_EXPENSE_MANAGER_PASSWORD"),
   },
   {
-    fullName: "Ougass",
-    email: "adaweo3@yahoo.fr",
-    phone: "77222222",
+    fullName: "Super Admin",
+    email: requiredEnv("SEED_SUPER_ADMIN_EMAIL"),
+    phone: process.env.SEED_SUPER_ADMIN_PHONE || "77222222",
     role: "SUPER_ADMIN",
-    password: "Super@123",
+    password: requiredEnv("SEED_SUPER_ADMIN_PASSWORD"),
   },
   {
-    fullName: "Trésorerie",
-    email: "adaweo4@yahoo.fr",
-    phone: "77333333",
+    fullName: "Tresorerie",
+    email: requiredEnv("SEED_TREASURY_EMAIL"),
+    phone: process.env.SEED_TREASURY_PHONE || "77333333",
     role: "EQUIPE_TRESORERIE",
-    password: "Tresor@123",
+    password: requiredEnv("SEED_TREASURY_PASSWORD"),
   },
 ];
 
@@ -51,9 +59,9 @@ async function main() {
             status: "ACTIVE",
           },
         });
-        console.log(`ℹ️ Super Admin vérifié : ${user.email}`);
+        console.log(`Super Admin verifie : ${user.email}`);
       } else {
-        console.log(`ℹ️ Utilisateur existe déjà : ${user.email}`);
+        console.log(`Utilisateur existe deja : ${user.email}`);
       }
       continue;
     }
@@ -73,14 +81,13 @@ async function main() {
       },
     });
 
-    console.log(`✅ Créé : ${user.email} | ${user.role}`);
-    console.log(`🔑 Mot de passe : ${user.password}`);
+    console.log(`Cree : ${user.email} | ${user.role}`);
   }
 }
 
 main()
   .catch((e) => {
-    console.error("❌ Seed error:", e);
+    console.error("Seed error:", e);
     process.exit(1);
   })
   .finally(async () => {

@@ -26,7 +26,7 @@ router.get("/subscriptions", subscriptions);
 
 // ACTIONS USERS
 router.patch("/users/:userId/status", setUserStatus);
-router.patch("/users/:userId/role", setUserRole);
+router.patch("/users/:userId/role", requireRole("SUPER_ADMIN"), setUserRole);
 router.post("/users/:userId/otp/reset", resetUserOtp);
 
 // ACTIONS SUBSCRIPTIONS

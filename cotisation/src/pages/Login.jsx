@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import toast from "react-hot-toast";
@@ -32,11 +32,6 @@ export default function Login() {
 
   const [email, setEmail] = useState(state?.email || "");
   const [password, setPassword] = useState("");
-
-  // si l'utilisateur arrive de /otp ou /register avec un email
-  useEffect(() => {
-    if (state?.email) setEmail(state.email);
-  }, [state?.email]);
 
   const m = useMutation({
     mutationFn: loginApi,

@@ -66,6 +66,13 @@ export async function createPaymentOrder({ user, data, req }) {
       throw err;
     }
 
+    if (data.amount !== expense.amount) {
+      const err = new Error("Le montant de l'ordre de paiement doit correspondre au montant de la depense approuvee");
+      err.status = 400;
+      throw err;
+    }
+
+    const amount = expense.amount;
     const referenceNumber = await generateReference(tx);
     const created = await tx.paymentOrder.create({
       data: {
@@ -75,7 +82,7 @@ export async function createPaymentOrder({ user, data, req }) {
         paymentMethod: data.paymentMethod,
         currency: data.currency,
         paymentCountry: data.paymentCountry,
-        amount: data.amount,
+        amount,
         bankCountry: data.paymentMethod === "CASH" ? null : data.paymentCountry,
         bankName: data.paymentMethod === "CASH" ? null : data.bankName,
         bankReference: data.paymentMethod === "CASH" ? null : data.bankReference,

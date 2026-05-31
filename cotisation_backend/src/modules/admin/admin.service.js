@@ -237,7 +237,41 @@ export async function setUserStatus({ adminId, userId, status, req }) {
   return updated;
 }
 
-export async function setUserRole({ adminId, userId, role, req }) {
+function createHttpError(message, status) {
+  const err = new Error(message);
+  err.status = status;
+  return err;
+}
+
+async function assertCanSetUserRole({ adminId, adminRole, userId, role, req }) {
+  if (adminRole !== "SUPER_ADMIN") {
+    await auditLog({
+      userId: adminId,
+      action: "ADMIN_SET_USER_ROLE_DENIED",
+      entity: "User",
+      entityId: userId,
+      req,
+      meta: { requestedRole: role, reason: "SUPER_ADMIN_REQUIRED" },
+    });
+    throw createHttpError("Seul le Super Admin peut modifier les roles utilisateurs", 403);
+  }
+
+  if (adminId === userId) {
+    await auditLog({
+      userId: adminId,
+      action: "SUPER_ADMIN_SET_OWN_ROLE_DENIED",
+      entity: "User",
+      entityId: userId,
+      req,
+      meta: { requestedRole: role, reason: "SELF_ROLE_CHANGE_BLOCKED" },
+    });
+    throw createHttpError("Un Super Admin ne peut pas modifier son propre role", 400);
+  }
+}
+
+export async function setUserRole({ adminId, adminRole, userId, role, req }) {
+  await assertCanSetUserRole({ adminId, adminRole, userId, role, req });
+
   const updated = await prisma.user.update({
     where: { id: userId },
     data: { role },
@@ -253,7 +287,7 @@ export async function setUserRole({ adminId, userId, role, req }) {
 
   await auditLog({
     userId: adminId,
-    action: "ADMIN_SET_USER_ROLE",
+    action: "SUPER_ADMIN_SET_USER_ROLE",
     entity: "User",
     entityId: updated.id,
     req,

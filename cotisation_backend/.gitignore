@@ -4,5 +4,6 @@ node_modules
 
 /generated/prisma
 
-# Private server-side uploads
-private_uploads
+# Server-side uploads contain private user documents.
+uploads/
+private_uploads/
