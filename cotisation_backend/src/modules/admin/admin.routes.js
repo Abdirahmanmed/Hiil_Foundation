@@ -5,6 +5,8 @@ import {
   dashboard,
   users,
   subscriptions,
+  adherentsContributions,
+  createInternalUser,
   setUserStatus,
   setUserRole,
   resetUserOtp,
@@ -23,10 +25,12 @@ router.use(auth, requireRole("ADMIN", "SUPER_ADMIN"));
 router.get("/dashboard", dashboard);
 router.get("/users", users);
 router.get("/subscriptions", subscriptions);
+router.get("/adherents-contributions", adherentsContributions);
 
 // ACTIONS USERS
+router.post("/users", createInternalUser);
 router.patch("/users/:userId/status", setUserStatus);
-router.patch("/users/:userId/role", setUserRole);
+router.patch("/users/:userId/role", requireRole("SUPER_ADMIN"), setUserRole);
 router.post("/users/:userId/otp/reset", resetUserOtp);
 
 // ACTIONS SUBSCRIPTIONS

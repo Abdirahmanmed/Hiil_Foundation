@@ -38,7 +38,7 @@
   "client_create_sub": "Créer une Transactions",
   "client_sub_desc": "Wallet (Djibouti) ou virement bancaire.",
   "currency": "Devise",
-  "payment_method": "Méthode de paiement",
+  "payment_method": "Méthode paiement",
   "bank_transfer": "Virement bancaire",
   "wallet_djibouti": "Wallet (Djibouti)",
   "bank_country": "Pays banque",
@@ -76,6 +76,14 @@
   "admin_audit": "Audit",
   "admin_kpi": "KPI",
   "admin_kpi_sub": "Statistiques clés (temps réel)",
+  "admin_internal_users": "Nombre total de Users internes",
+  "admin_adherents_count": "Nombre d'adhérents",
+  "admin_associations_count": "Nombre d'associations",
+  "admin_expense_managers_count": "Gestionnaires de dépense",
+  "admin_treasury_users_count": "Équipes trésorerie",
+  "admin_monthly_contributions": "Cotisations mensuelles",
+  "admin_annual_contributions": "Cotisations annuelles",
+  "admin_total_contributions_amount": "Total montant cotisations",
   "admin_payment_split": "Répartition méthodes paiement",
   "admin_payment_split_sub": "WALLET vs BANK_TRANSFER",
   "admin_tip_pending": "Astuce: PENDING_CONSENT → ACTIVE après consentement.",
@@ -725,7 +733,29 @@
       "regular": "Régulière (quelques heures/semaine)",
       "longterm": "Mission longue (1 mois+)"
     }
-  }
+  },
+  "paymentModes": {
+    "AUTOMATIC": "Automatique",
+    "MANUAL": "Manuel"
+  },
+  "frequencies": {
+    "MONTHLY": "Mensuel",
+    "QUARTERLY": "Trimestriel",
+    "SEMIANNUAL": "Semestriel",
+    "ANNUAL": "Annuel"
+  },
+  "users": "Users",
+  "add_user": "Ajouter un user",
+  "adherents": "Adhérents",
+  "payment_amount": "Montant paiement",
+  "payment_date": "Date de paiement",
+  "user_created_success": "Utilisateur créé avec succès",
+  "email_invalid": "Email invalide",
+  "password_mismatch": "Mot de passe différent",
+  "admin_users_sub": "Gestion des utilisateurs internes du système.",
+  "admin_adherents_sub": "Cotisations des adhérents et associations.",
+  "admin_search_adherent": "Rechercher nom, téléphone, pays, méthode, statut",
+  "created_at": "Date création"
 }
 
   }

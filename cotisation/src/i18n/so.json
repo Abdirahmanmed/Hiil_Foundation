@@ -9,7 +9,7 @@
   "logout": "Ka bax",
   "register_title": "Is-diiwaangelin",
   "register_subtitle": "Abuur akoon + dukumiintiyo. Kadib OTP email.",
-  "full_name": "Magaca oo dhan",
+  "full_name": "Magac buuxa",
   "phone": "Telefoon",
   "email": "Email",
   "password": "Furaha sirta",
@@ -38,7 +38,7 @@
   "client_create_sub": "Samee Macamil",
   "client_sub_desc": "Wallet (Jabuuti) ama wareejin bangi.",
   "currency": "Lacag",
-  "payment_method": "Habka lacag bixinta",
+  "payment_method": "Habka bixinta",
   "bank_transfer": "Wareejin bangi",
   "wallet_djibouti": "Wallet (Jabuuti)",
   "bank_country": "Waddanka bangiga",
@@ -76,6 +76,14 @@
   "admin_audit": "Audit",
   "admin_kpi": "KPI",
   "admin_kpi_sub": "Tirooyin muhiim ah (waqtiga-dhabta ah)",
+  "admin_internal_users": "Wadarta users gudaha",
+  "admin_adherents_count": "Tirada xubnaha",
+  "admin_associations_count": "Tirada ururrada",
+  "admin_expense_managers_count": "Maareeyayaasha kharashka",
+  "admin_treasury_users_count": "Kooxaha maaliyadda",
+  "admin_monthly_contributions": "Qaaraanka billaha ah",
+  "admin_annual_contributions": "Qaaraanka sanadlaha ah",
+  "admin_total_contributions_amount": "Wadarta lacagta qaaraanka",
   "admin_payment_split": "Qaybinta hababka lacag bixinta",
   "admin_payment_split_sub": "WALLET vs BANK_TRANSFER",
   "admin_tip_pending": "Talo: PENDING_CONSENT → ACTIVE kadib oggolaansho.",
@@ -202,7 +210,7 @@
   "association_status_ph": "",
   "president_id_doc": "Aqoonsiga madaxweynaha ururka",
   "president_id_doc_hint": "Sawir ama PDF, server-ka ayaa lagu haynayaa URL guud la’aan.",
-  "confirm_password": "Xaqiiji furaha sirta",
+  "confirm_password": "Xaqiiji erayga sirta",
   "passwords_mismatch": "Furayaasha sirta isma waafaqaan.",
   "country_required": "Waddanku waa qasab.",
   "representative_type_required": "Nooca wakiilka waa qasab.",
@@ -472,6 +480,7 @@
         "fundraising":   "Ururinta Tabaruca"
       }
     }
+<<<<<<< HEAD
   }
 },"impact": {
   "sectionLabel": "Saameynteenna",
@@ -629,4 +638,29 @@
   }
 }
   }
+=======
+  },
+  "paymentModes": {
+    "AUTOMATIC": "Toos ah",
+    "MANUAL": "Gacanta"
+  },
+  "frequencies": {
+    "MONTHLY": "Bil kasta",
+    "QUARTERLY": "Saddex bilood kasta",
+    "SEMIANNUAL": "Lix bilood kasta",
+    "ANNUAL": "Sanadle"
+  },
+  "users": "Users",
+  "add_user": "Ku dar user",
+  "adherents": "Xubno",
+  "payment_amount": "Qaddarka bixinta",
+  "payment_date": "Taariikhda bixinta",
+  "user_created_success": "User waa la abuuray",
+  "email_invalid": "Email sax ma aha",
+  "password_mismatch": "Erayada sirta way kala duwan yihiin",
+  "admin_users_sub": "Maamul isticmaalayaasha gudaha ee nidaamka.",
+  "admin_adherents_sub": "Qaaraanka xubnaha iyo ururrada.",
+  "admin_search_adherent": "Raadi magac, telefoon, waddan, hab, xaalad",
+  "created_at": "Taariikhda abuurka"
+>>>>>>> 4bad5ca0549101b393a92337efa09490466c618f
 }

@@ -29,3 +29,13 @@ export async function print(req, res, next) {
     next(err);
   }
 }
+
+export async function markPrinted(req, res, next) {
+  try {
+    const params = paymentOrderIdParamsSchema.parse(req.params);
+    const paymentOrder = await service.markPaymentOrderPrinted({ user: req.user, id: params.id, req });
+    res.json({ paymentOrder });
+  } catch (err) {
+    next(err);
+  }
+}

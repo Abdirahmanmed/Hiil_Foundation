@@ -13,6 +13,16 @@ export async function getAdminUsers() {
   return res.data; // { users }
 }
 
+export async function createAdminUser(payload) {
+  const res = await http.post(`${basePath}/users`, payload);
+  return res.data; // { user }
+}
+
+export async function getAdherentsContributions() {
+  const res = await http.get(`${basePath}/adherents-contributions`);
+  return res.data; // { contributions }
+}
+
 export async function getAdminSubscriptions() {
   const res = await http.get(`${basePath}/subscriptions`);
   return res.data; // { subscriptions }

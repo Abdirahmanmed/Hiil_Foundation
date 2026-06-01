@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion"; // eslint-disable-line no-unused-vars
+
 import { useTranslation } from "react-i18next";
 import { useMemo, useState } from "react";
 import Brand from "../components/Brand";
@@ -36,6 +37,18 @@ const floaty = {
     y: [0, -9, 0],
     transition: { duration: 5, repeat: Infinity, ease: "easeInOut" },
   },
+};
+
+const generateSixDigitCode = () => {
+  const cryptoApi = globalThis.crypto;
+
+  if (cryptoApi?.getRandomValues) {
+    const values = new Uint32Array(1);
+    cryptoApi.getRandomValues(values);
+    return String(100000 + (values[0] % 900000));
+  }
+
+  return String(100000 + (Date.now() % 900000));
 };
 
 /* ─── SectionLabel ───────────────────────────────────────── */
@@ -3440,7 +3453,7 @@ function Soutenir({ G }) {
 
   const handleSendOtp = () => {
     if (selectedWallet && phone.length >= 8) {
-      const code = String(Math.floor(100000 + Math.random() * 900000));
+      const code = generateSixDigitCode();
       setGeneratedOtp(code);
       setDonStep("otp");
       setOtp("");
@@ -3658,10 +3671,30 @@ function Soutenir({ G }) {
                     >
                       🔒 {t("home.support.otp.confirmBtn")} {selectedAmount} →
                     </button>
+<<<<<<< HEAD
                     <p style={{ fontSize: "0.72rem", color: G.slateLight, textAlign: "center", marginTop: "0.75rem" }}>
                       {t("home.support.otp.notReceived")}{" "}
                       <span style={{ color: G.green, cursor: "pointer", fontWeight: 700 }}
                         onClick={() => { const code = String(Math.floor(100000 + Math.random() * 900000)); setGeneratedOtp(code); setOtp(""); }}
+=======
+
+                    <p
+                      style={{
+                        fontSize: "0.72rem",
+                        color: G.slateLight,
+                        textAlign: "center",
+                        marginTop: "0.75rem",
+                      }}
+                    >
+                      Vous n'avez pas reçu le code ?{" "}
+                      <span
+                        style={{ color: G.green, cursor: "pointer", fontWeight: 700 }}
+                        onClick={() => {
+                          const code = generateSixDigitCode();
+                          setGeneratedOtp(code);
+                          setOtp("");
+                        }}
+>>>>>>> 4bad5ca0549101b393a92337efa09490466c618f
                       >
                         {t("home.support.otp.resend")}
                       </span>
@@ -4410,7 +4443,7 @@ export default function Home() {
               {t("contact_desc")}
             </p>
             <a
-              href="mailto:contact@example.com"
+              href="mailto:contact@hiilfoundation.org"
               style={{
                 display: "inline-block",
                 padding: "0.9rem 2.5rem",

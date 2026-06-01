@@ -28,7 +28,7 @@ app.use(morgan("dev"));
 app.use(globalLimiter);
 
 // fichiers uploadés (local)
-app.use("/api/uploads", express.static("uploads"));
+// Sensitive user documents must not be exposed as static public files.
 
 // health check
 app.get("/api/health", (req, res) => {

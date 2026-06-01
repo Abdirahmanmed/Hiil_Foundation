@@ -66,6 +66,13 @@ export async function createPaymentOrder({ user, data, req }) {
       throw err;
     }
 
+    if (data.amount !== expense.amount) {
+      const err = new Error("Le montant de l'ordre de paiement doit correspondre au montant de la depense approuvee");
+      err.status = 400;
+      throw err;
+    }
+
+    const amount = expense.amount;
     const referenceNumber = await generateReference(tx);
     const created = await tx.paymentOrder.create({
       data: {
@@ -75,7 +82,7 @@ export async function createPaymentOrder({ user, data, req }) {
         paymentMethod: data.paymentMethod,
         currency: data.currency,
         paymentCountry: data.paymentCountry,
-        amount: data.amount,
+        amount,
         bankCountry: data.paymentMethod === "CASH" ? null : data.paymentCountry,
         bankName: data.paymentMethod === "CASH" ? null : data.bankName,
         bankReference: data.paymentMethod === "CASH" ? null : data.bankReference,
@@ -110,11 +117,27 @@ export async function getPaymentOrderPrint({ user, id, req }) {
     throw err;
   }
 
-  if (order.status !== "IMPRIME") {
-    await prisma.paymentOrder.update({ where: { id }, data: { status: "IMPRIME" } });
-    order.status = "IMPRIME";
+  await auditLog({ userId: user.id, action: "PAYMENT_ORDER_PRINT_VIEW", entity: "PaymentOrder", entityId: id, req, meta: { referenceNumber: order.referenceNumber } });
+  return order;
+}
+
+export async function markPaymentOrderPrinted({ user, id, req }) {
+  const order = await prisma.paymentOrder.findUnique({ where: { id }, include: includeOrder() });
+  if (!order) {
+    const err = new Error("Ordre de paiement introuvable");
+    err.status = 404;
+    throw err;
   }
 
-  await auditLog({ userId: user.id, action: "PAYMENT_ORDER_PRINT", entity: "PaymentOrder", entityId: id, req, meta: { referenceNumber: order.referenceNumber } });
-  return order;
+  const updated =
+    order.status === "IMPRIME"
+      ? order
+      : await prisma.paymentOrder.update({
+          where: { id },
+          data: { status: "IMPRIME" },
+          include: includeOrder(),
+        });
+
+  await auditLog({ userId: user.id, action: "PAYMENT_ORDER_PRINT_MARKED", entity: "PaymentOrder", entityId: id, req, meta: { referenceNumber: updated.referenceNumber } });
+  return updated;
 }

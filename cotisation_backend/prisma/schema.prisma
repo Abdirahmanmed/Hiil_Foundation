@@ -148,6 +148,8 @@ model User {
   auditLogs     AuditLog[]
   expenses      Expense[]
   paymentOrders PaymentOrder[]
+
+  @@index([status])
 }
 
 model Otp {
@@ -162,6 +164,8 @@ model Otp {
   usedAt    DateTime?
 
   createdAt DateTime @default(now())
+
+  @@index([userId, channel, usedAt, expiresAt])
 }
 
 model Subscription {
@@ -203,6 +207,7 @@ model Subscription {
   updatedAt DateTime @updatedAt
 
   @@index([userId, createdAt])
+  @@index([status])
 }
 
 model AuditLog {
@@ -278,4 +283,5 @@ model PaymentOrder {
 
   @@index([expenseId])
   @@index([createdById, createdAt])
+  @@index([status])
 }

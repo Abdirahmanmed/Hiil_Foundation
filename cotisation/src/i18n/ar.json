@@ -76,6 +76,14 @@
   "admin_audit": "التدقيق",
   "admin_kpi": "مؤشرات الأداء",
   "admin_kpi_sub": "إحصائيات رئيسية (بالوقت الحقيقي)",
+  "admin_internal_users": "إجمالي المستخدمين الداخليين",
+  "admin_adherents_count": "عدد الأعضاء",
+  "admin_associations_count": "عدد الجمعيات",
+  "admin_expense_managers_count": "مديرو النفقات",
+  "admin_treasury_users_count": "فرق الخزينة",
+  "admin_monthly_contributions": "الاشتراكات الشهرية",
+  "admin_annual_contributions": "الاشتراكات السنوية",
+  "admin_total_contributions_amount": "إجمالي مبلغ الاشتراكات",
   "admin_payment_split": "توزيع طرق الدفع",
   "admin_payment_split_sub": "WALLET مقابل BANK_TRANSFER",
   "admin_tip_pending": "PENDING_CONSENT ← تصبح ACTIVE بعد الموافقة.",
@@ -472,6 +480,7 @@
         "fundraising":   "جمع التبرعات"
       }
     }
+<<<<<<< HEAD
   }
 },"impact": {
   "sectionLabel": "أثرنا",
@@ -629,4 +638,29 @@
   }
 }
   }
+=======
+  },
+  "paymentModes": {
+    "AUTOMATIC": "??????",
+    "MANUAL": "????"
+  },
+  "frequencies": {
+    "MONTHLY": "????",
+    "QUARTERLY": "??? ????",
+    "SEMIANNUAL": "??? ????",
+    "ANNUAL": "????"
+  },
+  "users": "المستخدمون",
+  "add_user": "إضافة مستخدم",
+  "adherents": "الأعضاء",
+  "payment_amount": "مبلغ الدفع",
+  "payment_date": "تاريخ الدفع",
+  "user_created_success": "تم إنشاء المستخدم بنجاح",
+  "email_invalid": "البريد الإلكتروني غير صالح",
+  "password_mismatch": "كلمتا المرور غير متطابقتين",
+  "admin_users_sub": "إدارة مستخدمي النظام الداخليين.",
+  "admin_adherents_sub": "مساهمات الأعضاء والجمعيات.",
+  "admin_search_adherent": "ابحث بالاسم أو الهاتف أو البلد أو الطريقة أو الحالة",
+  "created_at": "تاريخ الإنشاء"
+>>>>>>> 4bad5ca0549101b393a92337efa09490466c618f
 }

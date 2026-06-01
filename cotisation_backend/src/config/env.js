@@ -26,7 +26,12 @@ function parsePositiveInteger(name, fallback) {
   return value;
 }
 
+const hasBrevoApiKey = Boolean(process.env.BREVO_API_KEY);
 const emailPort = parsePositiveInteger("EMAIL_PORT", 587);
+const emailFrom = hasBrevoApiKey ? required("EMAIL_FROM") : process.env.EMAIL_FROM;
+const emailHost = hasBrevoApiKey ? process.env.EMAIL_HOST : required("EMAIL_HOST");
+const emailUser = hasBrevoApiKey ? process.env.EMAIL_USER : required("EMAIL_USER");
+const emailPass = hasBrevoApiKey ? process.env.EMAIL_PASS : required("EMAIL_PASS");
 
 export const env = {
   // Server
@@ -51,12 +56,17 @@ export const env = {
   OTP_MAX_SEND_PER_HOUR: Number(process.env.OTP_MAX_SEND_PER_HOUR || 3),
   OTP_PEPPER: required("OTP_PEPPER"),
 
-  // EMAIL (OTP)
-  EMAIL_HOST: required("EMAIL_HOST"),
+  // Brevo Transactional Email API (recommended on Render)
+  BREVO_API_KEY: process.env.BREVO_API_KEY,
+  EMAIL_FROM: emailFrom,
+  EMAIL_FROM_NAME: process.env.EMAIL_FROM_NAME || "Hiil Foundation",
+
+  // EMAIL SMTP fallback (used only when BREVO_API_KEY is absent)
+  EMAIL_HOST: emailHost,
   EMAIL_PORT: emailPort,
   EMAIL_SECURE: parseBoolean("EMAIL_SECURE", emailPort === 465),
-  EMAIL_USER: required("EMAIL_USER"),
-  EMAIL_PASS: required("EMAIL_PASS"),
+  EMAIL_USER: emailUser,
+  EMAIL_PASS: emailPass,
   EMAIL_CONNECTION_TIMEOUT_MS: parsePositiveInteger("EMAIL_CONNECTION_TIMEOUT_MS", 30_000),
   EMAIL_GREETING_TIMEOUT_MS: parsePositiveInteger("EMAIL_GREETING_TIMEOUT_MS", 30_000),
   EMAIL_SOCKET_TIMEOUT_MS: parsePositiveInteger("EMAIL_SOCKET_TIMEOUT_MS", 60_000),

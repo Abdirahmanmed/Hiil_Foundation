@@ -76,6 +76,14 @@
   "admin_audit": "Audit",
   "admin_kpi": "KPI",
   "admin_kpi_sub": "Key statistics (real-time)",
+  "admin_internal_users": "Total internal users",
+  "admin_adherents_count": "Members count",
+  "admin_associations_count": "Associations count",
+  "admin_expense_managers_count": "Expense managers",
+  "admin_treasury_users_count": "Treasury teams",
+  "admin_monthly_contributions": "Monthly contributions",
+  "admin_annual_contributions": "Annual contributions",
+  "admin_total_contributions_amount": "Total contributions amount",
   "admin_payment_split": "Payment methods split",
   "admin_payment_split_sub": "WALLET vs BANK_TRANSFER",
   "admin_tip_pending": "Tip: PENDING_CONSENT → ACTIVE after consent.",
@@ -472,6 +480,7 @@
         "fundraising":   "Fundraising"
       }
     }
+<<<<<<< HEAD
   }
   },"impact": {
   "sectionLabel": "Our impact",
@@ -629,4 +638,29 @@
   }
 }
   }
+=======
+  },
+  "paymentModes": {
+    "AUTOMATIC": "Automatic",
+    "MANUAL": "Manual"
+  },
+  "frequencies": {
+    "MONTHLY": "Monthly",
+    "QUARTERLY": "Quarterly",
+    "SEMIANNUAL": "Semiannual",
+    "ANNUAL": "Annual"
+  },
+  "users": "Users",
+  "add_user": "Add user",
+  "adherents": "Members",
+  "payment_amount": "Payment amount",
+  "payment_date": "Payment date",
+  "user_created_success": "User created successfully",
+  "email_invalid": "Invalid email",
+  "password_mismatch": "Passwords do not match",
+  "admin_users_sub": "Manage internal system users.",
+  "admin_adherents_sub": "Contributions from members and associations.",
+  "admin_search_adherent": "Search name, phone, country, method, status",
+  "created_at": "Created at"
+>>>>>>> 4bad5ca0549101b393a92337efa09490466c618f
 }

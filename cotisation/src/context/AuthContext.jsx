@@ -2,10 +2,17 @@ import { createContext, useContext, useState } from "react";
 
 const AuthContext = createContext(null);
 
+function readStoredUser() {
+  try {
+    return JSON.parse(localStorage.getItem("user") || "null");
+  } catch {
+    localStorage.clear();
+    return null;
+  }
+}
+
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(() =>
-    JSON.parse(localStorage.getItem("user") || "null")
-  );
+  const [user, setUser] = useState(readStoredUser);
 
   const login = (data) => {
     localStorage.setItem("accessToken", data.accessToken);
@@ -25,4 +32,5 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => useContext(AuthContext);
