@@ -1,5 +1,6 @@
 import * as adminService from "./admin.service.js";
 import {
+  createInternalUserSchema,
   setUserStatusSchema,
   setUserRoleSchema,
   resetUserOtpSchema,
@@ -34,7 +35,31 @@ export async function subscriptions(req, res, next) {
   }
 }
 
+export async function adherentsContributions(req, res, next) {
+  try {
+    const contributions = await adminService.listAdherentsContributions();
+    res.json({ contributions });
+  } catch (err) {
+    next(err);
+  }
+}
+
 /* ===== ACTIONS USERS ===== */
+
+export async function createInternalUser(req, res, next) {
+  try {
+    const body = createInternalUserSchema.parse(req.body);
+    const created = await adminService.createInternalUser({
+      adminId: req.user.id,
+      adminRole: req.user.role,
+      data: body,
+      req,
+    });
+    res.status(201).json({ user: created });
+  } catch (err) {
+    next(err);
+  }
+}
 
 export async function setUserStatus(req, res, next) {
   try {

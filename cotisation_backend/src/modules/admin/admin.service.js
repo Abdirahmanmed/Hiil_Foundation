@@ -1,5 +1,43 @@
 import prisma from "../../config/prisma.js";
 import { auditLog } from "../../utils/audit.js";
+import { hashPassword } from "../../utils/hash.js";
+
+const INTERNAL_USER_ROLES = [
+  "ADMIN",
+  "SUPER_ADMIN",
+  "GESTIONNAIRE_DEPENSE",
+  "EQUIPE_TRESORERIE",
+];
+
+const CREATABLE_INTERNAL_ROLES = [
+  "ADMIN",
+  "GESTIONNAIRE_DEPENSE",
+  "EQUIPE_TRESORERIE",
+];
+
+const ADMIN_CREATABLE_INTERNAL_ROLES = [
+  "GESTIONNAIRE_DEPENSE",
+  "EQUIPE_TRESORERIE",
+];
+
+function userPublicSelect() {
+  return {
+    id: true,
+    fullName: true,
+    phone: true,
+    email: true,
+    accountType: true,
+    companyName: true,
+    country: true,
+    city: true,
+    role: true,
+    status: true,
+    otpLockedUntil: true,
+    otpSendCountHour: true,
+    otpSendWindowStart: true,
+    createdAt: true,
+  };
+}
 
 function getPeriodStarts() {
   const now = new Date();
@@ -78,8 +116,8 @@ export async function getDashboardStats({ role } = {}) {
   ] = await Promise.all([
     prisma.user.count(),
     prisma.user.count({ where: { status: "ACTIVE" } }),
-    prisma.user.count({ where: { accountType: "CLIENT_ADHERENT" } }),
-    prisma.user.count({ where: { accountType: "ASSOCIATION" } }),
+    prisma.user.count({ where: { role: "CLIENT", accountType: "CLIENT_ADHERENT" } }),
+    prisma.user.count({ where: { role: "CLIENT", accountType: "ASSOCIATION" } }),
     prisma.subscription.count(),
     prisma.subscription.count({ where: subscriptionActiveWhere }),
     prisma.subscription.count({ where: { ...subscriptionActiveWhere, createdAt: { gte: monthStart } } }),
@@ -178,23 +216,9 @@ export async function getDashboardStats({ role } = {}) {
 
 export async function listUsers() {
   return prisma.user.findMany({
+    where: { role: { in: INTERNAL_USER_ROLES } },
     orderBy: { createdAt: "desc" },
-    select: {
-      id: true,
-      fullName: true,
-      phone: true,
-      email: true,
-      accountType: true,
-      companyName: true,
-      country: true,
-      city: true,
-      role: true,
-      status: true,
-      otpLockedUntil: true,
-      otpSendCountHour: true,
-      otpSendWindowStart: true,
-      createdAt: true,
-    },
+    select: userPublicSelect(),
   });
 }
 
@@ -207,9 +231,95 @@ export async function listSubscriptions() {
   });
 }
 
+export async function listAdherentsContributions() {
+  const subscriptions = await prisma.subscription.findMany({
+    where: { user: { role: "CLIENT" } },
+    orderBy: { createdAt: "desc" },
+    select: {
+      id: true,
+      paymentMethod: true,
+      amount: true,
+      currency: true,
+      status: true,
+      createdAt: true,
+      user: {
+        select: {
+          id: true,
+          accountType: true,
+          fullName: true,
+          companyName: true,
+          phone: true,
+          country: true,
+          city: true,
+        },
+      },
+    },
+  });
+
+  return subscriptions.map((subscription) => ({
+    id: subscription.id,
+    name:
+      subscription.user?.accountType === "ASSOCIATION"
+        ? subscription.user?.companyName || subscription.user?.fullName || ""
+        : subscription.user?.fullName || subscription.user?.companyName || "",
+    phone: subscription.user?.phone || "",
+    country: subscription.user?.country || "",
+    city: subscription.user?.city || "",
+    paymentMethod: subscription.paymentMethod,
+    amount: subscription.amount,
+    currency: subscription.currency,
+    status: subscription.status,
+    paidAt: subscription.createdAt,
+  }));
+}
+
 /* =========================
    ACTIONS: USERS
    ========================= */
+
+function assertCanCreateInternalUser({ adminRole, role }) {
+  if (role === "SUPER_ADMIN") {
+    throw createHttpError("SUPER_ADMIN ne peut pas être créé depuis l'interface", 403);
+  }
+
+  if (!CREATABLE_INTERNAL_ROLES.includes(role)) {
+    throw createHttpError("Rôle interne non autorisé", 400);
+  }
+
+  if (adminRole === "ADMIN" && !ADMIN_CREATABLE_INTERNAL_ROLES.includes(role)) {
+    throw createHttpError("Un ADMIN ne peut créer que GESTIONNAIRE_DEPENSE ou EQUIPE_TRESORERIE", 403);
+  }
+}
+
+export async function createInternalUser({ adminId, adminRole, data, req }) {
+  assertCanCreateInternalUser({ adminRole, role: data.role });
+
+  const passwordHash = await hashPassword(data.password);
+  const created = await prisma.user.create({
+    data: {
+      fullName: data.fullName,
+      email: data.email.toLowerCase(),
+      phone: data.phone,
+      role: data.role,
+      status: data.status || "ACTIVE",
+      passwordHash,
+      country: "N/A",
+      city: "N/A",
+    },
+    select: userPublicSelect(),
+  });
+
+  await auditLog({
+    userId: adminId,
+    action: "USER_CREATED",
+    entity: "User",
+    entityId: created.id,
+    req,
+    meta: { role: created.role, status: created.status },
+  });
+
+  return created;
+}
 
 export async function setUserStatus({ adminId, userId, status, req }) {
   const updated = await prisma.user.update({
@@ -244,6 +354,18 @@ function createHttpError(message, status) {
 }
 
 async function assertCanSetUserRole({ adminId, adminRole, userId, role, req }) {
+  if (role === "SUPER_ADMIN") {
+    await auditLog({
+      userId: adminId,
+      action: "ADMIN_SET_USER_ROLE_DENIED",
+      entity: "User",
+      entityId: userId,
+      req,
+      meta: { requestedRole: role, reason: "SUPER_ADMIN_BLOCKED" },
+    });
+    throw createHttpError("SUPER_ADMIN ne peut pas être attribué depuis l'interface", 403);
+  }
+
   if (adminRole !== "SUPER_ADMIN") {
     await auditLog({
       userId: adminId,

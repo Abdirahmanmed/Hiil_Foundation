@@ -14,12 +14,11 @@ import { useTranslation } from "react-i18next";
 import {
   getAdminDashboard,
   getAdminUsers,
-  getAdminSubscriptions,
+  createAdminUser,
+  getAdherentsContributions,
   patchUserStatus,
   patchUserRole,
   resetUserOtp,
-  patchSubscriptionStatus,
-  forceSubscriptionConsent,
   getUserDetails,
   getAudit,
 } from "../api/admin.api";
@@ -89,13 +88,23 @@ export default function AdminDashboard() {
   const { user, logout } = useAuth();
 
   // Tabs
-  const [tab, setTab] = useState("overview"); // overview | users | subscriptions | audit
+  const [tab, setTab] = useState("overview"); // overview | users | adherents | audit
 
   // Users
   const [userSearch, setUserSearch] = useState("");
   const [selectedUserId, setSelectedUserId] = useState(null);
+  const [createUserOpen, setCreateUserOpen] = useState(false);
+  const [createUserForm, setCreateUserForm] = useState({
+    fullName: "",
+    email: "",
+    phone: "",
+    role: "GESTIONNAIRE_DEPENSE",
+    status: "ACTIVE",
+    password: "",
+    confirmPassword: "",
+  });
 
-  // Subs
+  // Adhérents
   const [subSearch, setSubSearch] = useState("");
   const [subStatus, setSubStatus] = useState("ALL");
 
@@ -116,8 +125,8 @@ export default function AdminDashboard() {
     queryFn: getAdminUsers,
   });
   const qSubs = useQuery({
-    queryKey: ["admin-subs"],
-    queryFn: getAdminSubscriptions,
+    queryKey: ["admin-adherents-contributions"],
+    queryFn: getAdherentsContributions,
   });
 
   const qUserDetails = useQuery({
@@ -149,7 +158,7 @@ export default function AdminDashboard() {
 
   const stats = qStats.data?.stats;
   const users = useMemo(() => qUsers.data?.users || [], [qUsers.data?.users]);
-  const subs = useMemo(() => qSubs.data?.subscriptions || [], [qSubs.data?.subscriptions]);
+  const subs = useMemo(() => qSubs.data?.contributions || [], [qSubs.data?.contributions]);
 
   // Derived data
   const usersFiltered = useMemo(() => {
@@ -180,16 +189,11 @@ export default function AdminDashboard() {
       const matchText = !s
         ? true
         : [
-            sub.bankCountry,
-            sub.bankName,
-            sub.currency,
+            sub.name,
+            sub.phone,
+            sub.country,
+            sub.city,
             sub.paymentMethod,
-            sub.mode,
-            sub.walletProvider,
-            sub.walletAccount,
-            sub.user?.fullName,
-            sub.user?.email,
-            sub.user?.phone,
             sub.status,
           ]
             .filter(Boolean)
@@ -256,29 +260,48 @@ export default function AdminDashboard() {
       toast.error(err?.response?.data?.message || t("error_generic")),
   });
 
-  const mSubStatus = useMutation({
-    mutationFn: ({ subscriptionId, status }) =>
-      patchSubscriptionStatus(subscriptionId, status),
+  const mCreateUser = useMutation({
+    mutationFn: createAdminUser,
     onSuccess: () => {
-      toast.success(t("admin_sub_status_updated"));
-      qSubs.refetch();
-      if (selectedUserId) qUserDetails.refetch();
+      toast.success(t("user_created_success"));
+      setCreateUserOpen(false);
+      setCreateUserForm({
+        fullName: "",
+        email: "",
+        phone: "",
+        role: user?.role === "SUPER_ADMIN" ? "ADMIN" : "GESTIONNAIRE_DEPENSE",
+        status: "ACTIVE",
+        password: "",
+        confirmPassword: "",
+      });
+      qUsers.refetch();
+      qStats.refetch();
     },
     onError: (err) =>
       toast.error(err?.response?.data?.message || t("error_generic")),
   });
 
-  const mForceConsent = useMutation({
-    mutationFn: ({ subscriptionId, consentVersion }) =>
-      forceSubscriptionConsent(subscriptionId, consentVersion),
-    onSuccess: () => {
-      toast.success(t("admin_consent_forced"));
-      qSubs.refetch();
-      if (selectedUserId) qUserDetails.refetch();
-    },
-    onError: (err) =>
-      toast.error(err?.response?.data?.message || t("error_generic")),
-  });
+  const canCreateAdminUser = user?.role === "SUPER_ADMIN";
+  const createUserRoleOptions = canCreateAdminUser
+    ? ["ADMIN", "GESTIONNAIRE_DEPENSE", "EQUIPE_TRESORERIE"]
+    : ["GESTIONNAIRE_DEPENSE", "EQUIPE_TRESORERIE"];
+
+  function updateCreateUserForm(field, value) {
+    setCreateUserForm((current) => ({ ...current, [field]: value }));
+  }
+
+  function submitCreateUser(e) {
+    e.preventDefault();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(createUserForm.email)) {
+      toast.error(t("email_invalid"));
+      return;
+    }
+    if (createUserForm.password !== createUserForm.confirmPassword) {
+      toast.error(t("password_mismatch"));
+      return;
+    }
+    mCreateUser.mutate(createUserForm);
+  }
 
   const auditTotal = qAudit.data?.total ?? 0;
   const auditItems = qAudit.data?.items ?? [];
@@ -315,8 +338,8 @@ export default function AdminDashboard() {
         <div className="flex flex-wrap gap-2">
           {[
             { id: "overview", label: t("admin_overview") },
-            { id: "users", label: t("admin_clients") },
-            { id: "subscriptions", label: t("admin_subscriptions") },
+            { id: "users", label: t("users") },
+            { id: "adherents", label: t("adherents") },
             { id: "audit", label: t("admin_audit") },
           ].map((tt) => (
             <button
@@ -440,26 +463,35 @@ export default function AdminDashboard() {
         {tab === "users" ? (
           <Card className="p-7 border border-emerald-100 bg-white shadow-[0_20px_60px_-30px_rgba(16,185,129,0.2)]">
             <SectionTitle
-              title={t("admin_clients_title")}
-              subtitle={t("admin_clients_sub")}
+              title={t("users")}
+              subtitle={t("admin_users_sub")}
               right={
-                <div className="w-72">
-                  <Input
-                    value={userSearch}
-                    onChange={(e) => setUserSearch(e.target.value)}
-                    placeholder={t("admin_search_user")}
-                  />
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                  <button
+                    onClick={() => setCreateUserOpen(true)}
+                    className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-black text-emerald-800 hover:bg-emerald-100"
+                  >
+                    {t("add_user")}
+                  </button>
+                  <div className="w-72">
+                    <Input
+                      value={userSearch}
+                      onChange={(e) => setUserSearch(e.target.value)}
+                      placeholder={t("admin_search_user")}
+                    />
+                  </div>
                 </div>
               }
             />
 
             <div className="mt-5 overflow-hidden rounded-2xl border border-emerald-100">
               <div className="grid grid-cols-12 gap-2 bg-emerald-50 px-4 py-3 text-xs font-black text-slate-600">
-                <div className="col-span-3">{t("client")}</div>
+                <div className="col-span-2">{t("name")}</div>
+                <div className="col-span-2">{t("email")}</div>
                 <div className="col-span-2">{t("phone")}</div>
-                <div className="col-span-2">{t("country_city")}</div>
                 <div className="col-span-2">{t("role")}</div>
                 <div className="col-span-1">{t("status")}</div>
+                <div className="col-span-1">{t("created_at")}</div>
                 <div className="col-span-2 text-right">{t("actions")}</div>
               </div>
 
@@ -472,106 +504,110 @@ export default function AdminDashboard() {
                   {t("no_results")}
                 </div>
               ) : (
-                usersFiltered.map((u) => (
-                  <div
-                    key={u.id}
-                    className="grid grid-cols-12 items-center gap-2 border-t border-emerald-100 px-4 py-3 text-sm hover:bg-emerald-50/40"
-                  >
-                    <button
-                      type="button"
-                      onClick={() => setSelectedUserId(u.id)}
-                      className="col-span-3 text-left"
-                      title={t("admin_user_details")}
+                usersFiltered.map((u) => {
+                  const canEditRole = user?.role === "SUPER_ADMIN" && u.id !== user?.id;
+                  const editableRoles = ["ADMIN", "GESTIONNAIRE_DEPENSE", "EQUIPE_TRESORERIE"];
+
+                  return (
+                    <div
+                      key={u.id}
+                      className="grid grid-cols-12 items-center gap-2 border-t border-emerald-100 px-4 py-3 text-sm hover:bg-emerald-50/40"
                     >
-                      <div className="font-extrabold text-slate-900">
-                        {u.companyName || u.fullName}
-                      </div>
-                      <div className="text-xs text-slate-500">
-                        {u.email} • {u.accountType || "CLIENT_ADHERENT"}
-                      </div>
-                    </button>
-
-                    <div className="col-span-2 text-slate-700">{u.phone}</div>
-
-                    <div className="col-span-2 text-slate-700">
-                      {u.country} / {u.city}
-                    </div>
-
-                    <div className="col-span-2">
-                      <Select
-                        value={u.role}
-                        onChange={(e) =>
-                          mUserRole.mutate({
-                            userId: u.id,
-                            role: e.target.value,
-                          })
-                        }
-                      >
-                        <option value="CLIENT">CLIENT</option>
-                        <option value="ADMIN">ADMIN</option>
-                        <option value="GESTIONNAIRE_DEPENSE">GESTIONNAIRE_DEPENSE</option>
-                        <option value="SUPER_ADMIN">SUPER_ADMIN</option>
-                        <option value="EQUIPE_TRESORERIE">EQUIPE_TRESORERIE</option>
-                      </Select>
-                    </div>
-
-                    <div className="col-span-1">
-                      <Badge tone={USER_STATUS_TONES[u.status] || "neutral"}>
-                        {u.status}
-                      </Badge>
-                    </div>
-
-                    <div className="col-span-2 flex justify-end gap-2">
-                      <Select
-                        value={u.status}
-                        onChange={(e) =>
-                          mUserStatus.mutate({
-                            userId: u.id,
-                            status: e.target.value,
-                          })
-                        }
-                        className="max-w-[180px]"
-                      >
-                        {[
-                          "PENDING_VERIFICATION",
-                          "ACTIVE",
-                          "SUSPENDED",
-                          "BLOCKED",
-                        ].map((s) => (
-                          <option key={s} value={s}>
-                            {s}
-                          </option>
-                        ))}
-                      </Select>
-
                       <button
-                        onClick={() => mResetOtp.mutate(u.id)}
-                        className="rounded-xl border border-emerald-200 bg-white px-3 py-2 text-xs font-black text-slate-700 hover:bg-emerald-50"
-                        title="Reset OTP lock/counters"
+                        type="button"
+                        onClick={() => setSelectedUserId(u.id)}
+                        className="col-span-2 text-left"
+                        title={t("admin_user_details")}
                       >
-                        Reset OTP
+                        <div className="font-extrabold text-slate-900">
+                          {u.fullName || "—"}
+                        </div>
                       </button>
+
+                      <div className="col-span-2 truncate text-slate-700">{u.email}</div>
+                      <div className="col-span-2 text-slate-700">{u.phone}</div>
+
+                      <div className="col-span-2">
+                        {canEditRole && editableRoles.includes(u.role) ? (
+                          <Select
+                            value={u.role}
+                            onChange={(e) =>
+                              mUserRole.mutate({
+                                userId: u.id,
+                                role: e.target.value,
+                              })
+                            }
+                          >
+                            {editableRoles.map((role) => (
+                              <option key={role} value={role}>
+                                {role}
+                              </option>
+                            ))}
+                          </Select>
+                        ) : (
+                          <Badge tone="neutral">{u.role}</Badge>
+                        )}
+                      </div>
+
+                      <div className="col-span-1">
+                        <Badge tone={USER_STATUS_TONES[u.status] || "neutral"}>
+                          {u.status}
+                        </Badge>
+                      </div>
+
+                      <div className="col-span-1 text-xs text-slate-500">
+                        {fmtDate(u.createdAt)}
+                      </div>
+
+                      <div className="col-span-2 flex justify-end gap-2">
+                        <Select
+                          value={u.status}
+                          onChange={(e) =>
+                            mUserStatus.mutate({
+                              userId: u.id,
+                              status: e.target.value,
+                            })
+                          }
+                          className="max-w-[160px]"
+                        >
+                          {["ACTIVE", "SUSPENDED"].map((s) => (
+                            <option key={s} value={s}>
+                              {s}
+                            </option>
+                          ))}
+                        </Select>
+
+                        {u.otpLockedUntil || u.otpSendCountHour ? (
+                          <button
+                            onClick={() => mResetOtp.mutate(u.id)}
+                            className="rounded-xl border border-emerald-200 bg-white px-3 py-2 text-xs font-black text-slate-700 hover:bg-emerald-50"
+                            title="Reset OTP lock/counters"
+                          >
+                            Reset OTP
+                          </button>
+                        ) : null}
+                      </div>
                     </div>
-                  </div>
-                ))
+                  );
+                })
               )}
             </div>
           </Card>
         ) : null}
 
-        {/* SUBSCRIPTIONS */}
-        {tab === "subscriptions" ? (
+        {/* ADHERENTS */}
+        {tab === "adherents" ? (
           <Card className="p-7 border border-emerald-100 bg-white shadow-[0_20px_60px_-30px_rgba(16,185,129,0.2)]">
             <SectionTitle
-              title={t("admin_subs_title")}
-              subtitle={t("admin_subs_sub")}
+              title={t("adherents")}
+              subtitle={t("admin_adherents_sub")}
               right={
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                   <div className="w-72">
                     <Input
                       value={subSearch}
                       onChange={(e) => setSubSearch(e.target.value)}
-                      placeholder={t("admin_search_sub")}
+                      placeholder={t("admin_search_adherent")}
                     />
                   </div>
                   <div className="w-56">
@@ -597,13 +633,16 @@ export default function AdminDashboard() {
               }
             />
 
-            <div className="mt-5 overflow-hidden rounded-2xl border border-emerald-100">
-              <div className="grid grid-cols-12 gap-2 bg-emerald-50 px-4 py-3 text-xs font-black text-slate-600">
-                <div className="col-span-3">{t("client")}</div>
-                <div className="col-span-3">{t("payment")}</div>
-                <div className="col-span-2">{t("amount")}</div>
-                <div className="col-span-2">{t("status")}</div>
-                <div className="col-span-2 text-right">{t("actions")}</div>
+            <div className="mt-5 overflow-x-auto rounded-2xl border border-emerald-100">
+              <div className="grid min-w-[980px] grid-cols-12 gap-2 bg-emerald-50 px-4 py-3 text-xs font-black text-slate-600">
+                <div className="col-span-2">{t("name")}</div>
+                <div className="col-span-2">{t("phone")}</div>
+                <div className="col-span-1">{t("country")}</div>
+                <div className="col-span-1">{t("city")}</div>
+                <div className="col-span-2">{t("payment_method")}</div>
+                <div className="col-span-1">{t("payment_amount")}</div>
+                <div className="col-span-1">{t("status")}</div>
+                <div className="col-span-2 text-right">{t("payment_date")}</div>
               </div>
 
               {qSubs.isLoading ? (
@@ -618,108 +657,31 @@ export default function AdminDashboard() {
                 subsFiltered.map((s) => (
                   <div
                     key={s.id}
-                    className="grid grid-cols-12 items-center gap-2 border-t border-emerald-100 px-4 py-3 text-sm"
+                    className="grid min-w-[980px] grid-cols-12 items-center gap-2 border-t border-emerald-100 px-4 py-3 text-sm"
                   >
-                    <div className="col-span-3">
-                      <div className="font-extrabold text-slate-900">
-                        {s.user?.fullName}
-                      </div>
-                      <div className="text-xs text-slate-500">
-                        {s.user?.email} • {s.user?.phone}
-                      </div>
-                      <div className="mt-1 text-[11px] text-slate-500">
-                        {fmtDate(s.createdAt)}
-                      </div>
+                    <div className="col-span-2 font-extrabold text-slate-900">
+                      {s.name || "—"}
                     </div>
-
-                    <div className="col-span-3 text-slate-700">
-                      <div className="font-black text-slate-900">
-                        {s.paymentMethod}
-                      </div>
-                      <div className="text-xs text-slate-500">
-                        {s.bankCountry} • {s.bankName} • {s.currency}
-                      </div>
-                      {s.paymentMethod === "WALLET" ? (
-                        <div className="mt-1 text-xs text-slate-600">
-                          {s.walletProvider} • {s.walletAccount}
-                        </div>
-                      ) : (
-                        <div className="mt-1 text-xs text-slate-600">
-                          {s.mode} • {s.accountNumber || "-"}
-                        </div>
-                      )}
+                    <div className="col-span-2 text-slate-700">{s.phone || "—"}</div>
+                    <div className="col-span-1 text-slate-700">{s.country || "—"}</div>
+                    <div className="col-span-1 text-slate-700">{s.city || "—"}</div>
+                    <div className="col-span-2 font-black text-slate-900">
+                      {s.paymentMethod || "—"}
                     </div>
-
-                    <div className="col-span-2">
-                      <div className="font-black text-emerald-700">
-                        {s.amount} {s.currency}
-                      </div>
-                      <div className="text-xs text-slate-500">
-                        {s.frequency}
-                      </div>
+                    <div className="col-span-1 font-black text-emerald-700">
+                      {s.amount} {s.currency}
                     </div>
-
-                    <div className="col-span-2">
+                    <div className="col-span-1">
                       <Badge tone={SUB_STATUS_TONES[s.status] || "neutral"}>
                         {s.status}
                       </Badge>
-                      <div className="mt-1 text-xs text-slate-500">
-                        Consent: {s.consentAccepted ? "✅" : "❌"}
-                      </div>
                     </div>
-
-                    <div className="col-span-2 flex justify-end gap-2">
-                      <Select
-                        value={s.status}
-                        onChange={(e) =>
-                          mSubStatus.mutate({
-                            subscriptionId: s.id,
-                            status: e.target.value,
-                          })
-                        }
-                        className="max-w-[190px]"
-                      >
-                        {[
-                          "DRAFT",
-                          "PENDING_CONSENT",
-                          "ACTIVE",
-                          "ACTIVE_MANUAL",
-                          "CANCELLED",
-                        ].map((st) => (
-                          <option key={st} value={st}>
-                            {st}
-                          </option>
-                        ))}
-                      </Select>
-
-                      {!s.consentAccepted ? (
-                        <button
-                          onClick={() =>
-                            mForceConsent.mutate({
-                              subscriptionId: s.id,
-                              consentVersion: "admin_force_v1",
-                            })
-                          }
-                          className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-black text-emerald-800 hover:bg-emerald-100"
-                        >
-                          {t("admin_force")}
-                        </button>
-                      ) : (
-                        <button
-                          disabled
-                          className="cursor-not-allowed rounded-xl border border-emerald-100 bg-emerald-50/30 px-3 py-2 text-xs font-black text-slate-400"
-                        >
-                          {t("admin_ok")}
-                        </button>
-                      )}
+                    <div className="col-span-2 text-right text-xs text-slate-500">
+                      {fmtDate(s.paidAt || s.createdAt)}
                     </div>
                   </div>
                 ))
               )}
-            </div>
-
-            <div className="mt-4 rounded-2xl border border-emerald-100 bg-emerald-50/40 p-4 text-xs text-slate-600">
-              {t("admin_force_hint")}
             </div>
           </Card>
         ) : null}
@@ -855,6 +817,117 @@ export default function AdminDashboard() {
           </Card>
         ) : null}
       </div>
+
+      {/* CREATE INTERNAL USER DRAWER */}
+      <Drawer
+        open={createUserOpen}
+        onClose={() => setCreateUserOpen(false)}
+        title={t("add_user")}
+        subtitle={t("admin_users_sub")}
+      >
+        <form onSubmit={submitCreateUser} className="space-y-4">
+          <div>
+            <div className="mb-1 text-xs font-black text-slate-600">
+              {t("full_name")}
+            </div>
+            <Input
+              value={createUserForm.fullName}
+              onChange={(e) => updateCreateUserForm("fullName", e.target.value)}
+              required
+            />
+          </div>
+
+          <div>
+            <div className="mb-1 text-xs font-black text-slate-600">
+              {t("email")}
+            </div>
+            <Input
+              type="email"
+              value={createUserForm.email}
+              onChange={(e) => updateCreateUserForm("email", e.target.value)}
+              required
+            />
+          </div>
+
+          <div>
+            <div className="mb-1 text-xs font-black text-slate-600">
+              {t("phone")}
+            </div>
+            <Input
+              value={createUserForm.phone}
+              onChange={(e) => updateCreateUserForm("phone", e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <div className="mb-1 text-xs font-black text-slate-600">
+                {t("role")}
+              </div>
+              <Select
+                value={createUserForm.role}
+                onChange={(e) => updateCreateUserForm("role", e.target.value)}
+              >
+                {createUserRoleOptions.map((role) => (
+                  <option key={role} value={role}>
+                    {role}
+                  </option>
+                ))}
+              </Select>
+            </div>
+
+            <div>
+              <div className="mb-1 text-xs font-black text-slate-600">
+                {t("status")}
+              </div>
+              <Select
+                value={createUserForm.status}
+                onChange={(e) => updateCreateUserForm("status", e.target.value)}
+              >
+                <option value="ACTIVE">ACTIVE</option>
+                <option value="SUSPENDED">SUSPENDED</option>
+              </Select>
+            </div>
+          </div>
+
+          <div>
+            <div className="mb-1 text-xs font-black text-slate-600">
+              {t("password")}
+            </div>
+            <Input
+              type="password"
+              minLength={8}
+              value={createUserForm.password}
+              onChange={(e) => updateCreateUserForm("password", e.target.value)}
+              required
+            />
+          </div>
+
+          <div>
+            <div className="mb-1 text-xs font-black text-slate-600">
+              {t("confirm_password")}
+            </div>
+            <Input
+              type="password"
+              minLength={8}
+              value={createUserForm.confirmPassword}
+              onChange={(e) =>
+                updateCreateUserForm("confirmPassword", e.target.value)
+              }
+              required
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={mCreateUser.isPending}
+            className="w-full rounded-xl bg-emerald-600 px-4 py-3 text-sm font-black text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {mCreateUser.isPending ? t("loading") : t("add_user")}
+          </button>
+        </form>
+      </Drawer>
 
       {/* USER DETAILS DRAWER */}
       <Drawer
