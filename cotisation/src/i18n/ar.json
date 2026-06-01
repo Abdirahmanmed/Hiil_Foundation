@@ -237,6 +237,13 @@
   "payment_orders": "Ordres de paiement",
   "create_payment_order": "Créer un ordre de paiement",
   "print": "Imprimer",
+  "nav_home": "الرئيسية",
+"nav_about": "من نحن",
+"nav_actions": "أعمالنا",
+"nav_impact": "أثرنا",
+"nav_news": "الأخبار",
+"nav_support": "ادعمنا",
+"nav_contact": "اتصل بنا",
   "enumStatus": {
     "EN_ATTENTE": "قيد الانتظار",
     "APPROUVER": "موافق عليه",
@@ -480,7 +487,6 @@
         "fundraising":   "جمع التبرعات"
       }
     }
-<<<<<<< HEAD
   }
 },"impact": {
   "sectionLabel": "أثرنا",
@@ -636,10 +642,8 @@
     "competences": { "health": "صحة / طب", "education": "تعليم", "it": "تقنية المعلومات / رقمي", "communication": "اتصال / وسائل تواصل", "logistics": "لوجستيك / ميداني", "legal": "قانوني / مالي", "other": "أخرى" },
     "dispo": { "occasional": "متقطع (أيام قليلة)", "regular": "منتظم (بضع ساعات/أسبوع)", "longterm": "مهمة طويلة (شهر+)" }
   }
-}
-  }
-=======
-  },
+},
+  
   "paymentModes": {
     "AUTOMATIC": "??????",
     "MANUAL": "????"
@@ -662,5 +666,5 @@
   "admin_adherents_sub": "مساهمات الأعضاء والجمعيات.",
   "admin_search_adherent": "ابحث بالاسم أو الهاتف أو البلد أو الطريقة أو الحالة",
   "created_at": "تاريخ الإنشاء"
->>>>>>> 4bad5ca0549101b393a92337efa09490466c618f
+}
 }

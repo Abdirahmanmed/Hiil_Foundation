@@ -3671,12 +3671,6 @@ function Soutenir({ G }) {
                     >
                       🔒 {t("home.support.otp.confirmBtn")} {selectedAmount} →
                     </button>
-<<<<<<< HEAD
-                    <p style={{ fontSize: "0.72rem", color: G.slateLight, textAlign: "center", marginTop: "0.75rem" }}>
-                      {t("home.support.otp.notReceived")}{" "}
-                      <span style={{ color: G.green, cursor: "pointer", fontWeight: 700 }}
-                        onClick={() => { const code = String(Math.floor(100000 + Math.random() * 900000)); setGeneratedOtp(code); setOtp(""); }}
-=======
 
                     <p
                       style={{
@@ -3694,7 +3688,6 @@ function Soutenir({ G }) {
                           setGeneratedOtp(code);
                           setOtp("");
                         }}
->>>>>>> 4bad5ca0549101b393a92337efa09490466c618f
                       >
                         {t("home.support.otp.resend")}
                       </span>

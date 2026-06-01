@@ -263,6 +263,14 @@
   "payment_orders_amount": "Montant ordres de paiement",
   "latest_expenses": "Dernières dépenses",
   "latest_payment_orders": "Derniers ordres de paiement",
+
+  "nav_home": "Accueil",
+"nav_about": "Qui sommes-nous",
+"nav_actions": "Nos actions",
+"nav_impact": "Notre impact",
+"nav_news": "Actualités",
+"nav_support": "Soutenir",
+"nav_contact": "Contact",
   "enumStatus": {
     "EN_ATTENTE": "En attente",
     "APPROUVER": "Approuvée",

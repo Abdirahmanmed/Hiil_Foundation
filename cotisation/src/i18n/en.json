@@ -237,6 +237,14 @@
   "payment_orders": "Ordres de paiement",
   "create_payment_order": "Créer un ordre de paiement",
   "print": "Imprimer",
+
+  "nav_home": "Home",
+"nav_about": "About us",
+"nav_actions": "Our actions",
+"nav_impact": "Our impact",
+"nav_news": "News",
+"nav_support": "Support us",
+"nav_contact": "Contact",
   "enumStatus": {
     "EN_ATTENTE": "Pending",
     "APPROUVER": "Approved",
@@ -480,7 +488,6 @@
         "fundraising":   "Fundraising"
       }
     }
-<<<<<<< HEAD
   }
   },"impact": {
   "sectionLabel": "Our impact",
@@ -636,10 +643,8 @@
     "competences": { "health": "Health / Medical", "education": "Education", "it": "IT / Digital", "communication": "Communication / Social media", "logistics": "Logistics / Field", "legal": "Legal / Finance", "other": "Other" },
     "dispo": { "occasional": "Occasional (a few days)", "regular": "Regular (a few hours/week)", "longterm": "Long mission (1 month+)" }
   }
-}
-  }
-=======
-  },
+},
+  
   "paymentModes": {
     "AUTOMATIC": "Automatic",
     "MANUAL": "Manual"
@@ -662,5 +667,6 @@
   "admin_adherents_sub": "Contributions from members and associations.",
   "admin_search_adherent": "Search name, phone, country, method, status",
   "created_at": "Created at"
->>>>>>> 4bad5ca0549101b393a92337efa09490466c618f
+}
+
 }

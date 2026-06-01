@@ -237,6 +237,14 @@
   "payment_orders": "Ordres de paiement",
   "create_payment_order": "Créer un ordre de paiement",
   "print": "Imprimer",
+  "nav_home": "Bogga hore",
+"nav_about": "Nagu saabsan",
+"nav_actions": "Hawshaheenna",
+"nav_impact": "Saameyntayada",
+"nav_news": "Wararka",
+"nav_support": "Naga taageero",
+"nav_contact": "Nala soo xiriir",
+
   "enumStatus": {
     "EN_ATTENTE": "Sugaya",
     "APPROUVER": "La ansixiyay",
@@ -480,7 +488,6 @@
         "fundraising":   "Ururinta Tabaruca"
       }
     }
-<<<<<<< HEAD
   }
 },"impact": {
   "sectionLabel": "Saameynteenna",
@@ -637,9 +644,7 @@
     "dispo": { "occasional": "Kala go'an (dhowr maalmood)", "regular": "Joogto (dhowr saac/toddobaad)", "longterm": "Howlgal dheer (bil+)" }
   }
 }
-  }
-=======
-  },
+  ,
   "paymentModes": {
     "AUTOMATIC": "Toos ah",
     "MANUAL": "Gacanta"
@@ -662,5 +667,7 @@
   "admin_adherents_sub": "Qaaraanka xubnaha iyo ururrada.",
   "admin_search_adherent": "Raadi magac, telefoon, waddan, hab, xaalad",
   "created_at": "Taariikhda abuurka"
->>>>>>> 4bad5ca0549101b393a92337efa09490466c618f
 }
+}
+
+
