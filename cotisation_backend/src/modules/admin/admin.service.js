@@ -2,18 +2,13 @@ import prisma from "../../config/prisma.js";
 import { auditLog } from "../../utils/audit.js";
 import { hashPassword } from "../../utils/hash.js";
 
-const INTERNAL_USER_ROLES = [
+const VISIBLE_INTERNAL_USER_ROLES = [
   "ADMIN",
-  "SUPER_ADMIN",
   "GESTIONNAIRE_DEPENSE",
   "EQUIPE_TRESORERIE",
 ];
 
-const CREATABLE_INTERNAL_ROLES = [
-  "ADMIN",
-  "GESTIONNAIRE_DEPENSE",
-  "EQUIPE_TRESORERIE",
-];
+const CREATABLE_INTERNAL_ROLES = VISIBLE_INTERNAL_USER_ROLES;
 
 const ADMIN_CREATABLE_INTERNAL_ROLES = [
   "GESTIONNAIRE_DEPENSE",
@@ -216,7 +211,7 @@ export async function getDashboardStats({ role } = {}) {
 
 export async function listUsers() {
   return prisma.user.findMany({
-    where: { role: { in: INTERNAL_USER_ROLES } },
+    where: { role: { in: VISIBLE_INTERNAL_USER_ROLES } },
     orderBy: { createdAt: "desc" },
     select: userPublicSelect(),
   });
