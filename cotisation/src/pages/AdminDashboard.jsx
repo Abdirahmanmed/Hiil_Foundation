@@ -52,6 +52,9 @@ const SUB_STATUS_TONES = {
   CANCELLED: "red",
 };
 
+const ROLE_OPTIONS = ["ADMIN", "GESTIONNAIRE_DEPENSE", "EQUIPE_TRESORERIE"];
+const ADMIN_ROLE_OPTIONS = ["GESTIONNAIRE_DEPENSE", "EQUIPE_TRESORERIE"];
+
 function fmtDate(d) {
   try {
     return new Date(d).toLocaleString();
@@ -157,7 +160,10 @@ export default function AdminDashboard() {
   });
 
   const stats = qStats.data?.stats;
-  const users = useMemo(() => qUsers.data?.users || [], [qUsers.data?.users]);
+  const users = useMemo(
+    () => (qUsers.data?.users || []).filter((apiUser) => apiUser.role !== "SUPER_ADMIN"),
+    [qUsers.data?.users],
+  );
   const subs = useMemo(() => qSubs.data?.contributions || [], [qSubs.data?.contributions]);
 
   // Derived data
@@ -282,9 +288,7 @@ export default function AdminDashboard() {
   });
 
   const canCreateAdminUser = user?.role === "SUPER_ADMIN";
-  const createUserRoleOptions = canCreateAdminUser
-    ? ["ADMIN", "GESTIONNAIRE_DEPENSE", "EQUIPE_TRESORERIE"]
-    : ["GESTIONNAIRE_DEPENSE", "EQUIPE_TRESORERIE"];
+  const createUserRoleOptions = canCreateAdminUser ? ROLE_OPTIONS : ADMIN_ROLE_OPTIONS;
 
   function updateCreateUserForm(field, value) {
     setCreateUserForm((current) => ({ ...current, [field]: value }));
@@ -506,7 +510,7 @@ export default function AdminDashboard() {
               ) : (
                 usersFiltered.map((u) => {
                   const canEditRole = user?.role === "SUPER_ADMIN" && u.id !== user?.id;
-                  const editableRoles = ["ADMIN", "GESTIONNAIRE_DEPENSE", "EQUIPE_TRESORERIE"];
+                  const editableRoles = ROLE_OPTIONS;
 
                   return (
                     <div
