@@ -407,5 +407,17 @@
     "QUARTERLY": "??? ????",
     "SEMIANNUAL": "??? ????",
     "ANNUAL": "????"
-  }
+  },
+  "users": "المستخدمون",
+  "add_user": "إضافة مستخدم",
+  "adherents": "الأعضاء",
+  "payment_amount": "مبلغ الدفع",
+  "payment_date": "تاريخ الدفع",
+  "user_created_success": "تم إنشاء المستخدم بنجاح",
+  "email_invalid": "البريد الإلكتروني غير صالح",
+  "password_mismatch": "كلمتا المرور غير متطابقتين",
+  "admin_users_sub": "إدارة مستخدمي النظام الداخليين.",
+  "admin_adherents_sub": "مساهمات الأعضاء والجمعيات.",
+  "admin_search_adherent": "ابحث بالاسم أو الهاتف أو البلد أو الطريقة أو الحالة",
+  "created_at": "تاريخ الإنشاء"
 }

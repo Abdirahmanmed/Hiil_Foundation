@@ -5,8 +5,23 @@ export const setUserStatusSchema = z.object({
 });
 
 export const setUserRoleSchema = z.object({
-  role: z.enum(["CLIENT", "ADMIN", "GESTIONNAIRE_DEPENSE", "SUPER_ADMIN", "EQUIPE_TRESORERIE"]),
+  role: z.enum(["ADMIN", "GESTIONNAIRE_DEPENSE", "EQUIPE_TRESORERIE"]),
 });
+
+export const createInternalUserSchema = z
+  .object({
+    fullName: z.string().trim().min(1),
+    email: z.string().trim().email(),
+    phone: z.string().trim().min(1),
+    role: z.enum(["ADMIN", "GESTIONNAIRE_DEPENSE", "EQUIPE_TRESORERIE"]),
+    status: z.enum(["ACTIVE", "SUSPENDED"]).default("ACTIVE"),
+    password: z.string().min(8),
+    confirmPassword: z.string().min(8),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    path: ["confirmPassword"],
+    message: "Les mots de passe sont différents",
+  });
 
 export const resetUserOtpSchema = z.object({});
 
