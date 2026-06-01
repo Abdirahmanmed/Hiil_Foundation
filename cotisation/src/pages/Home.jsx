@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion"; // eslint-disable-line no-unused-vars
+
 import { useTranslation } from "react-i18next";
 import { useMemo, useState } from "react";
 import Brand from "../components/Brand";
