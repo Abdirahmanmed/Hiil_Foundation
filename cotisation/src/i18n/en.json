@@ -396,6 +396,237 @@
           "desc": "Distribution of nutritional supplements and awareness sessions for mothers in critical areas."
         }
       }
+    },"about": {
+  "sectionLabel": "Who we are",
+  "titlePrefix": "About",
+  "titleHighlight": "our organization",
+  "subtitle": "Discover who we are, what drives us, and how we act for lasting impact.",
+  "tabs": {
+    "histoire": {
+      "label": "Our story",
+      "title": "Our story",
+      "body": "Founded in 2026, our organization was born from the commitment of engaged citizens facing the challenges of their territory. Over more than a decade of concrete action, we have built a solid network of partners, volunteers, and beneficiaries who share a common vision: a fairer, more caring future for all.",
+      "highlight": "Over 10 years of commitment serving communities."
+    },
+    "mission": {
+      "label": "Mission & values",
+      "title": "Mission & values",
+      "body": "Our mission is to promote sustainable development and social inclusion through innovative and participatory programs. We rely on four core values: integrity, solidarity, innovation, and transparency.",
+      "values": {
+        "integrity": "Integrity",
+        "solidarity": "Solidarity",
+        "innovation": "Innovation",
+        "transparency": "Transparency"
+      }
+    },
+    "gouvernance": {
+      "label": "Governance",
+      "title": "Governance",
+      "body": "Our governance structure ensures rigorous and democratic management. The Board of Directors, made up of 9 elected members, oversees the overall strategy, while the leadership team handles daily operations.",
+      "members": {
+        "president":     { "role": "President",          "name": "Amina Warsame" },
+        "vicePresident": { "role": "Vice-President",     "name": "Hassan Farah"  },
+        "treasurer":     { "role": "Treasurer",          "name": "Hodan Elmi"    },
+        "secretary":     { "role": "Secretary General",  "name": "Yusuf Ibrahim" }
+      }
+    },
+    "equipe": {
+      "label": "Operational team",
+      "title": "Operational team",
+      "body": "Our multidisciplinary team of 24 permanent staff and 150+ active volunteers brings its expertise to our programs. Each member is driven by a deep commitment to our mission.",
+      "stats": {
+        "permanent":     "Permanent staff",
+        "volunteers":    "Volunteers",
+        "nationalities": "Nationalities",
+        "programs":      "Programs"
+      }
+    },
+    "statuts": {
+      "label": "Statutes & public utility",
+      "title": "Statutes & public utility recognition",
+      "body": "Recognized as a public utility organization since 2015 by decree, our organization benefits from a robust legal framework that strengthens the trust of our partners and donors. Our statutes are available for download below.",
+      "docs": {
+        "constitutive": "Articles of incorporation (PDF)",
+        "decree":       "Recognition decree (PDF)",
+        "receipt":      "Declaration receipt (PDF)"
+      }
+    },
+    "rapport": {
+      "label": "Annual report",
+      "title": "Annual report",
+      "body": "Our annual report details all our activities, measurable results, and use of resources. It reflects our commitment to accountability and transparency towards our stakeholders.",
+      "docs": {
+        "report2024": "Annual report 2024 (PDF)",
+        "report2023": "Annual report 2023 (PDF)",
+        "report2022": "Annual report 2022 (PDF)"
+      }
+    },
+    "finances": {
+      "label": "Financial transparency",
+      "title": "Financial transparency",
+      "body": "We publish our accounts each year, certified by an independent auditor. The allocation of our resources reflects our commitment to maximizing direct impact on our beneficiaries.",
+      "budget": {
+        "fieldActions":  "Field actions",
+        "operations":    "Operations",
+        "communication": "Communication",
+        "fundraising":   "Fundraising"
+      }
     }
+  }
+  },"impact": {
+  "sectionLabel": "Our impact",
+  "titlePrefix": "Concrete &",
+  "titleHighlight": "measurable results",
+  "subtitle": "Transparency is at the heart of our commitment. Here is proof of what we achieve together.",
+  "indicatorsTitle": "Key figures & indicators",
+  "reportsTitle": "Impact reports",
+  "testimonialsTitle": "Testimonials & success stories",
+  "videosTitle": "Videos & reports",
+  "evaluationTitle": "Project evaluation & monitoring",
+  "indicators": {
+    "beneficiaries": { "label": "Direct beneficiaries", "evolution": "+18% vs 2023" },
+    "regions":       { "label": "Intervention regions", "evolution": "+2 new" },
+    "projects":      { "label": "Completed projects", "evolution": "+11 this year" },
+    "partners":      { "label": "Active partners", "evolution": "+5 new" },
+    "funds":         { "label": "Funds mobilized", "evolution": "+22% vs 2023" },
+    "satisfaction":  { "label": "Satisfaction rate", "evolution": "+3pts" }
+  },
+  "reports": {
+    "latestBadge":   "⭐ Latest report",
+    "archiveBadge":  "Archive",
+    "reportLabel":   "Report",
+    "pagesLabel":    "pages",
+    "downloadLabel": "Download (PDF)",
+    "r2024": { "desc": "Full review of 2024: programs, funding, field results and 2025 outlook." },
+    "r2023": { "desc": "Looking back on a pivotal year with the expansion of our programs into 2 new regions." },
+    "r2022": { "desc": "Consolidation report: structuring our teams and strengthening our partnerships." }
+  },
+  "testimonials": {
+    "t1": {
+      "quote": "Thanks to the microcredit program, I was able to open my own sewing workshop. Today I employ 3 women from my neighborhood.",
+      "name": "Fadumo Hassan",
+      "role": "Beneficiary — Women's entrepreneurship program"
+    },
+    "t2": {
+      "quote": "Access to clean water has transformed our daily lives. Children no longer get sick from contaminated water.",
+      "name": "Ibrahim Moussa",
+      "role": "Village chief — Northern zone"
+    },
+    "t3": {
+      "quote": "The tablets provided by the digital program changed the way I learn. I want to become an engineer.",
+      "name": "Asma Dirie",
+      "role": "Student — Digital school, Eastern region"
+    }
+  },
+  "videos": {
+    "playerPlaceholder": "Simulated playback — embed your video player here",
+    "v1": { "category": "Field report", "title": "Water reaches the village — North Project 2024" },
+    "v2": { "category": "Testimonial", "title": "Fadumo: from beneficiary to entrepreneur" },
+    "v3": { "category": "Education", "title": "The digital school at the end of the world" }
+  },
+  "evaluation": {
+    "steps": {
+      "s1": { "label": "Initial assessment", "desc": "Needs analysis, stakeholder mapping and definition of success indicators before launch." },
+      "s2": { "label": "Ongoing monitoring", "desc": "Monthly field data collection, monitoring visits and interim reports shared with partners." },
+      "s3": { "label": "Mid-term review", "desc": "Independent review at the halfway point to adjust activities and maximize impact on beneficiaries." },
+      "s4": { "label": "Final report & knowledge capture", "desc": "Full review, lessons learned and publication of results to inform our future programs." }
+    }
+  }
+},"news": {
+  "sectionLabel": "News",
+  "titlePrefix": "Stay",
+  "titleHighlight": "informed",
+  "subtitle": "Follow our news, events and access press resources from our organization.",
+  "tabs": { "blog": "📝 Blog / Articles", "presse": "📣 Press releases", "events": "📅 Events", "newsletter": "📧 Newsletter", "kit": "🗂 Press room" },
+  "blog": {
+    "readMore": "Read article →", "viewAll": "View all articles →",
+    "a1": { "category": "Water & Health", "date": "Nov 15, 2024", "title": "Clean water transforms an entire region", "desc": "A look back at the inauguration of 14 boreholes in the North zone: a striking before-and-after for 3,200 residents." },
+    "a2": { "category": "Education", "date": "Oct 2, 2024", "title": "12 new digital classrooms opened", "desc": "Thanks to the Digital School program, 850 students now have access to modern learning tools." },
+    "a3": { "category": "Women & Economy", "date": "Sep 18, 2024", "title": "420 women entrepreneurs: mid-term review", "desc": "Halfway through the microcredit program, the first success stories are emerging strongly." }
+  },
+  "presse": {
+    "downloadBtn": "Download PDF",
+    "c1": { "tag": "Partnership", "date": "Nov 10, 2024", "title": "Cooperation agreement signed with UNICEF" },
+    "c2": { "tag": "Program", "date": "Oct 28, 2024", "title": "Official launch of the Emergency Child Nutrition program" },
+    "c3": { "tag": "Governance", "date": "Sep 5, 2024", "title": "Board of Directors renewed — new members elected" }
+  },
+  "events": {
+    "upcomingBadge": "Upcoming", "pastBadge": "Past", "registerBtn": "Register →", "reportBtn": "View report →",
+    "e1": { "date": "Jan 15, 2025", "title": "Annual Partners Forum 2025", "lieu": "Djibouti City", "desc": "2024 review and 2025 roadmap presentation to all our partners." },
+    "e2": { "date": "Feb 8, 2025", "title": "Open field day", "lieu": "North Zone", "desc": "Visit our ongoing projects and meet the teams and beneficiaries on the ground." },
+    "e3": { "date": "Nov 22, 2024", "title": "Conference: Water & Rural Development", "lieu": "Kempinski Hotel, Djibouti", "desc": "International expert panel on water access solutions in the Horn of Africa." }
+  },
+  "newsletter": {
+    "archivesTitle": "Newsletter Archives", "viewBtn": "View",
+    "subscribeTitle": "Subscribe to the newsletter",
+    "subscribeDesc": "News, reports and events delivered to your inbox. Unsubscribe in one click.",
+    "nameLabel": "First and last name", "namePlaceholder": "Your name",
+    "emailLabel": "Email address", "emailPlaceholder": "you@example.com",
+    "subscribeBtn": "Subscribe for free →",
+    "privacyNote": "🔒 Confidential data. Unsubscribe at any time.",
+    "archives": { "n1": "Newsletter #18 — November 2024", "n2": "Newsletter #17 — October 2024", "n3": "Newsletter #16 — September 2024", "n4": "Newsletter #15 — August 2024" }
+  },
+  "kit": {
+    "filesTitle": "Downloadable resources", "downloadBtn": "↓ DL",
+    "pressContactTitle": "Press contact", "pressContactRole": "Communications Manager",
+    "pressContactDept": "Press Relations Department", "pressContactHours": "Available Mon–Fri, 8am–5pm",
+    "accreditationLabel": "Accreditation:", "accreditationDesc": "For interview or field reporting requests, please contact us 5 business days in advance.",
+    "files": { "f1": { "name": "Full press kit (ZIP)" }, "f2": { "name": "HD logos (PNG / SVG / EPS)" }, "f3": { "name": "Field photo library (40 photos)" }, "f4": { "name": "Press kit 2024 (PDF)" }, "f5": { "name": "2024 results infographics" } }
+  }
+},
+"support": {
+  "sectionLabel": "Support us",
+  "titlePrefix": "Act by our",
+  "titleHighlight": "side",
+  "subtitle": "Your support — financial or in time — transforms lives. Every gesture counts, whatever form it takes.",
+  "whyGiveTitle": "Why give?",
+  "donTitle": "Make a donation",
+  "back": "Back",
+  "donTabs": { "instant": "Instant donation", "bank": "Bank transfer", "card": "Credit card" },
+  "wallets": { "other": "Other" },
+  "whyGive": {
+    "w1": { "title": "Direct & measurable impact", "desc": "100% of your donations go to field programs. Every dollar is tracked and published in our annual report." },
+    "w2": { "title": "Full transparency", "desc": "We publish certified accounts and a detailed impact report every year." },
+    "w3": { "title": "Secure payments", "desc": "All transactions are secured and encrypted. Your banking details are never stored." },
+    "w4": { "title": "Tax receipt", "desc": "Automatically receive your tax receipt within 24 hours of your donation." }
+  },
+  "bankDon": { "title": "Bank transfer", "desc": "To make a donation by bank transfer, please register or log in to your donor account.", "cta": "Register / Log in →" },
+  "cardDon": { "title": "Credit card payment", "desc": "To make a donation by credit card, please register or log in to your donor account.", "cta": "Register / Log in →" },
+  "instant": {
+    "chooseAmount": "Choose an amount", "hint100": "a nutritional supplement for a child for 1 month.",
+    "hint250": "school supplies for 2 students for the whole year.",
+    "amountLabel": "Amount", "chooseWallet": "Choose your wallet",
+    "phoneLabel": "Phone number", "phonePlaceholder": "e.g. 77 00 00 00", "sendOtpBtn": "Send OTP code →"
+  },
+  "otp": {
+    "sentTo": "A 6-digit code has been sent to", "enterBelow": "Enter it below to confirm your donation.",
+    "testMode": "Test mode — your OTP:", "label": "OTP code (6 digits)",
+    "confirmBtn": "Confirm my donation of", "notReceived": "Didn't receive the code?", "resend": "Resend"
+  },
+  "success": { "title": "Congratulations!", "desc": "Your donation of", "thanks": " has been received. Thank you for your generosity!", "receipt": "A tax receipt will be sent by SMS within 24 hours.", "anotherDon": "Make another donation" },
+  "mecenats": {
+    "m1": { "title": "Corporate sponsorship", "desc": "Associate your brand with high-impact projects. 60% tax deduction within the limit of 0.5% of turnover.", "cta": "Download our sponsorship offer →" },
+    "m2": { "title": "Sponsorship", "desc": "Sponsor a child, a family or an entire project. Receive regular news from your sponsored person.", "cta": "Choose a sponsorship →", "badge1": "Child from $15/month", "badge2": "Project from $50/month" },
+    "m3": { "title": "Online fundraising", "desc": "Create your own fundraiser for a birthday, a sports challenge or an event. Turnkey tools provided.", "cta": "Launch my fundraiser →" }
+  },
+  "volunteer": {
+    "sectionTitle": "Volunteering & getting involved",
+    "intro": "Join our 150+ active volunteers. Whether you're available occasionally or long-term, there's a place for you.",
+    "applyBtn": "Apply →", "formTitle": "I want to get involved",
+    "nameLabel": "Full name", "namePlaceholder": "Your name",
+    "emailLabel": "Email", "emailPlaceholder": "you@example.com",
+    "competenceLabel": "Skills or area of interest", "dispoLabel": "Availability",
+    "selectPlaceholder": "Select...", "submitBtn": "Send my application →",
+    "submittedTitle": "Application sent!", "submittedDesc": "Our team will get back to you within 7 business days.", "closeBtn": "Close",
+    "roles": {
+      "r1": { "role": "Healthcare professional", "dispo": "Occasional or mission" },
+      "r2": { "role": "Developer / Tech", "dispo": "Remote or field" },
+      "r3": { "role": "Communication / Social media", "dispo": "A few hrs/week" },
+      "r4": { "role": "Field logistics", "dispo": "1–4 week mission" }
+    },
+    "competences": { "health": "Health / Medical", "education": "Education", "it": "IT / Digital", "communication": "Communication / Social media", "logistics": "Logistics / Field", "legal": "Legal / Finance", "other": "Other" },
+    "dispo": { "occasional": "Occasional (a few days)", "regular": "Regular (a few hours/week)", "longterm": "Long mission (1 month+)" }
+  }
+}
   }
 }

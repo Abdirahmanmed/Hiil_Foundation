@@ -422,6 +422,311 @@
           "desc": "Distribution de compléments nutritionnels et sensibilisation des mères dans les zones critiques."
         }
       }
+    }, "about": {
+    "sectionLabel": "Qui sommes-nous",
+    "titlePrefix": "À propos de",
+    "titleHighlight": "notre organisation",
+    "subtitle": "Découvrez qui nous sommes, ce qui nous anime et comment nous agissons pour un impact durable.",
+    "tabs": {
+      "histoire": {
+        "label": "Notre histoire",
+        "title": "Notre histoire",
+        "body": "Fondée en 2026, notre organisation est née de la volonté de citoyens engagés face aux défis de leur territoire. En plus d'une décennie d'actions concrètes, nous avons construit un réseau solide de partenaires, de bénévoles et de bénéficiaires qui partagent une même vision : un avenir plus juste et solidaire pour tous.",
+        "highlight": "Plus de 10 ans d'engagement au service des communautés."
+      },
+      "mission": {
+        "label": "Mission & valeurs",
+        "title": "Mission & valeurs",
+        "body": "Notre mission est de promouvoir le développement durable et l'inclusion sociale à travers des programmes innovants et participatifs. Nous nous appuyons sur quatre valeurs fondamentales : l'intégrité, la solidarité, l'innovation et la transparence.",
+        "values": {
+          "integrity": "Intégrité",
+          "solidarity": "Solidarité",
+          "innovation": "Innovation",
+          "transparency": "Transparence"
+        }
+      },
+      "gouvernance": {
+        "label": "Gouvernance",
+        "title": "Gouvernance",
+        "body": "Notre structure de gouvernance garantit une gestion rigoureuse et démocratique. Le Conseil d'administration, composé de 9 membres élus, supervise la stratégie globale, tandis que l'équipe dirigeante assure la mise en œuvre opérationnelle au quotidien.",
+        "members": {
+          "president":     { "role": "Présidente",         "name": "Amina Warsame" },
+          "vicePresident": { "role": "Vice-président",     "name": "Hassan Farah"  },
+          "treasurer":     { "role": "Trésorière",         "name": "Hodan Elmi"    },
+          "secretary":     { "role": "Secrétaire général", "name": "Yusuf Ibrahim" }
+        }
+      },
+      "equipe": {
+        "label": "Équipe opérationnelle",
+        "title": "Équipe opérationnelle",
+        "body": "Notre équipe pluridisciplinaire de 24 collaborateurs permanents et 150+ bénévoles actifs met son expertise au service de nos programmes. Chaque membre est animé par un engagement profond envers notre mission.",
+        "stats": {
+          "permanent":     "Permanents",
+          "volunteers":    "Bénévoles",
+          "nationalities": "Nationalités",
+          "programs":      "Programmes"
+        }
+      },
+      "statuts": {
+        "label": "Statuts & utilité publique",
+        "title": "Statuts & reconnaissance d'utilité publique",
+        "body": "Reconnue d'utilité publique depuis 2015 par décret, notre organisation bénéficie d'un cadre légal robuste qui renforce la confiance de nos partenaires et donateurs. Nos statuts sont disponibles en téléchargement ci-dessous.",
+        "docs": {
+          "constitutive": "Statuts constitutifs (PDF)",
+          "decree":       "Décret de reconnaissance (PDF)",
+          "receipt":      "Récépissé de déclaration (PDF)"
+        }
+      },
+      "rapport": {
+        "label": "Rapport annuel",
+        "title": "Rapport annuel",
+        "body": "Notre rapport annuel détaille l'ensemble de nos activités, nos résultats mesurables et l'utilisation des ressources. Il témoigne de notre engagement envers la redevabilité et la transparence vis-à-vis de nos parties prenantes.",
+        "docs": {
+          "report2024": "Rapport annuel 2024 (PDF)",
+          "report2023": "Rapport annuel 2023 (PDF)",
+          "report2022": "Rapport annuel 2022 (PDF)"
+        }
+      },
+      "finances": {
+        "label": "Transparence financière",
+        "title": "Transparence financière",
+        "body": "Nous publions chaque année nos comptes certifiés par un commissaire aux comptes indépendant. La répartition de nos ressources reflète notre engagement à maximiser l'impact direct sur nos bénéficiaires.",
+        "budget": {
+          "fieldActions":  "Actions terrain",
+          "operations":    "Fonctionnement",
+          "communication": "Communication",
+          "fundraising":   "Levée de fonds"
+        }
+      }
     }
+  },"impact": {
+  "sectionLabel": "Notre impact",
+  "titlePrefix": "Des résultats",
+  "titleHighlight": "concrets & mesurables",
+  "subtitle": "La transparence est au cœur de notre engagement. Voici la preuve de ce que nous accomplissons ensemble.",
+  "indicatorsTitle": "Résultats chiffrés & indicateurs clés",
+  "reportsTitle": "Rapports d'impact",
+  "testimonialsTitle": "Témoignages & success stories",
+  "videosTitle": "Vidéos & reportages",
+  "evaluationTitle": "Évaluation & suivi des projets",
+  "indicators": {
+    "beneficiaries": { "label": "Bénéficiaires directs", "evolution": "+18% vs 2023" },
+    "regions":       { "label": "Régions d'intervention", "evolution": "+2 nouvelles" },
+    "projects":      { "label": "Projets réalisés", "evolution": "+11 cette année" },
+    "partners":      { "label": "Partenaires actifs", "evolution": "+5 nouveaux" },
+    "funds":         { "label": "Fonds mobilisés", "evolution": "+22% vs 2023" },
+    "satisfaction":  { "label": "Taux de satisfaction", "evolution": "+3pts" }
+  },
+  "reports": {
+    "latestBadge":    "⭐ Dernier rapport",
+    "archiveBadge":   "Archives",
+    "reportLabel":    "Rapport",
+    "pagesLabel":     "pages",
+    "downloadLabel":  "Télécharger (PDF)",
+    "r2024": { "desc": "Bilan complet de l'année 2024 : programmes, financements, résultats terrain et perspectives 2025." },
+    "r2023": { "desc": "Retour sur une année charnière avec l'extension de nos programmes dans 2 nouvelles régions." },
+    "r2022": { "desc": "Rapport de consolidation : structuration de nos équipes et renforcement de nos partenariats." }
+  },
+  "testimonials": {
+    "t1": {
+      "quote": "Grâce au programme de microcrédits, j'ai pu ouvrir mon propre atelier de couture. Aujourd'hui j'emploie 3 femmes de mon quartier.",
+      "name": "Fadumo Hassan",
+      "role": "Bénéficiaire — Programme entrepreneuriat féminin"
+    },
+    "t2": {
+      "quote": "L'accès à l'eau potable a transformé notre quotidien. Les enfants ne tombent plus malades à cause de l'eau contaminée.",
+      "name": "Ibrahim Moussa",
+      "role": "Chef de village — Zone Nord"
+    },
+    "t3": {
+      "quote": "Les tablettes offertes par le programme numérique ont changé ma façon d'apprendre. Je veux devenir ingénieure.",
+      "name": "Asma Dirie",
+      "role": "Élève — École numérique, région Est"
+    }
+  },
+  "videos": {
+    "playerPlaceholder": "Lecture simulée — intégrez ici votre lecteur vidéo",
+    "v1": { "category": "Reportage terrain", "title": "L'eau arrive au village — Projet Nord 2024" },
+    "v2": { "category": "Témoignage", "title": "Fadumo : de bénéficiaire à entrepreneuse" },
+    "v3": { "category": "Éducation", "title": "L'école numérique du bout du monde" }
+  },
+  "evaluation": {
+    "steps": {
+      "s1": { "label": "Diagnostic initial", "desc": "Analyse des besoins, cartographie des parties prenantes et définition des indicateurs de succès avant le lancement." },
+      "s2": { "label": "Suivi continu", "desc": "Collecte mensuelle de données terrain, visites de monitoring et rapports intermédiaires partagés avec les partenaires." },
+      "s3": { "label": "Évaluation mi-parcours", "desc": "Revue indépendante à mi-programme pour ajuster les activités et maximiser l'impact sur les bénéficiaires." },
+      "s4": { "label": "Rapport final & capitalisation", "desc": "Bilan complet, leçons apprises et publication des résultats pour alimenter nos futurs programmes." }
+    }
+  }
+},"news": {
+  "sectionLabel": "Actualités",
+  "titlePrefix": "Restez",
+  "titleHighlight": "informés",
+  "subtitle": "Suivez nos actualités, événements et accédez aux ressources presse de notre organisation.",
+  "tabs": {
+    "blog": "📝 Blog / Articles",
+    "presse": "📣 Communiqués",
+    "events": "📅 Événements",
+    "newsletter": "📧 Newsletter",
+    "kit": "🗂 Espace presse"
+  },
+  "blog": {
+    "readMore": "Lire l'article →",
+    "viewAll": "Voir tous les articles →",
+    "a1": { "category": "Eau & Santé", "date": "15 nov. 2024", "title": "L'eau potable transforme une région entière", "desc": "Retour sur l'inauguration des 14 forages dans la zone Nord : un avant-après saisissant pour 3 200 habitants." },
+    "a2": { "category": "Éducation", "date": "02 oct. 2024", "title": "12 nouvelles salles numériques ouvertes", "desc": "Grâce au programme École numérique, 850 élèves disposent désormais d'outils pédagogiques modernes." },
+    "a3": { "category": "Femmes & Économie", "date": "18 sept. 2024", "title": "420 femmes entrepreneures : bilan mi-parcours", "desc": "À mi-chemin du programme de microcrédits, les premières success stories émergent avec force." }
+  },
+  "presse": {
+    "downloadBtn": "Télécharger PDF",
+    "c1": { "tag": "Partenariat", "date": "10 nov. 2024", "title": "Signature d'un accord de coopération avec l'UNICEF" },
+    "c2": { "tag": "Programme", "date": "28 oct. 2024", "title": "Lancement officiel du programme Nutrition infantile d'urgence" },
+    "c3": { "tag": "Gouvernance", "date": "05 sept. 2024", "title": "Renouvellement du Conseil d'administration — nouveaux membres élus" }
+  },
+  "events": {
+    "upcomingBadge": "À venir",
+    "pastBadge": "Passé",
+    "registerBtn": "S'inscrire →",
+    "reportBtn": "Voir le compte-rendu →",
+    "e1": { "date": "15 jan. 2025", "title": "Forum annuel des partenaires 2025", "lieu": "Djibouti-ville", "desc": "Bilan de l'année 2024 et présentation de la feuille de route 2025 devant l'ensemble de nos partenaires." },
+    "e2": { "date": "08 fév. 2025", "title": "Journée portes ouvertes terrain", "lieu": "Zone Nord", "desc": "Visitez nos projets en cours et rencontrez les équipes et bénéficiaires sur le terrain." },
+    "e3": { "date": "22 nov. 2024", "title": "Conférence : Eau & développement rural", "lieu": "Hôtel Kempinski, Djibouti", "desc": "Panel d'experts internationaux sur les solutions d'accès à l'eau dans la Corne de l'Afrique." }
+  },
+  "newsletter": {
+    "archivesTitle": "Archives Newsletter",
+    "viewBtn": "Voir",
+    "subscribeTitle": "S'abonner à la newsletter",
+    "subscribeDesc": "Actualités, rapports et événements livrés dans votre boîte mail. Désabonnement en un clic.",
+    "nameLabel": "Prénom et nom",
+    "namePlaceholder": "Votre nom",
+    "emailLabel": "Adresse email",
+    "emailPlaceholder": "vous@exemple.com",
+    "subscribeBtn": "S'abonner gratuitement →",
+    "privacyNote": "🔒 Données confidentielles. Désabonnement à tout moment.",
+    "archives": {
+      "n1": "Newsletter #18 — Novembre 2024",
+      "n2": "Newsletter #17 — Octobre 2024",
+      "n3": "Newsletter #16 — Septembre 2024",
+      "n4": "Newsletter #15 — Août 2024"
+    }
+  },
+  "kit": {
+    "filesTitle": "Ressources téléchargeables",
+    "downloadBtn": "↓ DL",
+    "pressContactTitle": "Contact presse",
+    "pressContactRole": "Responsable Communication",
+    "pressContactDept": "Service Relations Presse",
+    "pressContactHours": "Disponible lun–ven, 8h–17h",
+    "accreditationLabel": "Accréditation :",
+    "accreditationDesc": "Pour toute demande d'entretien ou reportage terrain, merci de nous contacter 5 jours ouvrables à l'avance.",
+    "files": {
+      "f1": { "name": "Kit presse complet (ZIP)" },
+      "f2": { "name": "Logos HD (PNG / SVG / EPS)" },
+      "f3": { "name": "Photothèque terrain (40 photos)" },
+      "f4": { "name": "Dossier de presse 2024 (PDF)" },
+      "f5": { "name": "Infographies résultats 2024" }
+    }
+  }
+},
+"support": {
+  "sectionLabel": "Soutenir",
+  "titlePrefix": "Agissez à nos",
+  "titleHighlight": "côtés",
+  "subtitle": "Votre soutien — financier ou en temps — transforme des vies. Chaque geste compte, quelle que soit sa forme.",
+  "whyGiveTitle": "Pourquoi donner ?",
+  "donTitle": "Faire un don",
+  "back": "Retour",
+  "donTabs": {
+    "instant": "Don instantané",
+    "bank": "Don bancaire",
+    "card": "Carte bancaire"
+  },
+  "wallets": { "other": "Autre" },
+  "whyGive": {
+    "w1": { "title": "Impact direct & mesurable", "desc": "100% de vos dons vont aux programmes terrain. Chaque euro est tracé et publié dans notre rapport annuel." },
+    "w2": { "title": "Transparence totale", "desc": "Nous publions chaque année nos comptes certifiés et notre rapport d'impact détaillé." },
+    "w3": { "title": "Sécurité des paiements", "desc": "Toutes les transactions sont sécurisées et cryptées. Vos données bancaires ne sont jamais stockées." },
+    "w4": { "title": "Reçu fiscal", "desc": "Recevez automatiquement votre reçu fiscal pour déduction d'impôt dans les 24h suivant votre don." }
+  },
+  "bankDon": {
+    "title": "Don bancaire",
+    "desc": "Pour effectuer un don par virement bancaire, veuillez vous inscrire ou vous connecter à votre espace donateur.",
+    "cta": "S'inscrire / Se connecter →"
+  },
+  "cardDon": {
+    "title": "Paiement par carte bancaire",
+    "desc": "Pour effectuer un don par carte bancaire, veuillez vous inscrire ou vous connecter à votre espace donateur.",
+    "cta": "S'inscrire / Se connecter →"
+  },
+  "instant": {
+    "chooseAmount": "Choisissez un montant",
+    "hint100": "un complément nutritionnel pour un enfant pendant 1 mois.",
+    "hint250": "matériel scolaire pour 2 élèves sur toute l'année.",
+    "amountLabel": "Montant",
+    "chooseWallet": "Choisissez votre wallet",
+    "phoneLabel": "Numéro de téléphone",
+    "phonePlaceholder": "ex: 77 00 00 00",
+    "sendOtpBtn": "Envoyer le code OTP →"
+  },
+  "otp": {
+    "sentTo": "Un code à 6 chiffres a été envoyé au",
+    "enterBelow": "Saisissez-le ci-dessous pour confirmer votre don.",
+    "testMode": "Mode test — votre OTP :",
+    "label": "Code OTP (6 chiffres)",
+    "confirmBtn": "Confirmer mon don de",
+    "notReceived": "Vous n'avez pas reçu le code ?",
+    "resend": "Renvoyer"
+  },
+  "success": {
+    "title": "Félicitations !",
+    "desc": "Votre don de",
+    "thanks": " a bien été reçu. Merci pour votre générosité !",
+    "receipt": "Un reçu fiscal vous sera envoyé par SMS sous 24h.",
+    "anotherDon": "Faire un autre don"
+  },
+  "mecenats": {
+    "m1": { "title": "Mécénat d'entreprise", "desc": "Associez votre marque à des projets à fort impact. Déduction fiscale de 60% du don dans la limite de 0,5% du CA.", "cta": "Télécharger notre offre mécénat →" },
+    "m2": { "title": "Parrainage", "desc": "Parrainez un enfant, une famille ou un projet entier. Recevez des nouvelles régulières de votre filleul·e.", "cta": "Choisir un parrainage →", "badge1": "Enfant dès 15$/mois", "badge2": "Projet dès 50$/mois" },
+    "m3": { "title": "Collecte en ligne", "desc": "Créez votre propre collecte pour un anniversaire, un défi sportif ou un événement. Outils clés en main fournis.", "cta": "Lancer ma collecte →" }
+  },
+  "volunteer": {
+    "sectionTitle": "Bénévolat & s'impliquer",
+    "intro": "Rejoignez nos 150+ bénévoles actifs. Que vous soyez disponible ponctuellement ou sur le long terme, il y a une place pour vous.",
+    "applyBtn": "Candidater →",
+    "formTitle": "Je veux m'impliquer",
+    "nameLabel": "Nom complet",
+    "namePlaceholder": "Votre nom",
+    "emailLabel": "Email",
+    "emailPlaceholder": "vous@exemple.com",
+    "competenceLabel": "Compétences ou domaine d'intérêt",
+    "dispoLabel": "Disponibilité",
+    "selectPlaceholder": "Sélectionner...",
+    "submitBtn": "Envoyer ma candidature →",
+    "submittedTitle": "Candidature envoyée !",
+    "submittedDesc": "Notre équipe vous recontactera sous 7 jours ouvrables.",
+    "closeBtn": "Fermer",
+    "roles": {
+      "r1": { "role": "Professionnel de santé", "dispo": "Ponctuel ou mission" },
+      "r2": { "role": "Développeur / Tech", "dispo": "À distance ou terrain" },
+      "r3": { "role": "Communication / Réseaux", "dispo": "Quelques h/semaine" },
+      "r4": { "role": "Logistique terrain", "dispo": "Mission 1–4 semaines" }
+    },
+    "competences": {
+      "health": "Santé / Médical",
+      "education": "Éducation",
+      "it": "Informatique / Numérique",
+      "communication": "Communication / Réseaux sociaux",
+      "logistics": "Logistique / Terrain",
+      "legal": "Juridique / Finances",
+      "other": "Autre"
+    },
+    "dispo": {
+      "occasional": "Ponctuelle (quelques jours)",
+      "regular": "Régulière (quelques heures/semaine)",
+      "longterm": "Mission longue (1 mois+)"
+    }
+  }
+}
+
   }
 }

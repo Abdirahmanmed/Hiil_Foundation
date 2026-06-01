@@ -396,6 +396,237 @@
           "desc": "Qaybin nafaqooyin dheeri ah iyo wacyigelin hooyooyin ee meelaha nugul."
         }
       }
+    },"about": {
+  "sectionLabel": "Cidna Yaan",
+  "titlePrefix": "Ku saabsan",
+  "titleHighlight": "ururkeenna",
+  "subtitle": "Baaro cidda aan nahay, waxa nagu dhaqaaqa, iyo sida aan u shaqaynno si ay saameyntu u taabto.",
+  "tabs": {
+    "histoire": {
+      "label": "Taariikhdeenna",
+      "title": "Taariikhdeenna",
+      "body": "Ururka waxaa la aasaasay 2026-kii, ka soo jeeda dadaal shacabka ku hawlan xalinta caqabadaha bulshada. In ka badan toban sano oo hawl toos ah kadib, waxaan dhisay shabakad xooggan oo wata shuraako, xiddiidayaasha iyo faa'iidoodayaasha ee wadaaga aragtida: mustaqbal caddaalad ah oo wadajir leh oo dhammaan danaya.",
+      "highlight": "In ka badan 10 sano oo xilnimo ah oo adeegaya bulshooyinka."
+    },
+    "mission": {
+      "label": "Hadafka & Qiyamka",
+      "title": "Hadafka & Qiyamka",
+      "body": "Hadafkeenna waa in la kobciyo horumarinta joogtaynta iyo midaynta bulshada iyada oo loo marayo barnaamijyo cusub oo ka qaybgalaya. Waxaan ku tiirsan afar qiyam muhiim ah: daacadnimada, is-kaashiga, hal-abuurka, iyo hufnaanta.",
+      "values": {
+        "integrity": "Daacadnimo",
+        "solidarity": "Is-kaashi",
+        "innovation": "Hal-abuur",
+        "transparency": "Hufnaan"
+      }
+    },
+    "gouvernance": {
+      "label": "Maamulka",
+      "title": "Maamulka",
+      "body": "Hab-maamulkeenna wuxuu hubiyaa maarayn adag oo dimoqraadiyad leh. Golaha Maamulka, oo ka kooban 9 xubnood oo la doortay, ayaa xukuma istiraatiijiyada guud, halka kooxda hogaaminta ay mas'uul ka tahay hirgelinta maalinlaha ah.",
+      "members": {
+        "president":     { "role": "Madaxweynaha",        "name": "Amina Warsame" },
+        "vicePresident": { "role": "Ku-xigeenka",         "name": "Hassan Farah"  },
+        "treasurer":     { "role": "Xoghayaha Maaliyadda","name": "Hodan Elmi"    },
+        "secretary":     { "role": "Xoghayaha Guud",      "name": "Yusuf Ibrahim" }
+      }
+    },
+    "equipe": {
+      "label": "Kooxda Hawlgalka",
+      "title": "Kooxda Hawlgalka",
+      "body": "Kooxdeenna xirfadlayaasha kala duwan ee ka kooban 24 shaqaale joogto ah iyo 150+ oo xiddiidaye firfircoon ayaa aqoontooda u hirgelin barnaamijyadeenna. Xubin kasta waxaa wado go'doon qoto dheer oo ku saabsan hawsheenna.",
+      "stats": {
+        "permanent":     "Shaqaale joogto ah",
+        "volunteers":    "Xiddiidayaasha",
+        "nationalities": "Jinsiyo",
+        "programs":      "Barnaamijyo"
+      }
+    },
+    "statuts": {
+      "label": "Nidaamka & Faaiidada Guud",
+      "title": "Nidaamka & Aqoonsiga Faaiidada Guud",
+      "body": "Ururka oo lagu aqoonsaday faaiidada guud 2015-kii iyadoo la isticmaalayo xeer-baashaaladda, wuxuu ka faa'iidaystaa saldhig sharciyeed xooggan oo xoojiya kalsoonida wada-heshiisyadeenna iyo deeqdayaasha.",
+      "docs": {
+        "constitutive": "Qodobada Aasaasiga ah (PDF)",
+        "decree":       "Xeer-baashaladda Aqoonsiga (PDF)",
+        "receipt":      "Rasiidka Diiwaangelinta (PDF)"
+      }
+    },
+    "rapport": {
+      "label": "Warbixinta Sanadlaha ah",
+      "title": "Warbixinta Sanadlaha ah",
+      "body": "Warbixinteenna sanadlaha ahi waxay si faahfaahsan uga hadashaa dhammaan hawlahayaga, natiijooyinka lagu cabiray iyo isticmaalka kheyraadka. Waxay muujisaa xilnimadeenna xisaabaadka iyo hufnaanta.",
+      "docs": {
+        "report2024": "Warbixinta Sanadlaha 2024 (PDF)",
+        "report2023": "Warbixinta Sanadlaha 2023 (PDF)",
+        "report2022": "Warbixinta Sanadlaha 2022 (PDF)"
+      }
+    },
+    "finances": {
+      "label": "Hufnaanta Maaliyadda",
+      "title": "Hufnaanta Maaliyadda",
+      "body": "Sanad kasta waxaan daabacnaa xisaabteenna oo loo ansixiyay xisaabiye madax-bannaan. Qeybsanaanta kheyraadkeenna waxay muujisaa go'aankeenna ah in la badbaadiyo saameynta tooska ah ee faa'iidoodayaasha.",
+      "budget": {
+        "fieldActions":  "Hawlaha Goobta",
+        "operations":    "Hawlgalka",
+        "communication": "Xiriirka",
+        "fundraising":   "Ururinta Tabaruca"
+      }
     }
+  }
+},"impact": {
+  "sectionLabel": "Saameynteenna",
+  "titlePrefix": "Natiijooyinka",
+  "titleHighlight": "la taaban karo & la cabiray",
+  "subtitle": "Hufnaantu waa xudunta ballanqaadkeenna. Halkan waa caddaynta waxa aan wada gaarsiinayno.",
+  "indicatorsTitle": "Tirada natiijooyinka & tilmaamayaasha muhiimka ah",
+  "reportsTitle": "Warbixinnada Saameynta",
+  "testimonialsTitle": "Marag-furka & Sheekooyin Guusha",
+  "videosTitle": "Fiidiyowyada & Warbixinnada",
+  "evaluationTitle": "Qiimeynta & Raadraaca Mashaariicta",
+  "indicators": {
+    "beneficiaries": { "label": "Faa'iidoodayaasha Tooska ah", "evolution": "+18% oo ka badan 2023" },
+    "regions":       { "label": "Gobolada Faa'iidada", "evolution": "+2 cusub" },
+    "projects":      { "label": "Mashaariicta La Dhameeyay", "evolution": "+11 sanadkan" },
+    "partners":      { "label": "Shuraakada Firfircoon", "evolution": "+5 cusub" },
+    "funds":         { "label": "Maalgashiga La Soo Uruuriyay", "evolution": "+22% oo ka badan 2023" },
+    "satisfaction":  { "label": "Heerka Qanacsanaanta", "evolution": "+3 dhibcood" }
+  },
+  "reports": {
+    "latestBadge":   "⭐ Warbixinta ugu dambeysay",
+    "archiveBadge":  "Kaydka",
+    "reportLabel":   "Warbixin",
+    "pagesLabel":    "bog",
+    "downloadLabel": "Soo Degso (PDF)",
+    "r2024": { "desc": "Dib-u-eegis dhammaystiran oo 2024: barnaamijyo, maalgasho, natiijooyinka goobta iyo aragtida 2025." },
+    "r2023": { "desc": "Eegista sanad xasaasi ah oo ay ku baahday barnaamijyadeenna 2 gobol oo cusub." },
+    "r2022": { "desc": "Warbixin xoojinta: habaynta kooxaha iyo xoojinta wadashiiskayaga." }
+  },
+  "testimonials": {
+    "t1": {
+      "quote": "Mahadda barnaamijka amaahda yar-yar, waxaan awood u helay inaan xaraf gaar ah furo. Maanta waxaan shaqaaleeynayaa 3 haween oo xaafadeyda ah.",
+      "name": "Fadumo Hassan",
+      "role": "Faa'iidoode — Barnaamijka Ganacsiga Haweenka"
+    },
+    "t2": {
+      "quote": "Helitaanka biyo nadiif ah ayaa noloshayada maalinlaha ah bedeshay. Carruurtu mar dambe kuma xanuunato biyo wasakhaysan.",
+      "name": "Ibrahim Moussa",
+      "role": "Madaxa tuulada — Xagga Waqooyi"
+    },
+    "t3": {
+      "quote": "Tabletada uu barnaamijka dhijitaalku siiyay ayaa habka barashadayda bedeshay. Waxaan rabnaa inaan noqdo injineer.",
+      "name": "Asma Dirie",
+      "role": "Arday — Dugsiga Dhijitaalka, Gobolka Bari"
+    }
+  },
+  "videos": {
+    "playerPlaceholder": "Ciyaarta la muujiyay — halkan ku dhaji ciyaartahaaga fiidiyowga",
+    "v1": { "category": "Warbixin Goobta", "title": "Biyaha waxay gaartay tuulada — Mashruuca Waqooyi 2024" },
+    "v2": { "category": "Marag-fur", "title": "Fadumo: Faa'iidoode oo noqotay ganacsato" },
+    "v3": { "category": "Waxbarashada", "title": "Dugsi dhijitaalka ah ee dhammaadka adduunka" }
+  },
+  "evaluation": {
+    "steps": {
+      "s1": { "label": "Qiimaynta Bilowga", "desc": "Falanqaynta baahiyaha, sawirka kooxaha danaha leh iyo qeexista calaamadaha guusha ka hor bilawga." },
+      "s2": { "label": "Raadraaca Joogtada ah", "desc": "Uruurinta xogta goobta bil kasta, booqashooyinka raad-raaca iyo warbixinnada dhexe ee la wadaago shuraakada." },
+      "s3": { "label": "Dib-u-eegista Bartamaha", "desc": "Dib-u-eegis madaxbannaan oo bartamaha barnaamijka si loo hagaajiyo hawlaha lana badiyo saameynta faa'iidoodayaasha." },
+      "s4": { "label": "Warbixinta Ugu Dambaysa & Aqoonsiinta", "desc": "Dib-u-eegis dhammaystiran, casharo la baray iyo daabacaadda natiijooyinka si ay uga faa'iidaystaan barnaamijyadeenna mustaqbalka." }
+    }
+  }
+},"news": {
+  "sectionLabel": "Wararkii Dambe",
+  "titlePrefix": "Noqo mid",
+  "titleHighlight": "warsan",
+  "subtitle": "Raac wararkayaga, xafladaha iyo u hel kheyraadka saxaafadda ee ururkeenna.",
+  "tabs": { "blog": "📝 Blog / Maqaallo", "presse": "📣 Bayaanno Saxaafadeed", "events": "📅 Xafladaha", "newsletter": "📧 Wargeyska", "kit": "🗂 Gole Saxaafadeed" },
+  "blog": {
+    "readMore": "Akhri maqaalka →", "viewAll": "Arag dhammaan maqaallada →",
+    "a1": { "category": "Biyaha & Caafimaadka", "date": "15 Nof. 2024", "title": "Biyaha nadiifka ahi waxay u rogeen gobol oo dhan", "desc": "Dib u eegis kusaabsan furitaanka 14 beer oo ku yaal Xagga Waqooyi: isbeddel weyn oo ku dhacay 3,200 qof." },
+    "a2": { "category": "Waxbarashada", "date": "2 Okt. 2024", "title": "12 fasalood oo dhijitaal ah ayaa la furay", "desc": "Mahadda Barnaamijka Dugsi Dhijitaalka, 850 arday ayaa hadda heli kara agabka casriga ah ee barashada." },
+    "a3": { "category": "Haweenka & Dhaqaalaha", "date": "18 Seb. 2024", "title": "420 ganacsato haween: dib-u-eegis bartamaha", "desc": "Bartamaha barnaamijka amaahda yar-yar, sheekooyin guusha ugu horreysa ayaa si xooggan u soo baxayaan." }
+  },
+  "presse": {
+    "downloadBtn": "Soo Degso PDF",
+    "c1": { "tag": "Wadashiis", "date": "10 Nof. 2024", "title": "Heshiis wada-shaqayn oo la saxiixay UNICEF" },
+    "c2": { "tag": "Barnaamij", "date": "28 Okt. 2024", "title": "Bilaabista rasmiga ah ee Barnaamijka Nafaqada Carruurta Xaalufka" },
+    "c3": { "tag": "Maamulka", "date": "5 Seb. 2024", "title": "Cusboonaysiinta Golaha Maamulka — xubnaha cusub ee la doortay" }
+  },
+  "events": {
+    "upcomingBadge": "Soo socda", "pastBadge": "Waayey", "registerBtn": "Is-diiwaan geli →", "reportBtn": "Arag warbixinta →",
+    "e1": { "date": "15 Jan. 2025", "title": "Xaflada Sanadlaha Shuraakada 2025", "lieu": "Magaalada Jabuuti", "desc": "Dib-u-eegis 2024 iyo soo bandhigista qaab-dhismeedka 2025 shuraakadeenna oo dhan." },
+    "e2": { "date": "8 Feb. 2025", "title": "Maalinta Albaabada Furan ee Goobta", "lieu": "Xagga Waqooyi", "desc": "Booqo mashaariicteena socdaalka ah oo kulan la samee kooxaha iyo faa'iidoodayaasha goobta." },
+    "e3": { "date": "22 Nof. 2024", "title": "Shir: Biyaha & Horumarinta Reer Miyiga", "lieu": "Hudheelka Kempinski, Jabuuti", "desc": "Koox khubaro caalami ah oo ku saabsan xalalka helitaanka biyaha Geeska Afrika." }
+  },
+  "newsletter": {
+    "archivesTitle": "Kaydka Wargeysyada", "viewBtn": "Arag",
+    "subscribeTitle": "Ku biir wargeyska",
+    "subscribeDesc": "Warar, warbixinnada iyo xafladaha la soo diray sanduuqaaga boostada. Ka bixi hal gujis.",
+    "nameLabel": "Magaca hore iyo qabyada", "namePlaceholder": "Magacaaga",
+    "emailLabel": "Cinwaanka iimaaylka", "emailPlaceholder": "adiga@tusaale.com",
+    "subscribeBtn": "Bilaash ku biir →",
+    "privacyNote": "🔒 Macluumaadka sir ah. Ka bax waqti kasta.",
+    "archives": { "n1": "Wargeyska #18 — Nofembar 2024", "n2": "Wargeyska #17 — Oktoobar 2024", "n3": "Wargeyska #16 — Sebtembar 2024", "n4": "Wargeyska #15 — Agoosto 2024" }
+  },
+  "kit": {
+    "filesTitle": "Kheyraadka la soo degsan karo", "downloadBtn": "↓ DL",
+    "pressContactTitle": "Xiriirka Saxaafadda", "pressContactRole": "Masuulka Xiriirka",
+    "pressContactDept": "Waaxda Xiriirka Saxaafadda", "pressContactHours": "La heli karaa Isn–Jim, 8gn–5gn",
+    "accreditationLabel": "Oggolaanshaha Saxaafadeed:", "accreditationDesc": "Codsiga wareysigu ama warbixin goob, fadlan nala soo xiriir 5 maalmood shaqo oo ka hor.",
+    "files": { "f1": { "name": "Xirmooyinka saxaafadda oo buuxa (ZIP)" }, "f2": { "name": "Shaambadaha HD (PNG / SVG / EPS)" }, "f3": { "name": "Maktabadda sawirada goobta (40 sawir)" }, "f4": { "name": "Faylka saxaafadda 2024 (PDF)" }, "f5": { "name": "Infografigga natiijooyinka 2024" } }
+  }
+},
+"support": {
+  "sectionLabel": "Naga Taageero",
+  "titlePrefix": "Nala",
+  "titleHighlight": "shaqee",
+  "subtitle": "Taageeradaada — xaggamaaliyadda ama wakhtiga — waxay nolosha bedeshaa. Tallaabooyinka kasta waa muhiim, qaabkiisa ha ahaadee.",
+  "whyGiveTitle": "Maxaa loogu deeqaa?",
+  "donTitle": "Ku deeq",
+  "back": "Dib u noqo",
+  "donTabs": { "instant": "Deeq Deg Ah", "bank": "Wareejinta Bangiga", "card": "Kaarka Bangiga" },
+  "wallets": { "other": "Kale" },
+  "whyGive": {
+    "w1": { "title": "Saameyn Toos ah & La Cabiray", "desc": "100% deeqahaagu waxay u tagaan barnaamijyada goobta. Doolar kasta waa la raadraacaa waxaana lagu daabacaa warbixinteenna sanadlaha." },
+    "w2": { "title": "Hufnaan Buuxda", "desc": "Sanad kasta waxaan daabacnaa xisaabtiisa oo loo ansixiyay iyo warbixin saameyn faahfaahsan." },
+    "w3": { "title": "Amniga Lacag-bixinta", "desc": "Dhammaan macaamiiladu waa la sugaayaa waxaana la qariyaa. Macluumaadkaaga bangiga marna laguma kaydinayo." },
+    "w4": { "title": "Rasiidka Canshuurta", "desc": "Si otomaatig ah u hel rasiidkaaga canshuurta 24 saac kadib deeqda." }
+  },
+  "bankDon": { "title": "Wareejinta Bangiga", "desc": "Si aad u samayso deeq iyada oo la adeegsanayo wareejinta bangiga, fadlan is-diiwaan geli ama gal xisaabkaaga deeq-bixiyaha.", "cta": "Is-diiwaan geli / Gal →" },
+  "cardDon": { "title": "Lacag-bixinta Kaarka Bangiga", "desc": "Si aad u samayso deeq iyada oo la adeegsanayo kaarka bangiga, fadlan is-diiwaan geli ama gal xisaabkaaga deeq-bixiyaha.", "cta": "Is-diiwaan geli / Gal →" },
+  "instant": {
+    "chooseAmount": "Dooro qadarka", "hint100": "kaabid nafaqo ah oo loogu talagalay ilmo muddo hal bil ah.",
+    "hint250": "agab dugsiyeed oo loogu talagalay 2 arday oo sanadka oo dhan.",
+    "amountLabel": "Qadarka", "chooseWallet": "Dooro jeelkaaga",
+    "phoneLabel": "Lambarka telefoonka", "phonePlaceholder": "tusaale: 77 00 00 00", "sendOtpBtn": "Dir koodka OTP →"
+  },
+  "otp": {
+    "sentTo": "Lambarka 6-tirood ayaa loogu diray", "enterBelow": "Ku geli hoosta si aad u xaqiijiso deeqda.",
+    "testMode": "Qaab tijaabo — OTP-kaaga:", "label": "Koodka OTP (6 tirood)",
+    "confirmBtn": "Xaqiiji deeqtayda", "notReceived": "Koodhka ma heshay?", "resend": "Dib u dir"
+  },
+  "success": { "title": "Hambalyo!", "desc": "Deeqtaada", "thanks": " si fiican ayaa loo helay. Waad ku mahadsan tahay deeqdarnaantaada!", "receipt": "Rasiid canshuur ayaa laguugu diri doona SMS muddo 24 saac ah.", "anotherDon": "Ku deeq mar kale" },
+  "mecenats": {
+    "m1": { "title": "Deeqnimada Shirkadaha", "desc": "Ku xidhxidh calaamadahaaga mashaariicda saameynta badan leh. Goosasho canshuur 60% oo ku xaddidan 0.5% dakhliga.", "cta": "Soo degso astaanta deeqnimada →" },
+    "m2": { "title": "Daryeelka", "desc": "Daryeel ilmo, qoys ama mashruuc oo dhan. Warar joogto ah ka hel daryeelkaaga.", "cta": "Dooro daryeel →", "badge1": "Ilmo $15/bilkasta", "badge2": "Mashruuc $50/bilkasta" },
+    "m3": { "title": "Ururinta Online", "desc": "Abuur ururintaada gaarka ah maalin dhalashada, ciyaar tartan ama xafladda. Qalab diyaarsan oo la bixiyo.", "cta": "Bilow ururintayda →" }
+  },
+  "volunteer": {
+    "sectionTitle": "Xiddiidaynta & Ka qaybgalka",
+    "intro": "Ku soo biir 150+ xiddiidayaasha firfircoon. Haddaad diyaar u tahay si kala go'an ama muddo dheer, waxaa jira meel aad ku habboon.",
+    "applyBtn": "Codso →", "formTitle": "Waxaan rabaa inaan ka qaybgalo",
+    "nameLabel": "Magaca oo buuxa", "namePlaceholder": "Magacaaga",
+    "emailLabel": "Iimaaylka", "emailPlaceholder": "adiga@tusaale.com",
+    "competenceLabel": "Xirfadaha ama goobta xiisaha", "dispoLabel": "Diyaarnaanta",
+    "selectPlaceholder": "Dooro...", "submitBtn": "Dir codsigayga →",
+    "submittedTitle": "Codsiga la diray!", "submittedDesc": "Kooxdeenu kula xiriiri doontaa 7 maalmood shaqo gudahood.", "closeBtn": "Xidh",
+    "roles": {
+      "r1": { "role": "Xirfadlaha Caafimaadka", "dispo": "Kala go'an ama howlgal" },
+      "r2": { "role": "Horumariye / Teknoolajiyada", "dispo": "Fog ama goob" },
+      "r3": { "role": "Xiriirka / Bulshada Dhexdeeda", "dispo": "Dhowr saac/toddobaad" },
+      "r4": { "role": "Loojistikada Goobta", "dispo": "Howlgal 1–4 toddobaad" }
+    },
+    "competences": { "health": "Caafimaad / Dhakhtarnimo", "education": "Waxbarasho", "it": "IT / Dhijitaal", "communication": "Xiriirka / Bulshada Dhexdeeda", "logistics": "Loojistikada / Goobta", "legal": "Sharci / Maaliyadda", "other": "Kale" },
+    "dispo": { "occasional": "Kala go'an (dhowr maalmood)", "regular": "Joogto (dhowr saac/toddobaad)", "longterm": "Howlgal dheer (bil+)" }
+  }
+}
   }
 }
