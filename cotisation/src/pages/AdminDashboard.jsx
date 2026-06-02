@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import Card from "../components/ui/Card";
@@ -25,6 +25,7 @@ import {
 
 import { SimpleBarChart, SimplePieChart } from "../components/DashboardCharts";
 import LanguageSwitcher from "../components/LanguageSwitcher";
+import { logPerf } from "../utils/perf";
 
 const USER_STATUS_TONES = {
   PENDING_VERIFICATION: "yellow",
@@ -115,10 +116,12 @@ export default function AdminDashboard() {
   const qUsers = useQuery({
     queryKey: ["admin-users"],
     queryFn: getAdminUsers,
+    enabled: tab === "users",
   });
   const qSubs = useQuery({
     queryKey: ["admin-adherents-contributions"],
     queryFn: getAdherentsContributions,
+    enabled: tab === "adherents",
   });
 
   const qUserDetails = useQuery({
@@ -147,6 +150,16 @@ export default function AdminDashboard() {
     enabled: tab === "audit",
     keepPreviousData: true,
   });
+
+  useEffect(() => {
+    if (qStats.isSuccess) {
+      logPerf("dashboard.admin.firstDataLoad", {
+        endpoint: "/api/admin/dashboard",
+        latestUsers: qStats.data?.stats?.latestUsers?.length || 0,
+        latestSubscriptions: qStats.data?.stats?.latestSubscriptions?.length || 0,
+      });
+    }
+  }, [qStats.isSuccess, qStats.data]);
 
   const stats = qStats.data?.stats;
   const users = useMemo(

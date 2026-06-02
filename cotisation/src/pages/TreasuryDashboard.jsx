@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import Brand from "../components/Brand";
@@ -15,6 +15,7 @@ import { getExpenses } from "../api/expenses.api";
 import { getTreasuryDashboard } from "../api/treasury.api";
 import { createPaymentOrder, getPaymentOrderPrint, getPaymentOrders, markPaymentOrderPrinted } from "../api/paymentOrders.api";
 import { useTranslation } from "react-i18next";
+import { logPerf } from "../utils/perf";
 
 const statusTones = { EN_ATTENTE: "yellow", APPROUVER: "blue", EFFECTUER: "green", REJETER: "red", CREE: "yellow", IMPRIME: "green" };
 const fmtDate = (v) => (v ? new Date(v).toLocaleDateString("fr-FR") : "-");
@@ -46,8 +47,18 @@ export default function TreasuryDashboard() {
   const [form, setForm] = useState({ token: "", paymentMethod: "VIREMENT_BANCAIRE", currency: "FRANC", paymentCountry: "DJIBOUTI", amount: 1, bankName: "CAC Bank", bankReference: "", bankAccountHolder: "" });
 
   const qStats = useQuery({ queryKey: ["treasury-dashboard"], queryFn: getTreasuryDashboard });
-  const qExpenses = useQuery({ queryKey: ["expenses", "treasury"], queryFn: getExpenses });
-  const qOrders = useQuery({ queryKey: ["payment-orders"], queryFn: getPaymentOrders });
+  const qExpenses = useQuery({ queryKey: ["expenses", "treasury"], queryFn: getExpenses, enabled: tab === "expenses" });
+  const qOrders = useQuery({ queryKey: ["payment-orders"], queryFn: getPaymentOrders, enabled: tab === "orders" });
+  useEffect(() => {
+    if (qStats.isSuccess) {
+      logPerf("dashboard.treasury.firstDataLoad", {
+        endpoint: "/api/treasury/dashboard",
+        latestApprovedExpenses: qStats.data?.stats?.latestApprovedExpenses?.length || 0,
+        latestPaymentOrders: qStats.data?.stats?.latestPaymentOrders?.length || 0,
+      });
+    }
+  }, [qStats.isSuccess, qStats.data]);
+
   const stats = qStats.data?.stats;
   const expenses = qExpenses.data?.expenses || [];
   const orders = qOrders.data?.paymentOrders || [];
