@@ -3916,6 +3916,7 @@ export default function Home() {
               justifyContent: "space-between",
               minHeight: 64,
               gap: "0.75rem",
+               minWidth: 0,
             }}
           >
             {/* Logo */}
@@ -3923,14 +3924,14 @@ export default function Home() {
 
             {/* Nav desktop */}
             <nav
-              className="desktop-nav"
-              style={{
-                display: "flex",
+                className="desktop-nav"
+                style={{
+                 display: "flex",
                 alignItems: "center",
-                gap: "0.15rem",
+                gap: "0.2rem",
                 flex: 1,
-                justifyContent: "center",
-                overflow: "hidden",
+               justifyContent: "flex-end",
+                minWidth: 0,
               }}
             >
               {NAV_LINKS.map(({ id, label }) => (
@@ -3938,7 +3939,6 @@ export default function Home() {
                   key={id}
                   href={`#${id}`}
                   style={{
-                    fontSize: "0.78rem",
                     padding: "0.4rem 0.6rem",
                     flexShrink: 0,
                     fontWeight: 600,
@@ -3946,6 +3946,7 @@ export default function Home() {
                     textDecoration: "none",
                     borderRadius: "0.5rem",
                     whiteSpace: "nowrap",
+                    fontSize: "clamp(0.7rem, 0.8vw, 0.78rem)",
                     transition: "color 0.2s, background 0.2s",
                   }}
                   onMouseEnter={(e) => {
@@ -4528,7 +4529,7 @@ export default function Home() {
         *, *::before, *::after { box-sizing: border-box; }
 
         /* ── Responsive breakpoints ── */
-        @media (max-width: 768px) {
+        @media (max-width:  980px) {
           .desktop-nav        { display: none !important; }
           .desktop-login-btn  { display: none !important; }
           .mobile-burger      { display: flex !important; }
@@ -4538,14 +4539,14 @@ export default function Home() {
           .benevole-grid      { grid-template-columns: 1fr !important; }
         }
 
-        @media (min-width: 769px) {
+        @media (min-width: 981px) {
           .mobile-burger { display: none !important; }
         }
 
         /* Tablet : 769–1024px — nav visible mais compacte */
-        @media (min-width: 769px) and (max-width: 1024px) {
+        @media (min-width: 769px) and (max-width: 980px) {
           .desktop-nav a {
-            font-size: 0.72rem !important;
+            font-size: 0.68rem  !important;
             padding: 0.35rem 0.45rem !important;
           }
         }

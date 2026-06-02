@@ -1,25 +1,69 @@
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 
 export default function Brand() {
   const { t } = useTranslation();
 
   return (
-    <div className="flex items-center gap-3">
-      <div className="grid h-16 w-16 place-items-center rounded-2xl text-slate-950 shadow-glow">
+    <Link
+      to="/"
+      className="flex items-center gap-3 min-w-0 shrink"
+      style={{
+        textDecoration: "none",
+        maxWidth: 240,
+      }}
+    >
+      {/* Logo */}
+      <div
+        className="grid place-items-center rounded-2xl shadow-glow shrink-0"
+        style={{
+          width: 48,
+          height: 48,
+        }}
+      >
         <img
           src="/logoherciise.jpeg"
           alt={t("common.brandAlt")}
           style={{
-            height: 60,
-            width: "auto",
+            width: 44,
+            height: 44,
             objectFit: "contain",
           }}
         />
       </div>
-      <div>
-        <div className="text-lg font-black tracking-tight">{t("common.brandName")}</div>
-        <div className="text-xs text-black/55">{t("common.brandTagline")}</div>
+
+      {/* Texte */}
+      <div
+        className="min-w-0"
+        style={{
+          overflow: "hidden",
+        }}
+      >
+        <div
+          className="font-black tracking-tight"
+          style={{
+            fontSize: "1rem",
+            color: "#0f172a",
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
+        >
+          {t("common.brandName")}
+        </div>
+
+        <div
+          className="text-black/55"
+          style={{
+            fontSize: "0.72rem",
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
+        >
+          {t("common.brandTagline")}
+        </div>
       </div>
-    </div>
+    </Link>
   );
 }
