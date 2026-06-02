@@ -165,37 +165,33 @@ export default function ClientDashboard() {
     <div className="min-h-screen bg-white">
       {/* Top bar */}
       <div className="border-b border-emerald-100 bg-white/80 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-4">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-4 min-w-0">
           <Brand />
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2  shrink-0">
             <LanguageSwitcher />
 
-         <button
+   <button
   onClick={() => nav("/invite")}
   className="
-    flex items-center justify-center
+    flex items-center gap-1
     rounded-xl
     border border-emerald-200
     bg-emerald-50
-    px-2.5
-    py-2
+    px-2.5 py-2
     text-[11px]
     font-semibold
     text-emerald-800
-    transition
     hover:bg-emerald-100
-    focus:outline-none
-    focus:ring-4
-    focus:ring-emerald-100
     whitespace-nowrap
-    max-w-[110px]
-    overflow-hidden
-    text-ellipsis
     shrink-0
   "
 >
-  {t("invite_community")}
+  <span>+</span>
+
+  <span className="hidden lg:inline">
+    {t("invite_community")}
+  </span>
 </button>
 
             <div className="hidden text-xs text-slate-500 md:block">
