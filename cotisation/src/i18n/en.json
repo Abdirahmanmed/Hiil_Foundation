@@ -671,6 +671,7 @@
 ,
   "account": {
     "changePassword": "Change password",
+    "changePasswordShort": "Password",
     "currentPassword": "Current password",
     "newPassword": "New password",
     "confirmNewPassword": "Confirm new password",

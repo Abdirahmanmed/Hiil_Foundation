@@ -769,6 +769,7 @@
   },
   "account": {
     "changePassword": "Modifier mot de passe",
+    "changePasswordShort": "Mot de passe",
     "currentPassword": "Mot de passe actuel",
     "newPassword": "Nouveau mot de passe",
     "confirmNewPassword": "Confirmer le nouveau mot de passe",
