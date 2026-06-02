@@ -23,18 +23,7 @@ import {
   getAudit,
 } from "../api/admin.api";
 
-// Charts
-import {
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip as ReTooltip,
-  PieChart,
-  Pie,
-  Cell,
-} from "recharts";
+import { SimpleBarChart, SimplePieChart } from "../components/DashboardCharts";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 
 const USER_STATUS_TONES = {
@@ -219,11 +208,10 @@ export default function AdminDashboard() {
     return Array.from(map.entries()).map(([name, value]) => ({ name, value }));
   }, [users]);
 
-  const subStatusData = useMemo(() => {
-    const map = new Map();
-    for (const s of subs) map.set(s.status, (map.get(s.status) || 0) + 1);
-    return Array.from(map.entries()).map(([name, value]) => ({ name, value }));
-  }, [subs]);
+  const subFrequencyData = useMemo(() => [
+    { name: "Mensuelles", value: Number(stats?.monthlySubscriptionsCount || 0) },
+    { name: "Annuelles", value: Number(stats?.annualSubscriptionsCount || 0) },
+  ], [stats]);
 
   const subMethodData = useMemo(() => {
     const map = new Map();
@@ -387,49 +375,16 @@ export default function AdminDashboard() {
               </div>
 
               <div className="mt-6 grid gap-4 md:grid-cols-2">
-                <div className="rounded-2xl border border-emerald-100 bg-emerald-50/40 p-4">
-                  <div className="text-xs font-black text-slate-600">
-                    {t("admin_users_by_status")}
-                  </div>
-                  <div className="mt-3 h-56">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={userStatusData}>
-                        <XAxis
-                          dataKey="name"
-                          tick={{ fill: "rgba(15,23,42,0.65)", fontSize: 11 }}
-                        />
-                        <YAxis
-                          tick={{ fill: "rgba(15,23,42,0.65)", fontSize: 11 }}
-                        />
-                        <ReTooltip />
-                        <Bar dataKey="value" />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
-
-                <div className="rounded-2xl border border-emerald-100 bg-emerald-50/40 p-4">
-                  <div className="text-xs font-black text-slate-600">
-                    {t("admin_subs_by_status")}
-                  </div>
-                  <div className="mt-3 h-56">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={subStatusData}
-                          dataKey="value"
-                          nameKey="name"
-                          outerRadius={90}
-                        >
-                          {subStatusData.map((_, i) => (
-                            <Cell key={i} />
-                          ))}
-                        </Pie>
-                        <ReTooltip />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
+                <SimpleBarChart
+                  title={t("admin_users_by_status")}
+                  data={userStatusData}
+                  emptyMessage="Aucun utilisateur à afficher"
+                />
+                <SimplePieChart
+                  title="Cotisations mensuelles vs annuelles"
+                  data={subFrequencyData}
+                  emptyMessage="Aucune cotisation mensuelle ou annuelle"
+                />
               </div>
             </Card>
 
@@ -439,20 +394,12 @@ export default function AdminDashboard() {
                 subtitle={t("admin_payment_split_sub")}
               />
 
-              <div className="mt-4 h-64 rounded-2xl border border-emerald-100 bg-emerald-50/40 p-4">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={subMethodData}>
-                    <XAxis
-                      dataKey="name"
-                      tick={{ fill: "rgba(15,23,42,0.65)", fontSize: 11 }}
-                    />
-                    <YAxis
-                      tick={{ fill: "rgba(15,23,42,0.65)", fontSize: 11 }}
-                    />
-                    <ReTooltip />
-                    <Bar dataKey="value" />
-                  </BarChart>
-                </ResponsiveContainer>
+              <div className="mt-4">
+                <SimpleBarChart
+                  title={t("admin_payment_split")}
+                  data={subMethodData}
+                  emptyMessage="Aucune cotisation par méthode de paiement"
+                />
               </div>
 
               <div className="mt-4 rounded-2xl border border-emerald-100 bg-emerald-50/40 p-4 text-xs text-slate-600">
