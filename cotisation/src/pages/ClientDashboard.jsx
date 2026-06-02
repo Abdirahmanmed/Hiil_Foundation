@@ -8,6 +8,7 @@ import { PrimaryButton } from "../components/ui/Button";
 import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthContext";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { Share2 } from "lucide-react";
 import {
   createSubscriptionApi,
   listSubscriptionsApi,
@@ -187,8 +188,8 @@ export default function ClientDashboard() {
     shrink-0
   "
 >
-  <span></span>
-
+ 
+ <Share2 size={14} />
   <span className="hidden lg:inline">
     {t("invite_community")}
   </span>
