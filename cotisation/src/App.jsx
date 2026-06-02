@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import Shell from "./components/Shell";
 import ProtectedRoute from "./components/ProtectedRoute";
+import PublicOnlyRoute from "./components/PublicOnlyRoute";
 import { useTranslation } from "react-i18next";
 
 const Home = lazy(() => import("./pages/Home"));
@@ -34,10 +35,10 @@ export default function App() {
       <Shell>
         <Suspense fallback={<div className="p-6 text-sm text-slate-500">Chargement...</div>}>
           <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/otp" element={<OtpVerify />} />
-            <Route path="/login" element={<Login />} />
+            <Route path="/" element={<PublicOnlyRoute><Home /></PublicOnlyRoute>} />
+            <Route path="/register" element={<PublicOnlyRoute><Register /></PublicOnlyRoute>} />
+            <Route path="/otp" element={<PublicOnlyRoute><OtpVerify /></PublicOnlyRoute>} />
+            <Route path="/login" element={<PublicOnlyRoute><Login /></PublicOnlyRoute>} />
 
           <Route
             path="/client"
