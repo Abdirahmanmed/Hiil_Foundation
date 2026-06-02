@@ -11,6 +11,8 @@ import { PrimaryButton, GhostButton } from "../components/ui/Button";
 
 import { loginApi } from "../api/auth.api";
 import { useAuth } from "../context/AuthContext";
+import { getDashboardPath } from "../components/routeUtils";
+import { logPerf, nowMs, roundDurationMs } from "../utils/perf";
 
 function Field({ label, hint, children }) {
   return (
@@ -34,33 +36,40 @@ export default function Login() {
   const [password, setPassword] = useState("");
 
   const m = useMutation({
-    mutationFn: loginApi,
+    mutationFn: async (payload) => {
+      const start = nowMs();
+      try {
+        const data = await loginApi(payload);
+        logPerf("frontend.login.api", { durationMs: roundDurationMs(start) });
+        return data;
+      } catch (err) {
+        logPerf("frontend.login.api", {
+          durationMs: roundDurationMs(start),
+          status: err?.response?.status || "network_error",
+        });
+        throw err;
+      }
+    },
     onSuccess: (data) => {
+      const redirectStart = nowMs();
       login(data);
       toast.success(t("login_success"));
 
       // ✅ si nouveau client qui vient de valider OTP → propose invitation
       const inviteAfter = localStorage.getItem("invite_after_login") === "1";
+      let targetPath = getDashboardPath(data.user.role);
 
-      const roleRedirects = {
-        ADMIN: "/admin",
-        GESTIONNAIRE_DEPENSE: "/expense-manager",
-        SUPER_ADMIN: "/super-admin",
-        EQUIPE_TRESORERIE: "/treasury",
-      };
-
-      if (roleRedirects[data.user.role]) {
-        nav(roleRedirects[data.user.role]);
-        return;
-      }
-
-      if (inviteAfter) {
+      if (inviteAfter && data.user.role === "CLIENT") {
         localStorage.removeItem("invite_after_login");
-        nav("/invite");
-        return;
+        targetPath = "/invite";
       }
 
-      nav("/client");
+      logPerf("frontend.login.redirect", {
+        durationMs: roundDurationMs(redirectStart),
+        role: data.user.role,
+        targetPath,
+      });
+      nav(targetPath, { replace: true });
     },
     onError: (err) => {
       toast.error(err?.response?.data?.message || t("login_error"));
@@ -78,6 +87,7 @@ export default function Login() {
     if (!email.trim() || !password.trim()) {
       return toast.error(t("fill_required"));
     }
+    logPerf("frontend.login.submit", { hasEmail: true });
     m.mutate({ email: email.trim(), password });
   }
 
@@ -141,6 +151,11 @@ export default function Login() {
                 </GhostButton>
               </div>
 
+              {m.isPending ? (
+                <p className="text-xs font-semibold text-emerald-700">
+                  Connexion en cours, redirection vers votre dashboard...
+                </p>
+              ) : null}
               <p className="text-xs text-slate-500">{t("login_hint")}</p>
             </form>
           </div>
