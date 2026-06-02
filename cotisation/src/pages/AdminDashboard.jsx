@@ -25,6 +25,7 @@ import {
 
 import { SimpleBarChart, SimplePieChart } from "../components/DashboardCharts";
 import LanguageSwitcher from "../components/LanguageSwitcher";
+import AccountSecurityButton from "../components/AccountSecurityButton";
 import { logPerf } from "../utils/perf";
 
 const USER_STATUS_TONES = {
@@ -327,6 +328,8 @@ export default function AdminDashboard() {
               {user?.fullName} •{" "}
               <span className="font-bold text-slate-900">{user?.role}</span>
             </div>
+
+            <AccountSecurityButton />
 
             <button
               onClick={logout}
