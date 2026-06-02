@@ -7,7 +7,7 @@ export default function LanguageSwitcher() {
     <select
       value={i18n.language}
       onChange={(e) => i18n.changeLanguage(e.target.value)}
-      className="rounded-xl border border-black/10 bg-white px-3 py-2 text-xs font-bold text-slate-800 shadow-sm"
+      className="max-w-[5.5rem] shrink-0 rounded-xl border border-black/10 bg-white px-2 py-2 text-xs font-bold text-slate-800 shadow-sm sm:max-w-none sm:px-3"
     >
       <option value="fr">{t("common.langFr")}</option>
       <option value="en">{t("common.langEn")}</option>

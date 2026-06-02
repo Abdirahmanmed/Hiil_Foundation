@@ -670,6 +670,7 @@
 },
   "account": {
     "changePassword": "Beddel erayga sirta ah",
+    "changePasswordShort": "Eray sir ah",
     "currentPassword": "Erayga sirta ah ee hadda",
     "newPassword": "Erayga sirta ah ee cusub",
     "confirmNewPassword": "Xaqiiji erayga sirta ah ee cusub",
