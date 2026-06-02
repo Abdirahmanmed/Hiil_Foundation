@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
@@ -9,6 +9,7 @@ import Input from "../components/ui/Input";
 import Select from "../components/ui/Select";
 import Badge from "../components/ui/Badge";
 import LanguageSwitcher from "../components/LanguageSwitcher";
+import { logPerf } from "../utils/perf";
 import { SimpleBarChart, SimplePieChart } from "../components/DashboardCharts";
 import { statusRowsToChart } from "../components/chartUtils";
 import { useAuth } from "../context/AuthContext";
@@ -63,7 +64,16 @@ export default function ExpenseManagerDashboard() {
   const [form, setForm] = useState(initialForm);
 
   const qStats = useQuery({ queryKey: ["expenses-dashboard"], queryFn: getExpensesDashboard });
-  const qExpenses = useQuery({ queryKey: ["expenses"], queryFn: getExpenses });
+  const qExpenses = useQuery({ queryKey: ["expenses"], queryFn: getExpenses, enabled: tab === "expenses" });
+  useEffect(() => {
+    if (qStats.isSuccess) {
+      logPerf("dashboard.expenseManager.firstDataLoad", {
+        endpoint: "/api/expenses/dashboard",
+        latestExpenses: qStats.data?.stats?.latestExpenses?.length || 0,
+      });
+    }
+  }, [qStats.isSuccess, qStats.data]);
+
   const stats = qStats.data?.stats;
   const expenses = qExpenses.data?.expenses || [];
   const latestExpenses = stats?.latestExpenses || [];

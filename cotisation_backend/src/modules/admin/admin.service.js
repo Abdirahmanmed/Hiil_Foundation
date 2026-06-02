@@ -188,6 +188,7 @@ export async function getDashboardStats({ role } = {}) {
     latestExpenses,
     totalPaymentOrders,
     paymentOrdersAmount,
+    paymentOrdersByStatus,
     latestPaymentOrders,
   ] = await Promise.all([
     prisma.expense.aggregate({ _count: true, _sum: { amount: true } }),
@@ -199,6 +200,7 @@ export async function getDashboardStats({ role } = {}) {
     prisma.expense.findMany({ orderBy: { createdAt: "desc" }, take: 5, select: expensePublicSelect() }),
     prisma.paymentOrder.count(),
     prisma.paymentOrder.aggregate({ _sum: { amount: true } }),
+    prisma.paymentOrder.groupBy({ by: ["status"], _count: { status: true }, _sum: { amount: true } }),
     prisma.paymentOrder.findMany({ orderBy: { createdAt: "desc" }, take: 5, select: paymentOrderPublicSelect() }),
   ]);
 
@@ -213,6 +215,7 @@ export async function getDashboardStats({ role } = {}) {
     expensesByStatus: mapStatusRows(expensesByStatus),
     totalPaymentOrders,
     totalPaymentOrdersAmount: paymentOrdersAmount._sum.amount || 0,
+    paymentOrdersByStatus: mapStatusRows(paymentOrdersByStatus),
     latestExpenses,
     latestPaymentOrders,
   };

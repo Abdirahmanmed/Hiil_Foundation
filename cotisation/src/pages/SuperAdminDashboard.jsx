@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
@@ -11,7 +11,7 @@ import { statusRowsToChart } from "../components/chartUtils";
 import { useAuth } from "../context/AuthContext";
 import { getAdminDashboard } from "../api/admin.api";
 import { approveExpense, getExpenses, rejectExpense } from "../api/expenses.api";
-import { getPaymentOrders } from "../api/paymentOrders.api";
+import { logPerf } from "../utils/perf";
 
 const statusTones = { EN_ATTENTE: "yellow", APPROUVER: "blue", EFFECTUER: "green", REJETER: "red", CREE: "yellow", IMPRIME: "green" };
 const fmtDate = (v) => (v ? new Date(v).toLocaleDateString("fr-FR") : "-");
@@ -31,20 +31,27 @@ export default function SuperAdminDashboard() {
   const qc = useQueryClient();
   const [tab, setTab] = useState("dashboard");
   const qStats = useQuery({ queryKey: ["admin-dashboard", "super-admin"], queryFn: getAdminDashboard });
-  const qExpenses = useQuery({ queryKey: ["expenses", "super-admin"], queryFn: getExpenses });
-  const qPaymentOrders = useQuery({ queryKey: ["payment-orders", "super-admin"], queryFn: getPaymentOrders });
+  const qExpenses = useQuery({ queryKey: ["expenses", "super-admin"], queryFn: getExpenses, enabled: tab === "expenses" });
+  useEffect(() => {
+    if (qStats.isSuccess) {
+      logPerf("dashboard.superAdmin.firstDataLoad", {
+        endpoint: "/api/admin/dashboard",
+        latestUsers: qStats.data?.stats?.latestUsers?.length || 0,
+        latestSubscriptions: qStats.data?.stats?.latestSubscriptions?.length || 0,
+        latestExpenses: qStats.data?.stats?.latestExpenses?.length || 0,
+      });
+    }
+  }, [qStats.isSuccess, qStats.data]);
+
   const stats = qStats.data?.stats;
   const expenses = qExpenses.data?.expenses || [];
-  const paymentOrders = useMemo(() => qPaymentOrders.data?.paymentOrders || [], [qPaymentOrders.data?.paymentOrders]);
   const byStatus = useMemo(() => stats?.expensesByStatus || [], [stats]);
+  const paymentOrdersByStatus = useMemo(() => stats?.paymentOrdersByStatus || [], [stats]);
   const expenseStatusChartData = useMemo(() => statusRowsToChart(byStatus, (status) => t(`enumStatus.${status}`, status)), [byStatus, t]);
-  const paymentOrderStatusChartData = useMemo(() => {
-    const counts = new Map();
-    for (const order of paymentOrders) {
-      counts.set(order.status, (counts.get(order.status) || 0) + 1);
-    }
-    return Array.from(counts.entries()).map(([status, value]) => ({ name: t(`enumStatus.${status}`, status), value }));
-  }, [paymentOrders, t]);
+  const paymentOrderStatusChartData = useMemo(
+    () => statusRowsToChart(paymentOrdersByStatus, (status) => t(`enumStatus.${status}`, status)),
+    [paymentOrdersByStatus, t],
+  );
   const subscriptionFrequencyChartData = useMemo(() => [
     { name: "Mensuelles", value: Number(stats?.monthlySubscriptionsCount || 0) },
     { name: "Annuelles", value: Number(stats?.annualSubscriptionsCount || 0) },
