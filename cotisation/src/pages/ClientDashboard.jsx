@@ -172,11 +172,26 @@ export default function ClientDashboard() {
             <LanguageSwitcher />
 
             <button
-              onClick={() => nav("/invite")}
-              className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-800 transition hover:bg-emerald-100 focus:outline-none focus:ring-4 focus:ring-emerald-100"
-            >
-              {t("invite_community")}
-            </button>
+  onClick={() => nav("/invite")}
+  className="
+    rounded-lg
+    border border-emerald-200
+    bg-emerald-50
+    px-2 md:px-3
+    py-1.5
+    text-[10px] md:text-xs
+    font-semibold
+    text-emerald-800
+    transition
+    hover:bg-emerald-100
+    whitespace-nowrap
+    max-w-[120px]
+    overflow-hidden
+    text-ellipsis
+  "
+>
+  {t("invite_community")}
+</button>
 
             <div className="hidden text-xs text-slate-500 md:block">
               {user?.fullName} •{" "}
