@@ -187,7 +187,7 @@ export default function ClientDashboard() {
     shrink-0
   "
 >
-  <span><Share2 /></span>
+  <span></span>
 
   <span className="hidden lg:inline">
     {t("invite_community")}
