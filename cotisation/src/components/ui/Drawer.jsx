@@ -17,7 +17,10 @@ export default function Drawer({
       />
 
       {/* panel */}
-      <div className="absolute right-0 top-0 h-full w-full max-w-xl border-l border-emerald-100 bg-white p-5 shadow-2xl">
+      <div
+        className="absolute right-0 top-0 isolate h-full w-full max-w-xl border-l border-emerald-100 bg-white p-5 shadow-2xl"
+        style={{ backgroundColor: "#ffffff" }}
+      >
         <div className="flex items-start justify-between gap-3">
           <div>
             <div className="text-lg font-black text-slate-900">{title}</div>

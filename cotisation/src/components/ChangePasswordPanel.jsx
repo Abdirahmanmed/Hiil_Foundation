@@ -105,8 +105,8 @@ export default function ChangePasswordPanel({ onCancel }) {
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-4">
-      <div className="rounded-2xl border border-emerald-100 bg-emerald-50/50 p-4 text-sm text-slate-600">
+    <form onSubmit={onSubmit} className="space-y-4 bg-white">
+      <div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-4 text-sm text-slate-600">
         <div className="font-black text-slate-900">{t("account.security")}</div>
         <p className="mt-1">{t("account.changePasswordHelp")}</p>
       </div>
