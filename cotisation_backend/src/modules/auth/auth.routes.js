@@ -1,7 +1,8 @@
 import { Router } from "express";
 import { upload, validateUploadedFiles } from "../../utils/upload.js";
 import { auth } from "../../middlewares/auth.js";
-import { register, login, me } from "./auth.controller.js";
+import { changePasswordLimiter } from "../../middlewares/rateLimit.js";
+import { register, login, me, changePassword } from "./auth.controller.js";
 
 const router = Router();
 
@@ -20,5 +21,6 @@ router.post(
 
 router.post("/login", login);
 router.get("/me", auth, me);
+router.patch("/change-password", auth, changePasswordLimiter, changePassword);
 
 export default router;

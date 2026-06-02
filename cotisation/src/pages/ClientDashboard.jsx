@@ -15,6 +15,7 @@ import {
   consentApi,
 } from "../api/subscriptions.api";
 import LanguageSwitcher from "../components/LanguageSwitcher";
+import AccountSecurityButton from "../components/AccountSecurityButton";
 import { useNavigate } from "react-router-dom";
 
 const BANKS_BY_COUNTRY = {
@@ -199,6 +200,8 @@ export default function ClientDashboard() {
               {user?.fullName} •{" "}
               <span className="font-bold text-slate-800">{t(roleKey)}</span>
             </div>
+
+            <AccountSecurityButton />
 
             <button
               onClick={logout}

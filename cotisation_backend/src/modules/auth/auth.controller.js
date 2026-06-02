@@ -1,4 +1,8 @@
-import { registerSchema, loginSchema } from "./auth.schemas.js";
+import {
+  registerSchema,
+  loginSchema,
+  changePasswordSchema,
+} from "./auth.schemas.js";
 import * as authService from "./auth.service.js";
 import { sendEmailOtp } from "../otp/otp.service.js";
 
@@ -93,6 +97,23 @@ export async function me(req, res, next) {
   try {
     const user = await authService.getMe({ userId: req.user.id });
     return res.json({ user });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function changePassword(req, res, next) {
+  try {
+    const data = changePasswordSchema.parse(req.body);
+
+    await authService.changePassword({
+      userId: req.user.id,
+      currentPassword: data.currentPassword,
+      newPassword: data.newPassword,
+      req,
+    });
+
+    return res.json({ message: "Mot de passe modifié avec succès." });
   } catch (err) {
     next(err);
   }

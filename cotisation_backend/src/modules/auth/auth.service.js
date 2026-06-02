@@ -288,3 +288,53 @@ export async function getMe({ userId }) {
 
   return user;
 }
+
+export async function changePassword({
+  userId,
+  currentPassword,
+  newPassword,
+  req,
+}) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      email: true,
+      passwordHash: true,
+    },
+  });
+
+  if (!user) {
+    const err = new Error("Utilisateur introuvable.");
+    err.status = 404;
+    throw err;
+  }
+
+  const isCurrentPasswordValid = await verifyPassword(
+    user.passwordHash,
+    currentPassword,
+  );
+
+  if (!isCurrentPasswordValid) {
+    const err = new Error("Mot de passe actuel incorrect.");
+    err.status = 400;
+    throw err;
+  }
+
+  const passwordHash = await hashPassword(newPassword);
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { passwordHash },
+    select: { id: true },
+  });
+
+  await auditLog({
+    userId: user.id,
+    action: "PASSWORD_CHANGED",
+    entity: "User",
+    entityId: user.id,
+    req,
+    meta: { email: user.email },
+  });
+}
