@@ -171,23 +171,28 @@ export default function ClientDashboard() {
           <div className="flex items-center gap-2">
             <LanguageSwitcher />
 
-            <button
+         <button
   onClick={() => nav("/invite")}
   className="
-    rounded-lg
+    flex items-center justify-center
+    rounded-xl
     border border-emerald-200
     bg-emerald-50
-    px-2 md:px-3
-    py-1.5
-    text-[10px] md:text-xs
+    px-2.5
+    py-2
+    text-[11px]
     font-semibold
     text-emerald-800
     transition
     hover:bg-emerald-100
+    focus:outline-none
+    focus:ring-4
+    focus:ring-emerald-100
     whitespace-nowrap
-    max-w-[120px]
+    max-w-[110px]
     overflow-hidden
     text-ellipsis
+    shrink-0
   "
 >
   {t("invite_community")}
