@@ -760,7 +760,25 @@
   "admin_adherents_sub": "Qaaraanka xubnaha iyo ururrada.",
   "admin_search_adherent": "Raadi magac, telefoon, waddan, hab, xaalad",
   "created_at": "Taariikhda abuurka"
-}
+},
+  "account": {
+    "changePassword": "Beddel erayga sirta ah",
+    "changePasswordShort": "Eray sir ah",
+    "currentPassword": "Erayga sirta ah ee hadda",
+    "newPassword": "Erayga sirta ah ee cusub",
+    "confirmNewPassword": "Xaqiiji erayga sirta ah ee cusub",
+    "passwordChangedSuccess": "Erayga sirta ah si guul leh ayaa loo beddelay",
+    "currentPasswordIncorrect": "Erayga sirta ah ee hadda waa khalad",
+    "passwordsDoNotMatch": "Erayada sirta ah isma laha",
+    "newPasswordMustBeDifferent": "Erayga sirta ah ee cusub waa inuu ka duwanaadaa kii hore",
+    "minimum8Characters": "Ugu yaraan 8 xaraf",
+    "security": "Amniga",
+    "myAccount": "Akoonkayga",
+    "cancelReset": "Jooji / Dib u bilow",
+    "requiredFields": "Dhammaan meelaha waa qasab.",
+    "passwordChangeError": "Khalad ayaa dhacay markii erayga sirta ah la beddelay.",
+    "changePasswordHelp": "Dooro eray sir ah oo cusub oo ammaan ah si aad u ilaaliso akoonkaaga."
+  }
 }
 
 

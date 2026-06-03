@@ -7,37 +7,22 @@ export default function Brand() {
   return (
     <Link
       to="/"
-      className="flex items-center gap-3 min-w-0 shrink"
-      style={{
-        textDecoration: "none",
-        maxWidth: 240,
-      }}
+      className="flex min-w-0 items-center gap-2 text-inherit no-underline sm:gap-3"
     >
       {/* Logo */}
       <div
-        className="grid place-items-center rounded-2xl shadow-glow shrink-0"
-        style={{
-          width: 48,
-          height: 48,
-        }}
+        className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl shadow-glow sm:h-12 sm:w-12"
       >
         <img
           src="/logoherciise.jpeg"
           alt={t("common.brandAlt")}
-          style={{
-            width: 44,
-            height: 44,
-            objectFit: "contain",
-          }}
+          className="h-10 w-10 object-contain sm:h-11 sm:w-11"
         />
       </div>
 
       {/* Texte */}
       <div
-        className="min-w-0"
-        style={{
-          overflow: "hidden",
-        }}
+        className="min-w-0 overflow-hidden"
       >
         <div
           className="font-black tracking-tight"

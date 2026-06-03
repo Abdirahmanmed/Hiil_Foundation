@@ -743,6 +743,28 @@
   "admin_adherents_sub": "مساهمات الأعضاء والجمعيات.",
   "admin_search_adherent": "ابحث بالاسم أو الهاتف أو البلد أو الطريقة أو الحالة",
   "created_at": "تاريخ الإنشاء"
+<<<<<<< HEAD
 }
 
+=======
+},
+  "account": {
+    "changePassword": "تغيير كلمة المرور",
+    "changePasswordShort": "كلمة المرور",
+    "currentPassword": "كلمة المرور الحالية",
+    "newPassword": "كلمة المرور الجديدة",
+    "confirmNewPassword": "تأكيد كلمة المرور الجديدة",
+    "passwordChangedSuccess": "تم تغيير كلمة المرور بنجاح",
+    "currentPasswordIncorrect": "كلمة المرور الحالية غير صحيحة",
+    "passwordsDoNotMatch": "كلمتا المرور غير متطابقتين",
+    "newPasswordMustBeDifferent": "يجب أن تكون كلمة المرور الجديدة مختلفة عن القديمة",
+    "minimum8Characters": "8 أحرف على الأقل",
+    "security": "الأمان",
+    "myAccount": "حسابي",
+    "cancelReset": "إلغاء / إعادة تعيين",
+    "requiredFields": "جميع الحقول مطلوبة.",
+    "passwordChangeError": "حدث خطأ أثناء تغيير كلمة المرور.",
+    "changePasswordHelp": "اختر كلمة مرور جديدة وآمنة لحماية حسابك."
+  }
+>>>>>>> c5b7a69dfc590175b745e8b30e803d00736ca4a4
 }

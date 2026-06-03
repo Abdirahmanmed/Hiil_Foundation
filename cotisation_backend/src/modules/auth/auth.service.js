@@ -36,6 +36,7 @@ export async function createUser({ data, files, req }) {
     }
   }
 
+  const normalizedEmail = normalizeEmail(data.email);
   const passwordHash = await hashPassword(data.password);
 
   // ✅ fullName obligatoire dans Prisma -> pour association on met companyName
@@ -51,7 +52,7 @@ export async function createUser({ data, files, req }) {
       phone: data.phone,
       phone2: null,
 
-      email: data.email,
+      email: normalizedEmail,
       country: data.country,
       city: data.city,
       commune: isAssociation ? data.commune : null,
@@ -117,6 +118,10 @@ function roundMs(start, end = performance.now()) {
   return Math.round((end - start) * 10) / 10;
 }
 
+function normalizeEmail(email) {
+  return String(email || "").trim().toLowerCase();
+}
+
 function logLoginPerf({ totalStart, dbMs = 0, passwordVerifyMs = 0, tokenSignMs = 0, auditMs = 0, status, userId }) {
   console.log("[perf] auth.login", {
     status,
@@ -136,11 +141,12 @@ export async function loginUser({ email, password, req }) {
   let tokenSignMs = 0;
   let auditMs = 0;
   let user;
+  const normalizedEmail = normalizeEmail(email);
 
   try {
     const dbStart = performance.now();
     user = await prisma.user.findUnique({
-      where: { email },
+      where: { email: normalizedEmail },
       select: {
         id: true,
         passwordHash: true,
@@ -281,4 +287,54 @@ export async function getMe({ userId }) {
   });
 
   return user;
+}
+
+export async function changePassword({
+  userId,
+  currentPassword,
+  newPassword,
+  req,
+}) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      email: true,
+      passwordHash: true,
+    },
+  });
+
+  if (!user) {
+    const err = new Error("Utilisateur introuvable.");
+    err.status = 404;
+    throw err;
+  }
+
+  const isCurrentPasswordValid = await verifyPassword(
+    user.passwordHash,
+    currentPassword,
+  );
+
+  if (!isCurrentPasswordValid) {
+    const err = new Error("Mot de passe actuel incorrect.");
+    err.status = 400;
+    throw err;
+  }
+
+  const passwordHash = await hashPassword(newPassword);
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { passwordHash },
+    select: { id: true },
+  });
+
+  await auditLog({
+    userId: user.id,
+    action: "PASSWORD_CHANGED",
+    entity: "User",
+    entityId: user.id,
+    req,
+    meta: { email: user.email },
+  });
 }

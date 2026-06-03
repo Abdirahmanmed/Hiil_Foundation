@@ -842,5 +842,23 @@
   "created_at": "Date création"
 }
 
+  },
+  "account": {
+    "changePassword": "Modifier mot de passe",
+    "changePasswordShort": "Mot de passe",
+    "currentPassword": "Mot de passe actuel",
+    "newPassword": "Nouveau mot de passe",
+    "confirmNewPassword": "Confirmer le nouveau mot de passe",
+    "passwordChangedSuccess": "Mot de passe modifié avec succès",
+    "currentPasswordIncorrect": "Mot de passe actuel incorrect",
+    "passwordsDoNotMatch": "Les mots de passe ne correspondent pas",
+    "newPasswordMustBeDifferent": "Le nouveau mot de passe doit être différent de l’ancien",
+    "minimum8Characters": "Minimum 8 caractères",
+    "security": "Sécurité",
+    "myAccount": "Mon compte",
+    "cancelReset": "Annuler / Réinitialiser",
+    "requiredFields": "Tous les champs sont obligatoires.",
+    "passwordChangeError": "Erreur lors du changement de mot de passe.",
+    "changePasswordHelp": "Choisis un nouveau mot de passe sécurisé pour protéger ton compte."
   }
 }

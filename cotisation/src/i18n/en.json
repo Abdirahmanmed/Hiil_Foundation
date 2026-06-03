@@ -751,5 +751,23 @@
   "admin_search_adherent": "Search name, phone, country, method, status",
   "created_at": "Created at"
 }
-
+,
+  "account": {
+    "changePassword": "Change password",
+    "changePasswordShort": "Password",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "confirmNewPassword": "Confirm new password",
+    "passwordChangedSuccess": "Password changed successfully",
+    "currentPasswordIncorrect": "Current password is incorrect",
+    "passwordsDoNotMatch": "Passwords do not match",
+    "newPasswordMustBeDifferent": "The new password must be different from the old one",
+    "minimum8Characters": "Minimum 8 characters",
+    "security": "Security",
+    "myAccount": "My account",
+    "cancelReset": "Cancel / Reset",
+    "requiredFields": "All fields are required.",
+    "passwordChangeError": "Error while changing password.",
+    "changePasswordHelp": "Choose a secure new password to protect your account."
+  }
 }

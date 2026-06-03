@@ -142,3 +142,29 @@ export const loginSchema = z.object({
   email: z.string().email("Email invalide"),
   password: z.string().min(1, "Mot de passe requis"),
 });
+
+export const changePasswordSchema = z
+  .object({
+    currentPassword: z.string().min(1, "Mot de passe actuel requis"),
+    newPassword: z.string().min(8, "Minimum 8 caractères"),
+    confirmPassword: z
+      .string()
+      .min(1, "Confirmation du nouveau mot de passe requise"),
+  })
+  .superRefine((data, ctx) => {
+    if (data.newPassword !== data.confirmPassword) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["confirmPassword"],
+        message: "Les mots de passe ne correspondent pas",
+      });
+    }
+
+    if (data.newPassword === data.currentPassword) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["newPassword"],
+        message: "Le nouveau mot de passe doit être différent de l’ancien",
+      });
+    }
+  });

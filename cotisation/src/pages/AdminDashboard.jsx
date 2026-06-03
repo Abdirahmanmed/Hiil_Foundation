@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import Card from "../components/ui/Card";
-import Brand from "../components/Brand";
+import DashboardHeader from "../components/DashboardHeader";
 import { useAuth } from "../context/AuthContext";
 import Badge from "../components/ui/Badge";
 import SectionTitle from "../components/ui/SectionTitle";
@@ -24,7 +24,7 @@ import {
 } from "../api/admin.api";
 
 import { SimpleBarChart, SimplePieChart } from "../components/DashboardCharts";
-import LanguageSwitcher from "../components/LanguageSwitcher";
+import DashboardTabs from "../components/DashboardTabs";
 import { logPerf } from "../utils/perf";
 
 const USER_STATUS_TONES = {
@@ -314,53 +314,30 @@ export default function AdminDashboard() {
   const canNext = auditOffset + auditLimit < auditTotal;
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen overflow-x-hidden bg-white">
       {/* Top header */}
-      <div className="border-b border-emerald-100 bg-white/80 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-4">
-          <Brand />
-
-          <div className="flex items-center gap-2">
-            <LanguageSwitcher />
-
-            <div className="hidden text-xs text-slate-500 md:block">
-              {user?.fullName} •{" "}
-              <span className="font-bold text-slate-900">{user?.role}</span>
-            </div>
-
-            <button
-              onClick={logout}
-              className="rounded-xl border border-emerald-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-emerald-50 focus:outline-none focus:ring-4 focus:ring-emerald-100"
-            >
-              {t("logout")}
-            </button>
-          </div>
-        </div>
-      </div>
+      <DashboardHeader
+        userLabel={(
+          <>
+            {user?.fullName} •{" "}
+            <span className="font-bold text-slate-900">{user?.role}</span>
+          </>
+        )}
+        onLogout={logout}
+      />
 
       <div className="mx-auto max-w-6xl px-4 py-8 space-y-6">
         {/* Tabs */}
-        <div className="flex flex-wrap gap-2">
-          {[
+        <DashboardTabs
+          tabs={[
             { id: "overview", label: t("admin_overview") },
             { id: "users", label: t("users") },
             { id: "adherents", label: t("adherents") },
             { id: "audit", label: t("admin_audit") },
-          ].map((tt) => (
-            <button
-              key={tt.id}
-              onClick={() => setTab(tt.id)}
-              className={[
-                "rounded-full border px-4 py-2 text-xs font-black transition",
-                tab === tt.id
-                  ? "border-emerald-200 bg-emerald-50 text-emerald-800"
-                  : "border-emerald-100 bg-white text-slate-600 hover:bg-emerald-50",
-              ].join(" ")}
-            >
-              {tt.label}
-            </button>
-          ))}
-        </div>
+          ]}
+          activeTab={tab}
+          onChange={setTab}
+        />
 
         {/* OVERVIEW */}
         {tab === "overview" ? (
@@ -424,7 +401,7 @@ export default function AdminDashboard() {
 
         {/* USERS */}
         {tab === "users" ? (
-          <Card className="p-7 border border-emerald-100 bg-white shadow-[0_20px_60px_-30px_rgba(16,185,129,0.2)]">
+          <Card className="p-5 sm:p-7 border border-emerald-100 bg-white shadow-[0_20px_60px_-30px_rgba(16,185,129,0.2)]">
             <SectionTitle
               title={t("users")}
               subtitle={t("admin_users_sub")}
@@ -436,7 +413,7 @@ export default function AdminDashboard() {
                   >
                     {t("add_user")}
                   </button>
-                  <div className="w-72">
+                  <div className="w-full sm:w-72">
                     <Input
                       value={userSearch}
                       onChange={(e) => setUserSearch(e.target.value)}
@@ -560,20 +537,20 @@ export default function AdminDashboard() {
 
         {/* ADHERENTS */}
         {tab === "adherents" ? (
-          <Card className="p-7 border border-emerald-100 bg-white shadow-[0_20px_60px_-30px_rgba(16,185,129,0.2)]">
+          <Card className="p-5 sm:p-7 border border-emerald-100 bg-white shadow-[0_20px_60px_-30px_rgba(16,185,129,0.2)]">
             <SectionTitle
               title={t("adherents")}
               subtitle={t("admin_adherents_sub")}
               right={
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                  <div className="w-72">
+                  <div className="w-full sm:w-72">
                     <Input
                       value={subSearch}
                       onChange={(e) => setSubSearch(e.target.value)}
                       placeholder={t("admin_search_adherent")}
                     />
                   </div>
-                  <div className="w-56">
+                  <div className="w-full sm:w-56">
                     <Select
                       value={subStatus}
                       onChange={(e) => setSubStatus(e.target.value)}
@@ -651,7 +628,7 @@ export default function AdminDashboard() {
 
         {/* AUDIT */}
         {tab === "audit" ? (
-          <Card className="p-7 border border-emerald-100 bg-white shadow-[0_20px_60px_-30px_rgba(16,185,129,0.2)]">
+          <Card className="p-5 sm:p-7 border border-emerald-100 bg-white shadow-[0_20px_60px_-30px_rgba(16,185,129,0.2)]">
             <SectionTitle
               title={t("admin_audit_title")}
               subtitle={t("admin_audit_sub")}
