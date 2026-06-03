@@ -2,13 +2,13 @@ import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
-import DashboardHeader from "../components/DashboardHeader";
+import Brand from "../components/Brand";
 import Card from "../components/ui/Card";
 import Drawer from "../components/ui/Drawer";
 import Input from "../components/ui/Input";
 import Select from "../components/ui/Select";
 import Badge from "../components/ui/Badge";
-import DashboardTabs from "../components/DashboardTabs";
+import LanguageSwitcher from "../components/LanguageSwitcher";
 import { logPerf } from "../utils/perf";
 import { SimpleBarChart, SimplePieChart } from "../components/DashboardCharts";
 import { statusRowsToChart } from "../components/chartUtils";
@@ -308,4 +308,3 @@ export default function ExpenseManagerDashboard() {
     </div>
   );
 }
- 
