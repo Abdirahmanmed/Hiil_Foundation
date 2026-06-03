@@ -26,6 +26,24 @@ function parsePositiveInteger(name, fallback) {
   return value;
 }
 
+function parseOptionalPositiveInteger(name) {
+  const rawValue = process.env[name];
+  if (rawValue === undefined || rawValue === "") return undefined;
+
+  const value = Number(rawValue);
+  if (!Number.isInteger(value) || value <= 0) {
+    throw new Error(`❌ Variable d’environnement invalide : ${name} doit être un entier positif`);
+  }
+
+  return value;
+}
+
+function parsePaymentMode(name, fallback = "mock") {
+  const value = process.env[name] || fallback;
+  if (["mock", "live"].includes(value)) return value;
+  throw new Error(`❌ Variable d’environnement invalide : ${name} doit être mock ou live`);
+}
+
 const hasBrevoApiKey = Boolean(process.env.BREVO_API_KEY);
 const emailPort = parsePositiveInteger("EMAIL_PORT", 587);
 const emailFrom = hasBrevoApiKey ? required("EMAIL_FROM") : process.env.EMAIL_FROM;
@@ -73,4 +91,14 @@ export const env = {
 
   // Upload
   UPLOAD_MAX_MB: Number(process.env.UPLOAD_MAX_MB || 10),
+
+  // CAC Bank Payment API
+  CAC_BASE_URL: process.env.CAC_BASE_URL,
+  CAC_USERNAME: process.env.CAC_USERNAME,
+  CAC_PASSWORD: process.env.CAC_PASSWORD,
+  CAC_APP_KEY: process.env.CAC_APP_KEY,
+  CAC_API_KEY: process.env.CAC_API_KEY,
+  CAC_COMPANY_SERVICE_ID: parseOptionalPositiveInteger("CAC_COMPANY_SERVICE_ID"),
+  CAC_CURRENCY: process.env.CAC_CURRENCY || "DJF",
+  CAC_PAYMENT_MODE: parsePaymentMode("CAC_PAYMENT_MODE", "mock"),
 };

@@ -14,6 +14,10 @@ import {
   listSubscriptionsApi,
   consentApi,
 } from "../api/subscriptions.api";
+import {
+  confirmCacSubscriptionPaymentApi,
+  initiateCacSubscriptionPaymentApi,
+} from "../api/cacPayments.api";
 import { useNavigate } from "react-router-dom";
 
 const BANKS_BY_COUNTRY = {
@@ -51,6 +55,8 @@ export default function ClientDashboard() {
 
   const [amount, setAmount] = useState("6000");
   const [frequency, setFrequency] = useState("MONTHLY");
+  const [cacOtpBySubscription, setCacOtpBySubscription] = useState({});
+  const [activeCacSubscriptionId, setActiveCacSubscriptionId] = useState(null);
 
   // =========================
   // DERIVED
@@ -114,6 +120,29 @@ export default function ClientDashboard() {
       toast.error(err?.response?.data?.message || t("consent_error")),
   });
 
+  const initiateCacM = useMutation({
+    mutationFn: ({ id }) => initiateCacSubscriptionPaymentApi(id),
+    onSuccess: (_data, variables) => {
+      setActiveCacSubscriptionId(variables.id);
+      toast.success(t("cac_otp_sent"));
+      q.refetch();
+    },
+    onError: (err) =>
+      toast.error(err?.response?.data?.message || t("error_generic")),
+  });
+
+  const confirmCacM = useMutation({
+    mutationFn: ({ id, otp }) => confirmCacSubscriptionPaymentApi(id, otp),
+    onSuccess: () => {
+      toast.success(t("cac_payment_confirmed"));
+      setActiveCacSubscriptionId(null);
+      setCacOtpBySubscription({});
+      q.refetch();
+    },
+    onError: (err) =>
+      toast.error(err?.response?.data?.message || t("cac_otp_invalid")),
+  });
+
   // =========================
   // SUBMIT
   // =========================
@@ -160,6 +189,13 @@ export default function ClientDashboard() {
       : user?.accountType === "ASSOCIATION"
         ? "role_association"
         : "role_unknown";
+
+  function setCacOtp(subscriptionId, value) {
+    setCacOtpBySubscription((current) => ({
+      ...current,
+      [subscriptionId]: value.replace(/\D/g, "").slice(0, 6),
+    }));
+  }
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-white">
@@ -341,7 +377,19 @@ export default function ClientDashboard() {
               ) : subs.length === 0 ? (
                 <div className="text-sm text-slate-600">{t("no_subs")}</div>
               ) : (
-                subs.map((s) => (
+                subs.map((s) => {
+                  const isCacPaymentCandidate =
+                    s.walletProvider === "CAC_PAY" || s.bankName === "CAC Bank";
+                  const canPayWithCac =
+                    isCacPaymentCandidate &&
+                    s.status === "PENDING_CONSENT" &&
+                    !s.cacReference;
+                  const isCacOtpOpen =
+                    activeCacSubscriptionId === s.id ||
+                    s.cacStatus === "OTP_SENT";
+                  const cacOtp = cacOtpBySubscription[s.id] || "";
+
+                  return (
                   <div
                     key={s.id}
                     className="rounded-2xl border border-emerald-100 bg-emerald-50/40 p-4"
@@ -361,7 +409,53 @@ export default function ClientDashboard() {
                       {s.amount} {s.currency} • {s.frequency}
                     </div>
 
-                    {!s.consentAccepted ? (
+                    {s.cacReference ? (
+                      <div className="mt-2 text-xs font-semibold text-slate-600">
+                        {t("cac_payment_reference")}: {s.cacReference}
+                      </div>
+                    ) : canPayWithCac ? (
+                      <div className="mt-3 space-y-3">
+                        <PrimaryButton
+                          loading={
+                            initiateCacM.isPending &&
+                            initiateCacM.variables?.id === s.id
+                          }
+                          onClick={() => initiateCacM.mutate({ id: s.id })}
+                          type="button"
+                        >
+                          {t("cac_pay_with_bank")}
+                        </PrimaryButton>
+
+                        {isCacOtpOpen ? (
+                          <div className="space-y-2 rounded-xl border border-emerald-200 bg-white p-3">
+                            <div className="text-xs font-semibold text-emerald-700">
+                              {t("cac_otp_sent")}
+                            </div>
+                            <Input
+                              value={cacOtp}
+                              onChange={(e) => setCacOtp(s.id, e.target.value)}
+                              placeholder={t("otp_6_digits")}
+                              inputMode="numeric"
+                            />
+                            <PrimaryButton
+                              loading={
+                                confirmCacM.isPending &&
+                                confirmCacM.variables?.id === s.id
+                              }
+                              disabled={cacOtp.length !== 6}
+                              onClick={() =>
+                                confirmCacM.mutate({ id: s.id, otp: cacOtp })
+                              }
+                              type="button"
+                            >
+                              {t("cac_confirm_payment")}
+                            </PrimaryButton>
+                          </div>
+                        ) : null}
+                      </div>
+                    ) : null}
+
+                    {!s.consentAccepted && !canPayWithCac ? (
                       <div className="mt-3">
                         <PrimaryButton
                           loading={consentM.isPending}
@@ -377,7 +471,8 @@ export default function ClientDashboard() {
                       </div>
                     )}
                   </div>
-                ))
+                  );
+                })
               )}
             </div>
           </Card>

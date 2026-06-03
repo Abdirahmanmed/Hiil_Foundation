@@ -197,6 +197,13 @@ model Subscription {
 
   status SubscriptionStatus @default(PENDING_CONSENT)
 
+  cacPaymentRequestId String?
+  cacConfirmReference String?
+  cacReference        String?
+  cacStatus           String?
+  cacRawResponse      Json?
+  paidAt              DateTime?
+
   consentAccepted  Boolean   @default(false)
   consentVersion   String?
   consentAt        DateTime?

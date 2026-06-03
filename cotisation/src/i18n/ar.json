@@ -66,6 +66,13 @@
   "wallet_only_dj": "المحفظة متاحة فقط في جيبوتي.",
   "choose_country_first": "-- اختر دولة --",
   "wallet_number": "رقم المحفظة",
+  "cac_pay_with_bank": "ادفع عبر CAC Bank",
+  "cac_otp_sent": "تم إرسال OTP عبر SMS",
+  "cac_confirm_payment": "تأكيد الدفع",
+  "cac_payment_confirmed": "تم تأكيد الدفع",
+  "cac_otp_invalid": "OTP غير صالح",
+  "cac_payment_pending": "الدفع قيد الانتظار",
+  "cac_payment_reference": "مرجع الدفع",
   "loading": "جارٍ التحميل…",
   "load_error": "خطأ في التحميل.",
   "no_subs": "لا توجد معاملات.",
@@ -743,10 +750,6 @@
   "admin_adherents_sub": "مساهمات الأعضاء والجمعيات.",
   "admin_search_adherent": "ابحث بالاسم أو الهاتف أو البلد أو الطريقة أو الحالة",
   "created_at": "تاريخ الإنشاء"
-<<<<<<< HEAD
-}
-
-=======
 },
   "account": {
     "changePassword": "تغيير كلمة المرور",
@@ -766,5 +769,4 @@
     "passwordChangeError": "حدث خطأ أثناء تغيير كلمة المرور.",
     "changePasswordHelp": "اختر كلمة مرور جديدة وآمنة لحماية حسابك."
   }
->>>>>>> c5b7a69dfc590175b745e8b30e803d00736ca4a4
 }

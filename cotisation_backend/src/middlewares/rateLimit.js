@@ -30,3 +30,11 @@ export const changePasswordLimiter = rateLimit({
   legacyHeaders: false,
   message: { message: "Trop de tentatives. Réessaie plus tard." },
 });
+
+export const cacPaymentConfirmLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000, // 10 min
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: "Trop de tentatives OTP CAC. Reessaie plus tard." },
+});
