@@ -364,6 +364,82 @@
     "expenseRejected": "Dépense rejetée",
     "rejectError": "Erreur rejet"
   },
+  "treasury": {
+  "roleLabel": "Équipe trésorerie",
+  "dashboardTitle": "Dashboard trésorerie",
+  "dashboardSubtitle": "Statistiques dépenses globales et ordres de paiement.",
+  "stats": {
+    "totalExpenses": "Total dépenses",
+    "approved": "Dépenses approuvées",
+    "rejected": "Dépenses rejetées",
+    "pending": "Dépenses en attente",
+    "completed": "Dépenses effectuées",
+    "monthCount": "Dépenses du mois",
+    "totalAmount": "Montant total",
+    "monthAmount": "Montant du mois",
+    "totalOrders": "Ordres de paiement",
+    "monthOrders": "Ordres du mois",
+    "totalOrdersAmount": "Montant ordres de paiement",
+    "monthOrdersAmount": "Montant ordres du mois",
+    "createdOrders": "Ordres créés",
+    "printedOrders": "Ordres imprimés"
+  },
+  "latestApprovedExpenses": "Dernières dépenses approuvées",
+  "noApprovedExpenses": "Aucune dépense approuvée",
+  "latestPaymentOrders": "Derniers ordres de paiement",
+  "tabs": {
+    "dashboard": "Dashboard",
+    "expenses": "Liste des dépenses",
+    "orders": "Ordres de paiement"
+  },
+  "approvedExpensesTitle": "Dépenses approuvées",
+  "paymentOrdersTitle": "Ordres de paiement",
+  "createOrder": "Créer un ordre de paiement",
+  "noApprovedExpenses2": "Aucune dépense approuvée",
+  "noOrders": "Aucun ordre de paiement",
+  "charts": {
+    "ordersByStatus": "Ordres de paiement par statut",
+    "noOrdersByStatus": "Aucun ordre de paiement par statut",
+    "expensesByStatus": "Dépenses approuvées/effectuées/rejetées",
+    "noExpensesByStatus": "Aucune dépense par statut"
+  },
+  "table": {
+    "date": "Date",
+    "label": "Libellé",
+    "beneficiary": "Bénéficiaire",
+    "country": "Pays",
+    "amount": "Montant",
+    "status": "Statut",
+    "action": "Action",
+    "reference": "Référence",
+    "expense": "Dépense",
+    "method": "Méthode",
+    "currency": "Devise",
+    "paymentCountry": "Pays",
+    "print": "Imprimer"
+  },
+  "order": {
+    "token": "Token reçu du Super Admin",
+    "paymentMethod": "Méthode de paiement",
+    "currency": "Devise",
+    "paymentCountry": "Pays de paiement",
+    "amount": "Montant",
+    "bankName": "Nom de la banque",
+    "bankReference": "Référence bancaire / numéro chèque",
+    "bankAccountHolder": "Nom du titulaire / bénéficiaire bancaire",
+    "createTitle": "Créer un ordre de paiement",
+    "printTitle": "Ordre de paiement imprimable",
+    "reference": "Référence",
+    "date": "Date",
+    "expense": "Dépense",
+    "beneficiary": "Bénéficiaire",
+    "method": "Méthode",
+    "currency2": "Devise",
+    "country": "Pays",
+    "signTreasury": "Signature trésorerie",
+    "signValidation": "Signature validation"
+  }
+},
   "paymentOrders": {
     "empty": "Aucun ordre"
   },

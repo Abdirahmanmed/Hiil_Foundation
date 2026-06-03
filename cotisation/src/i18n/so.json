@@ -287,18 +287,35 @@
   "superAdmin.roleLabel": "Maamule sare",
   "expenses.roleLabel": "Maareeye kharash",
   "treasury.roleLabel": "Kooxda maaliyadda",
-  "common": {
-    "dashboard": "Dashboard",
-    "loading": "Chargement...",
-    "loadingError": "Erreur de chargement",
-    "date": "Date",
-    "type": "Type",
-    "amount": "Montant",
-    "country": "Pays",
-    "city": "Ville",
-    "save": "Enregistrer",
-    "noData": "Aucune donnée"
-  },
+
+ ```json
+"common": {
+  "dashboard": "Dashboard",
+  "loading": "Soo dejinaya...",
+  "loadingError": "Cilad soo dejin",
+
+  "date": "Taariikhda",
+  "type": "Nooca",
+  "city": "Magaalada",
+  "amount": "Lacagta",
+  "country": "Dalka",
+
+  "save": "Kaydi",
+  "noData": "Xog ma jirto"
+},
+
+"paymentModes": {
+  "AUTOMATIC": "Otomaatig",
+  "MANUAL": "Gacanta"
+},
+
+"frequencies": {
+  "MONTHLY": "Bil kasta",
+  "QUARTERLY": "Saddexdii biloodba",
+  "SEMIANNUAL": "Lixdii biloodba",
+  "ANNUAL": "Sanadle"
+},
+
   "expenses": {
     "empty": "Aucune dépense",
     "createSuccess": "Dépense enregistrée",
@@ -338,6 +355,82 @@
     "expenseRejected": "Dépense rejetée",
     "rejectError": "Erreur rejet"
   },
+  "treasury": {
+  "roleLabel": "Kooxda xisaabta",
+  "dashboardTitle": "Xaashida xisaabta",
+  "dashboardSubtitle": "Tirakoobka kharashyada guud iyo amarka lacag-bixinta.",
+  "stats": {
+    "totalExpenses": "Wadarta kharashyada",
+    "approved": "Kharashyada la ansixiyey",
+    "rejected": "Kharashyada la diiday",
+    "pending": "Kharashyada sugaya",
+    "completed": "Kharashyada la dhammeeyey",
+    "monthCount": "Kharashyada bishaan",
+    "totalAmount": "Wadarta lacagta",
+    "monthAmount": "Lacagta bishaan",
+    "totalOrders": "Amararka lacag-bixinta",
+    "monthOrders": "Amararka bishaan",
+    "totalOrdersAmount": "Wadarta amararka lacag-bixinta",
+    "monthOrdersAmount": "Lacagta amararka bishaan",
+    "createdOrders": "Amararka la sameeyey",
+    "printedOrders": "Amararka la daabacay"
+  },
+  "latestApprovedExpenses": "Kharashyada ugu dambeeyey ee la ansixiyey",
+  "noApprovedExpenses": "Ma jiraan kharashyo la ansixiyey",
+  "latestPaymentOrders": "Amararka lacag-bixinta ugu dambeeyey",
+  "tabs": {
+    "dashboard": "Xaashida",
+    "expenses": "Liiska kharashyada",
+    "orders": "Amararka lacag-bixinta"
+  },
+  "approvedExpensesTitle": "Kharashyada la ansixiyey",
+  "paymentOrdersTitle": "Amararka lacag-bixinta",
+  "createOrder": "Samee amar lacag-bixin",
+  "noApprovedExpenses2": "Ma jiraan kharashyo la ansixiyey",
+  "noOrders": "Ma jiraan amararka lacag-bixinta",
+  "charts": {
+    "ordersByStatus": "Amararka lacag-bixinta xaaladda ahaan",
+    "noOrdersByStatus": "Ma jiraan amararka lacag-bixinta",
+    "expensesByStatus": "Kharashyada ansixiyey/dhammeeyey/diiday",
+    "noExpensesByStatus": "Ma jiraan kharashyo xaaladda ahaan"
+  },
+  "table": {
+    "date": "Taariikhda",
+    "label": "Cinwaanka",
+    "beneficiary": "Faa'iidoole",
+    "country": "Dalka",
+    "amount": "Lacagta",
+    "status": "Xaaladda",
+    "action": "Ficil",
+    "reference": "Tixraaca",
+    "expense": "Kharashka",
+    "method": "Hab-socodka",
+    "currency": "Lacagta nooca",
+    "paymentCountry": "Dalka",
+    "print": "Daabac"
+  },
+  "order": {
+    "token": "Lambarka Super Admin ka helay",
+    "paymentMethod": "Hab lacag-bixinta",
+    "currency": "Lacagta nooca",
+    "paymentCountry": "Dalka lacag-bixinta",
+    "amount": "Lacagta",
+    "bankName": "Magaca bangiga",
+    "bankReference": "Tixraaca bangiga / lambarka jeegga",
+    "bankAccountHolder": "Magaca xisaabta lahaanshaha",
+    "createTitle": "Samee amar lacag-bixin",
+    "printTitle": "Amar lacag-bixin la daabaci karo",
+    "reference": "Tixraaca",
+    "date": "Taariikhda",
+    "expense": "Kharashka",
+    "beneficiary": "Faa'iidoole",
+    "method": "Hab-socodka",
+    "currency2": "Lacagta nooca",
+    "country": "Dalka",
+    "signTreasury": "Saxiixda xisaabta",
+    "signValidation": "Saxiixda ansixinta"
+  }
+},
   "paymentOrders": {
     "empty": "Aucun ordre"
   },

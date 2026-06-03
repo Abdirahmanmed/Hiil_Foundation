@@ -290,13 +290,13 @@
     "dashboard": "Dashboard",
     "loading": "Chargement...",
     "loadingError": "Erreur de chargement",
-    "date": "Date",
-    "type": "Type",
-    "amount": "Montant",
-    "country": "Pays",
-    "city": "Ville",
-    "save": "Enregistrer",
-    "noData": "Aucune donnée"
+    "date": "التاريخ",
+    "type": "النوع",
+    "amount": "المبلغ",
+    "country": "المدينة",
+    "city": "المدينة",
+    "save": "حفظ",
+    "noData": "لا توجد بيانات"
   },
   "expenses": {
     "empty": "Aucune dépense",
@@ -337,9 +337,86 @@
     "expenseRejected": "Dépense rejetée",
     "rejectError": "Erreur rejet"
   },
+  "treasury": {
+  "roleLabel": "فريق الخزينة",
+  "dashboardTitle": "لوحة الخزينة",
+  "dashboardSubtitle": "إحصائيات المصاريف العامة وأوامر الدفع.",
+  "stats": {
+    "totalExpenses": "إجمالي المصاريف",
+    "approved": "المصاريف المعتمدة",
+    "rejected": "المصاريف المرفوضة",
+    "pending": "المصاريف قيد الانتظار",
+    "completed": "المصاريف المنجزة",
+    "monthCount": "مصاريف الشهر",
+    "totalAmount": "المبلغ الإجمالي",
+    "monthAmount": "مبلغ الشهر",
+    "totalOrders": "أوامر الدفع",
+    "monthOrders": "أوامر الشهر",
+    "totalOrdersAmount": "مبلغ أوامر الدفع",
+    "monthOrdersAmount": "مبلغ أوامر الشهر",
+    "createdOrders": "الأوامر المُنشأة",
+    "printedOrders": "الأوامر المطبوعة"
+  },
+  "latestApprovedExpenses": "آخر المصاريف المعتمدة",
+  "noApprovedExpenses": "لا توجد مصاريف معتمدة",
+  "latestPaymentOrders": "آخر أوامر الدفع",
+  "tabs": {
+    "dashboard": "لوحة التحكم",
+    "expenses": "قائمة المصاريف",
+    "orders": "أوامر الدفع"
+  },
+  "approvedExpensesTitle": "المصاريف المعتمدة",
+  "paymentOrdersTitle": "أوامر الدفع",
+  "createOrder": "إنشاء أمر دفع",
+  "noApprovedExpenses2": "لا توجد مصاريف معتمدة",
+  "noOrders": "لا توجد أوامر دفع",
+  "charts": {
+    "ordersByStatus": "أوامر الدفع حسب الحالة",
+    "noOrdersByStatus": "لا توجد أوامر دفع حسب الحالة",
+    "expensesByStatus": "المصاريف معتمدة/منجزة/مرفوضة",
+    "noExpensesByStatus": "لا توجد مصاريف حسب الحالة"
+  },
+  "table": {
+    "date": "التاريخ",
+    "label": "التسمية",
+    "beneficiary": "المستفيد",
+    "country": "البلد",
+    "amount": "المبلغ",
+    "status": "الحالة",
+    "action": "إجراء",
+    "reference": "المرجع",
+    "expense": "المصروف",
+    "method": "الطريقة",
+    "currency": "العملة",
+    "paymentCountry": "البلد",
+    "print": "طباعة"
+  },
+  "order": {
+    "token": "الرمز المستلم من المشرف العام",
+    "paymentMethod": "طريقة الدفع",
+    "currency": "العملة",
+    "paymentCountry": "بلد الدفع",
+    "amount": "المبلغ",
+    "bankName": "اسم البنك",
+    "bankReference": "المرجع البنكي / رقم الشيك",
+    "bankAccountHolder": "اسم صاحب الحساب / المستفيد",
+    "createTitle": "إنشاء أمر دفع",
+    "printTitle": "أمر دفع قابل للطباعة",
+    "reference": "المرجع",
+    "date": "التاريخ",
+    "expense": "المصروف",
+    "beneficiary": "المستفيد",
+    "method": "الطريقة",
+    "currency2": "العملة",
+    "country": "البلد",
+    "signTreasury": "توقيع الخزينة",
+    "signValidation": "توقيع المصادقة"
+  }
+},
   "paymentOrders": {
     "empty": "Aucun ordre"
   },
+  
   "home": {
     "actions": {
       "sectionLabel": "أنشطتنا",
@@ -667,4 +744,5 @@
   "admin_search_adherent": "ابحث بالاسم أو الهاتف أو البلد أو الطريقة أو الحالة",
   "created_at": "تاريخ الإنشاء"
 }
+
 }
