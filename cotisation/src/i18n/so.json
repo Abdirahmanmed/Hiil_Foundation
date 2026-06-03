@@ -288,7 +288,7 @@
   "expenses.roleLabel": "Maareeye kharash",
   "treasury.roleLabel": "Kooxda maaliyadda",
 
- ```json
+ 
 "common": {
   "dashboard": "Dashboard",
   "loading": "Soo dejinaya...",
