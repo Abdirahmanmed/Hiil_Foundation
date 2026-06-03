@@ -317,35 +317,84 @@
 },
 
   "expenses": {
-    "empty": "Aucune dépense",
-    "createSuccess": "Dépense enregistrée",
-    "createError": "Erreur création dépense",
-    "managementTab": "Gestion de dépense",
-    "dashboardTitle": "Dashboard dépenses",
-    "dashboardSubtitle": "Statistiques limitées aux dépenses créées par vous.",
-    "latestExpenses": "Dernières dépenses",
-    "myExpenses": "Mes dépenses",
-    "newExpense": "Nouvelle dépense",
-    "listTab": "Liste des dépenses",
-    "label": "Libellé",
-    "quantity": "Quantité",
-    "unitPrice": "Prix unitaire",
-    "beneficiary": "Bénéficiaire",
+    "empty": "Wax kharash ah lama helin",
+    "createSuccess": "Kharashka waa la diiwaangeliyey",
+    "createError": "Qalad ayaa ka dhacay abuurista kharashka",
+    "managementTab": "Maamulka kharashaadka",
+    "dashboardTitle": "Dashboard-ka kharashaadka",
+    "dashboardSubtitle": "Tirakoobka wuxuu ku kooban yahay kharashaadka aad abuurtay.",
+    "latestExpenses": "Kharashaadkii ugu dambeeyay",
+    "myExpenses": "Kharashaadkayga",
+    "newExpense": "Kharash cusub",
+    "listTab": "Liiska kharashaadka",
+    "label": "Sharaxaad",
+    "quantity": "Tirada",
+    "unitPrice": "Qiimaha halkii unug",
+    "beneficiary": "Ka faa’iideystaha",
+
     "stats": {
-      "totalExpenses": "Total dépenses",
-      "approved": "Dépenses approuvées",
-      "rejected": "Dépenses rejetées",
-      "pending": "Dépenses en attente",
-      "completed": "Dépenses effectuées",
-      "monthCount": "Dépenses du mois",
-      "totalAmount": "Montant total",
-      "monthAmount": "Montant du mois"
+      "totalExpenses": "Wadarta kharashaadka",
+      "approved": "Kharashaadka la ansixiyey",
+      "rejected": "Kharashaadka la diiday",
+      "pending": "Kharashaadka sugaya",
+      "completed": "Kharashaadka la fuliyey",
+      "monthCount": "Kharashaadka bishan",
+      "totalAmount": "Wadarta lacagta",
+      "monthAmount": "Lacagta bishan",
+      "label": "Sharaxaad",
+      "quantity": "Tirada",
+      "unitPrice": "Qiimaha halkii unug",
+      "beneficiary": "Ka faa’iideystaha"
     }
   },
+
+  "expenseManager": {
+    "charts": {
+      "byStatus": "Kharashaadka sida xaaladda",
+      "noByStatus": "Ma jiro kharash xaaladdan leh",
+      "monthVsTotal": "Kharashaadka bisha / guud ahaan",
+      "noAmounts": "Lacag kharash lama helin"
+    }
+  },
+
   "superAdmin": {
-    "dashboardTitle": "Dashboard global",
-    "dashboardSubtitle": "Vue utilisateurs, cotisations, dépenses et ordres de paiement.",
-    "allExpenses": "Toutes les dépenses"
+    "dashboardTitle": "Dashboard guud",
+    "dashboardSubtitle": "Aragtida isticmaalayaasha, tabarucaadyada, kharashaadka iyo amarada lacag bixinta.",
+    "allExpenses": "Dhammaan kharashaadka",
+    "roleLabel": "Maamule Sare",
+    "createdBy": "Waxaa sameeyey",
+    "latestUsers": "Isticmaalayaashii ugu dambeeyey",
+    "latestSubscriptions": "Isdiiwaangelinnadii ugu dambeeyey",
+    "latestExpenses": "Kharashaadkii ugu dambeeyey",
+    "latestPaymentOrders": "Amaradii lacag bixinta ee ugu dambeeyey",
+
+    "stats": {
+      "users": "Isticmaalayaal",
+      "adherents": "Xubnaha",
+      "associations": "Ururrada",
+      "subscriptions": "Isdiiwaangelinnada",
+      "monthlySubscriptions": "Isdiiwaangelin bille ah",
+      "annualSubscriptions": "Isdiiwaangelin sanadle ah",
+      "totalCotisation": "Wadarta tabarucaadka",
+      "totalExpenses": "Wadarta kharashaadka",
+      "approvedExpenses": "Kharashaadka la ansixiyey",
+      "rejectedExpenses": "Kharashaadka la diiday",
+      "pendingExpenses": "Kharashaadka sugaya",
+      "completedExpenses": "Kharashaadka la fuliyey",
+      "paymentOrders": "Amarada lacag bixinta",
+      "paymentOrdersAmount": "Lacagta amarada lacag bixinta"
+    },
+
+    "charts": {
+      "expensesByStatus": "Kharashaadka sida xaaladda",
+      "noExpensesByStatus": "Ma jiraan kharashaad xaaladdan leh",
+      "ordersByStatus": "Amarada lacag bixinta sida xaaladda",
+      "noOrdersByStatus": "Ma jiraan amarro lacag bixin",
+      "subscriptions": "Isdiiwaangelin bille / sanadle",
+      "noSubscriptions": "Isdiiwaangelin ma jirto",
+      "monthly": "Bille",
+      "annual": "Sanadle"
+    }
   },
   "validation": {
     "approve": "Approuver",

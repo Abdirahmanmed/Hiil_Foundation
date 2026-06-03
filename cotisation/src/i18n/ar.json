@@ -299,35 +299,83 @@
     "noData": "لا توجد بيانات"
   },
   "expenses": {
-    "empty": "Aucune dépense",
-    "createSuccess": "Dépense enregistrée",
-    "createError": "Erreur création dépense",
-    "managementTab": "Gestion de dépense",
-    "dashboardTitle": "Dashboard dépenses",
-    "dashboardSubtitle": "Statistiques limitées aux dépenses créées par vous.",
-    "latestExpenses": "Dernières dépenses",
-    "myExpenses": "Mes dépenses",
-    "newExpense": "Nouvelle dépense",
-    "listTab": "Liste des dépenses",
-    "label": "Libellé",
-    "quantity": "Quantité",
-    "unitPrice": "Prix unitaire",
-    "beneficiary": "Bénéficiaire",
+    "empty": "لا توجد مصاريف",
+    "createSuccess": "تم تسجيل المصروف",
+    "createError": "خطأ أثناء إنشاء المصروف",
+    "managementTab": "إدارة المصاريف",
+    "dashboardTitle": "لوحة المصاريف",
+    "dashboardSubtitle": "إحصائيات خاصة بالمصاريف التي أنشأتها.",
+    "latestExpenses": "آخر المصاريف",
+    "myExpenses": "مصاريفي",
+    "newExpense": "مصروف جديد",
+    "listTab": "قائمة المصاريف",
+    "label": "الوصف",
+    "quantity": "الكمية",
+    "unitPrice": "سعر الوحدة",
+    "beneficiary": "المستفيد",
     "stats": {
-      "totalExpenses": "Total dépenses",
-      "approved": "Dépenses approuvées",
-      "rejected": "Dépenses rejetées",
-      "pending": "Dépenses en attente",
-      "completed": "Dépenses effectuées",
-      "monthCount": "Dépenses du mois",
-      "totalAmount": "Montant total",
-      "monthAmount": "Montant du mois"
+      "totalExpenses": "إجمالي المصاريف",
+      "approved": "المصاريف المعتمدة",
+      "rejected": "المصاريف المرفوضة",
+      "pending": "المصاريف قيد الانتظار",
+      "completed": "المصاريف المنجزة",
+      "monthCount": "مصاريف هذا الشهر",
+      "totalAmount": "المبلغ الإجمالي",
+      "monthAmount": "مبلغ هذا الشهر",
+      "label": "الوصف",
+      "quantity": "الكمية",
+      "unitPrice": "سعر الوحدة",
+      "beneficiary": "المستفيد"
     }
   },
+
+  "expenseManager": {
+    "charts": {
+      "byStatus": "المصاريف حسب الحالة",
+      "noByStatus": "لا توجد مصاريف حسب الحالة",
+      "monthVsTotal": "مصاريف الشهر / الإجمالي",
+      "noAmounts": "لا توجد مبالغ مصاريف"
+    }
+  },
+
   "superAdmin": {
-    "dashboardTitle": "Dashboard global",
-    "dashboardSubtitle": "Vue utilisateurs, cotisations, dépenses et ordres de paiement.",
-    "allExpenses": "Toutes les dépenses"
+    "dashboardTitle": "لوحة التحكم العامة",
+    "dashboardSubtitle": "عرض المستخدمين، الاشتراكات، المصاريف وأوامر الدفع.",
+    "allExpenses": "جميع المصاريف",
+    "roleLabel": "المشرف العام",
+    "createdBy": "تم الإنشاء بواسطة",
+    "latestUsers": "آخر المستخدمين المسجلين",
+    "latestSubscriptions": "آخر الاشتراكات",
+    "latestExpenses": "آخر المصاريف",
+    "latestPaymentOrders": "آخر أوامر الدفع",
+
+    "stats": {
+      "users": "المستخدمون",
+      "adherents": "الأعضاء",
+      "associations": "الجمعيات",
+      "subscriptions": "الاشتراكات",
+      "monthlySubscriptions": "الاشتراكات الشهرية",
+      "annualSubscriptions": "الاشتراكات السنوية",
+      "totalCotisation": "إجمالي المساهمات",
+      "totalExpenses": "إجمالي المصاريف",
+      "approvedExpenses": "المصاريف المعتمدة",
+      "rejectedExpenses": "المصاريف المرفوضة",
+      "pendingExpenses": "المصاريف قيد الانتظار",
+      "completedExpenses": "المصاريف المنجزة",
+      "paymentOrders": "أوامر الدفع",
+      "paymentOrdersAmount": "مبلغ أوامر الدفع"
+    },
+
+    "charts": {
+      "expensesByStatus": "المصاريف حسب الحالة",
+      "noExpensesByStatus": "لا توجد مصاريف حسب الحالة",
+      "ordersByStatus": "أوامر الدفع حسب الحالة",
+      "noOrdersByStatus": "لا توجد أوامر دفع حسب الحالة",
+      "subscriptions": "الاشتراكات الشهرية / السنوية",
+      "noSubscriptions": "لا توجد اشتراكات",
+      "monthly": "شهري",
+      "annual": "سنوي"
+    }
   },
   "validation": {
     "approve": "Approuver",
