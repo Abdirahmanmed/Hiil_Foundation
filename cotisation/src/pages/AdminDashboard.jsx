@@ -1,8 +1,8 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import Card from "../components/ui/Card";
-import Brand from "../components/Brand";
+import DashboardHeader from "../components/DashboardHeader";
 import { useAuth } from "../context/AuthContext";
 import Badge from "../components/ui/Badge";
 import SectionTitle from "../components/ui/SectionTitle";
@@ -23,19 +23,9 @@ import {
   getAudit,
 } from "../api/admin.api";
 
-// Charts
-import {
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip as ReTooltip,
-  PieChart,
-  Pie,
-  Cell,
-} from "recharts";
-import LanguageSwitcher from "../components/LanguageSwitcher";
+import { SimpleBarChart, SimplePieChart } from "../components/DashboardCharts";
+import DashboardTabs from "../components/DashboardTabs";
+import { logPerf } from "../utils/perf";
 
 const USER_STATUS_TONES = {
   PENDING_VERIFICATION: "yellow",
@@ -126,10 +116,12 @@ export default function AdminDashboard() {
   const qUsers = useQuery({
     queryKey: ["admin-users"],
     queryFn: getAdminUsers,
+    enabled: tab === "users",
   });
   const qSubs = useQuery({
     queryKey: ["admin-adherents-contributions"],
     queryFn: getAdherentsContributions,
+    enabled: tab === "adherents",
   });
 
   const qUserDetails = useQuery({
@@ -158,6 +150,16 @@ export default function AdminDashboard() {
     enabled: tab === "audit",
     keepPreviousData: true,
   });
+
+  useEffect(() => {
+    if (qStats.isSuccess) {
+      logPerf("dashboard.admin.firstDataLoad", {
+        endpoint: "/api/admin/dashboard",
+        latestUsers: qStats.data?.stats?.latestUsers?.length || 0,
+        latestSubscriptions: qStats.data?.stats?.latestSubscriptions?.length || 0,
+      });
+    }
+  }, [qStats.isSuccess, qStats.data]);
 
   const stats = qStats.data?.stats;
   const users = useMemo(
@@ -219,11 +221,10 @@ export default function AdminDashboard() {
     return Array.from(map.entries()).map(([name, value]) => ({ name, value }));
   }, [users]);
 
-  const subStatusData = useMemo(() => {
-    const map = new Map();
-    for (const s of subs) map.set(s.status, (map.get(s.status) || 0) + 1);
-    return Array.from(map.entries()).map(([name, value]) => ({ name, value }));
-  }, [subs]);
+  const subFrequencyData = useMemo(() => [
+    { name: "Mensuelles", value: Number(stats?.monthlySubscriptionsCount || 0) },
+    { name: "Annuelles", value: Number(stats?.annualSubscriptionsCount || 0) },
+  ], [stats]);
 
   const subMethodData = useMemo(() => {
     const map = new Map();
@@ -313,53 +314,30 @@ export default function AdminDashboard() {
   const canNext = auditOffset + auditLimit < auditTotal;
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen overflow-x-hidden bg-white">
       {/* Top header */}
-      <div className="border-b border-emerald-100 bg-white/80 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-4">
-          <Brand />
-
-          <div className="flex items-center gap-2">
-            <LanguageSwitcher />
-
-            <div className="hidden text-xs text-slate-500 md:block">
-              {user?.fullName} •{" "}
-              <span className="font-bold text-slate-900">{user?.role}</span>
-            </div>
-
-            <button
-              onClick={logout}
-              className="rounded-xl border border-emerald-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-emerald-50 focus:outline-none focus:ring-4 focus:ring-emerald-100"
-            >
-              {t("logout")}
-            </button>
-          </div>
-        </div>
-      </div>
+      <DashboardHeader
+        userLabel={(
+          <>
+            {user?.fullName} •{" "}
+            <span className="font-bold text-slate-900">{user?.role}</span>
+          </>
+        )}
+        onLogout={logout}
+      />
 
       <div className="mx-auto max-w-6xl px-4 py-8 space-y-6">
         {/* Tabs */}
-        <div className="flex flex-wrap gap-2">
-          {[
+        <DashboardTabs
+          tabs={[
             { id: "overview", label: t("admin_overview") },
             { id: "users", label: t("users") },
             { id: "adherents", label: t("adherents") },
             { id: "audit", label: t("admin_audit") },
-          ].map((tt) => (
-            <button
-              key={tt.id}
-              onClick={() => setTab(tt.id)}
-              className={[
-                "rounded-full border px-4 py-2 text-xs font-black transition",
-                tab === tt.id
-                  ? "border-emerald-200 bg-emerald-50 text-emerald-800"
-                  : "border-emerald-100 bg-white text-slate-600 hover:bg-emerald-50",
-              ].join(" ")}
-            >
-              {tt.label}
-            </button>
-          ))}
-        </div>
+          ]}
+          activeTab={tab}
+          onChange={setTab}
+        />
 
         {/* OVERVIEW */}
         {tab === "overview" ? (
@@ -387,49 +365,16 @@ export default function AdminDashboard() {
               </div>
 
               <div className="mt-6 grid gap-4 md:grid-cols-2">
-                <div className="rounded-2xl border border-emerald-100 bg-emerald-50/40 p-4">
-                  <div className="text-xs font-black text-slate-600">
-                    {t("admin_users_by_status")}
-                  </div>
-                  <div className="mt-3 h-56">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={userStatusData}>
-                        <XAxis
-                          dataKey="name"
-                          tick={{ fill: "rgba(15,23,42,0.65)", fontSize: 11 }}
-                        />
-                        <YAxis
-                          tick={{ fill: "rgba(15,23,42,0.65)", fontSize: 11 }}
-                        />
-                        <ReTooltip />
-                        <Bar dataKey="value" />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
-
-                <div className="rounded-2xl border border-emerald-100 bg-emerald-50/40 p-4">
-                  <div className="text-xs font-black text-slate-600">
-                    {t("admin_subs_by_status")}
-                  </div>
-                  <div className="mt-3 h-56">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={subStatusData}
-                          dataKey="value"
-                          nameKey="name"
-                          outerRadius={90}
-                        >
-                          {subStatusData.map((_, i) => (
-                            <Cell key={i} />
-                          ))}
-                        </Pie>
-                        <ReTooltip />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
+                <SimpleBarChart
+                  title={t("admin_users_by_status")}
+                  data={userStatusData}
+                  emptyMessage="Aucun utilisateur à afficher"
+                />
+                <SimplePieChart
+                  title="Cotisations mensuelles vs annuelles"
+                  data={subFrequencyData}
+                  emptyMessage="Aucune cotisation mensuelle ou annuelle"
+                />
               </div>
             </Card>
 
@@ -439,20 +384,12 @@ export default function AdminDashboard() {
                 subtitle={t("admin_payment_split_sub")}
               />
 
-              <div className="mt-4 h-64 rounded-2xl border border-emerald-100 bg-emerald-50/40 p-4">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={subMethodData}>
-                    <XAxis
-                      dataKey="name"
-                      tick={{ fill: "rgba(15,23,42,0.65)", fontSize: 11 }}
-                    />
-                    <YAxis
-                      tick={{ fill: "rgba(15,23,42,0.65)", fontSize: 11 }}
-                    />
-                    <ReTooltip />
-                    <Bar dataKey="value" />
-                  </BarChart>
-                </ResponsiveContainer>
+              <div className="mt-4">
+                <SimpleBarChart
+                  title={t("admin_payment_split")}
+                  data={subMethodData}
+                  emptyMessage="Aucune cotisation par méthode de paiement"
+                />
               </div>
 
               <div className="mt-4 rounded-2xl border border-emerald-100 bg-emerald-50/40 p-4 text-xs text-slate-600">
@@ -464,7 +401,7 @@ export default function AdminDashboard() {
 
         {/* USERS */}
         {tab === "users" ? (
-          <Card className="p-7 border border-emerald-100 bg-white shadow-[0_20px_60px_-30px_rgba(16,185,129,0.2)]">
+          <Card className="p-5 sm:p-7 border border-emerald-100 bg-white shadow-[0_20px_60px_-30px_rgba(16,185,129,0.2)]">
             <SectionTitle
               title={t("users")}
               subtitle={t("admin_users_sub")}
@@ -476,7 +413,7 @@ export default function AdminDashboard() {
                   >
                     {t("add_user")}
                   </button>
-                  <div className="w-72">
+                  <div className="w-full sm:w-72">
                     <Input
                       value={userSearch}
                       onChange={(e) => setUserSearch(e.target.value)}
@@ -600,20 +537,20 @@ export default function AdminDashboard() {
 
         {/* ADHERENTS */}
         {tab === "adherents" ? (
-          <Card className="p-7 border border-emerald-100 bg-white shadow-[0_20px_60px_-30px_rgba(16,185,129,0.2)]">
+          <Card className="p-5 sm:p-7 border border-emerald-100 bg-white shadow-[0_20px_60px_-30px_rgba(16,185,129,0.2)]">
             <SectionTitle
               title={t("adherents")}
               subtitle={t("admin_adherents_sub")}
               right={
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                  <div className="w-72">
+                  <div className="w-full sm:w-72">
                     <Input
                       value={subSearch}
                       onChange={(e) => setSubSearch(e.target.value)}
                       placeholder={t("admin_search_adherent")}
                     />
                   </div>
-                  <div className="w-56">
+                  <div className="w-full sm:w-56">
                     <Select
                       value={subStatus}
                       onChange={(e) => setSubStatus(e.target.value)}
@@ -691,7 +628,7 @@ export default function AdminDashboard() {
 
         {/* AUDIT */}
         {tab === "audit" ? (
-          <Card className="p-7 border border-emerald-100 bg-white shadow-[0_20px_60px_-30px_rgba(16,185,129,0.2)]">
+          <Card className="p-5 sm:p-7 border border-emerald-100 bg-white shadow-[0_20px_60px_-30px_rgba(16,185,129,0.2)]">
             <SectionTitle
               title={t("admin_audit_title")}
               subtitle={t("admin_audit_sub")}

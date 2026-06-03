@@ -77,17 +77,12 @@ function SectionLabel({ children, color = G.green }) {
 
 /* ─── NosActions ─────────────────────────────────────────── */
 const THEMATIQUES = [
-  { icon: "🏥", label: "Santé", count: 12, color: "#ef4444" },
-  { icon: "📚", label: "Éducation", count: 18, color: "#3b82f6" },
-  { icon: "🌾", label: "Lutte contre la pauvreté", count: 9, color: "#f59e0b" },
-  { icon: "🌿", label: "Environnement", count: 7, color: "#22c55e" },
-  { icon: "🚨", label: "Aide d'urgence", count: 5, color: "#f97316" },
-  {
-    icon: "👩‍💼",
-    label: "Autonomisation des femmes",
-    count: 11,
-    color: "#a855f7",
-  },
+  { icon: "🏥", key: "home.actions.themes.health", count: 12, color: "#ef4444" },
+  { icon: "📚", key: "home.actions.themes.education", count: 18, color: "#3b82f6" },
+  { icon: "🌾", key: "home.actions.themes.poverty", count: 9, color: "#f59e0b" },
+  { icon: "🌿", key: "home.actions.themes.environment", count: 7, color: "#22c55e" },
+  { icon: "🚨", key: "home.actions.themes.emergency", count: 5, color: "#f97316" },
+  { icon: "👩‍💼", key: "home.actions.themes.women", count: 11, color: "#a855f7" },
 ];
 
 const PROGRAMMES = [
@@ -1100,254 +1095,144 @@ function NosActions({ G, t }) {
     </section>
   );
 }
-
-/* ─── NotreImpact ────────────────────────────────────────── */
-const INDICATEURS = [
-  {
-    val: "47 200",
-    label: "Bénéficiaires directs",
-    icon: "👥",
-    evolution: "+18% vs 2023",
-  },
-  { val: "62", label: "Projets réalisés", icon: "✅", evolution: "+9 en 2024" },
-  {
-    val: "14",
-    label: "Pays d'intervention",
-    icon: "🌍",
-    evolution: "3 nouveaux",
-  },
-  {
-    val: "8,4 M€",
-    label: "Ressources mobilisées",
-    icon: "💶",
-    evolution: "+22% vs 2023",
-  },
-  {
-    val: "94%",
-    label: "Projets finalisés dans les délais",
-    icon: "⏱️",
-    evolution: "Objectif : 90%",
-  },
-  {
-    val: "4,7/5",
-    label: "Satisfaction des bénéficiaires",
-    icon: "⭐",
-    evolution: "1 200 évaluations",
-  },
-];
-
-const RAPPORTS_IMPACT = [
-  {
-    year: "2024",
-    pages: 48,
-    featured: true,
-    desc: "Résultats complets, évaluations indépendantes et perspectives 2025.",
-  },
-  {
-    year: "2023",
-    pages: 42,
-    featured: false,
-    desc: "Bilan des programmes santé & éducation. +15 000 nouveaux bénéficiaires.",
-  },
-  {
-    year: "2022",
-    pages: 38,
-    featured: false,
-    desc: "Première édition des indicateurs d'impact standardisés.",
-  },
-];
-
-const TEMOIGNAGES = [
-  {
-    nom: "Dr. Safia O.",
-    role: "Coordinatrice santé, OMS",
-    photo: "👩🏾‍⚕️",
-    quote:
-      "Un partenaire de terrain remarquable. Leur capacité à mobiliser les communautés locales est exceptionnelle.",
-  },
-  {
-    nom: "Marc D.",
-    role: "Directeur, Agence Française de Développement",
-    photo: "👨‍💼",
-    quote:
-      "Des résultats mesurables, une gestion transparente. Un modèle à suivre dans le secteur associatif.",
-  },
-  {
-    nom: "Khadija M.",
-    role: "Bénéficiaire — Programme éducation",
-    photo: "👩🏾‍🎓",
-    quote:
-      "Ce programme a changé l'avenir de mon quartier. Les enfants ont maintenant accès à une éducation de qualité.",
-  },
-];
-
-const VIDEOS = [
-  {
-    titre: "Reportage : L'eau arrive au village",
-    duree: "4:32",
-    categorie: "Terrain",
-    thumb: "🌊",
-  },
-  {
-    titre: "Success story : Fatuma et son entreprise",
-    duree: "3:18",
-    categorie: "Témoignage",
-    thumb: "💼",
-  },
-  {
-    titre: "Bilan 2024 — Nos chiffres clés",
-    duree: "6:05",
-    categorie: "Rapport",
-    thumb: "📊",
-  },
-];
-
-const EVAL_ETAPES = [
-  {
-    label: "Définition des indicateurs",
-    desc: "En amont de chaque projet, nous définissons des KPIs SMART mesurables.",
-  },
-  {
-    label: "Collecte de données terrain",
-    desc: "Enquêtes régulières auprès des bénéficiaires et partenaires locaux.",
-  },
-  {
-    label: "Évaluation mi-parcours",
-    desc: "Revue indépendante à mi-projet avec ajustement si nécessaire.",
-  },
-  {
-    label: "Évaluation finale & capitalisation",
-    desc: "Rapport d'évaluation externe, leçons apprises et recommandations.",
-  },
-];
-/* ─── Actualités data ─────────────────────────────────────── */
-const ARTICLES = [
-  {
-    emoji: "🌿",
-    categorie: "Environnement",
-    catColor: "#22c55e",
-    catBg: "#f0fdf4",
-    catBorder: "rgba(22,163,74,0.2)",
-    date: "12 jan. 2025",
-    title: "Comment nos forages transforment la vie de 3 000 familles rurales",
-    desc: "Retour sur le programme d'accès à l'eau potable dans la région Nord.",
-  },
-  {
-    emoji: "📚",
-    categorie: "Éducation",
-    catColor: "#3b82f6",
-    catBg: "#eff6ff",
-    catBorder: "rgba(59,130,246,0.2)",
-    date: "5 jan. 2025",
-    title: "École numérique : 30 enseignants formés en 3 semaines",
-    desc: "Un succès remarquable dans la mise en œuvre du programme Numérique pour tous.",
-  },
-  {
-    emoji: "👩‍💼",
-    categorie: "Autonomisation",
-    catColor: "#a855f7",
-    catBg: "#f5f3ff",
-    catBorder: "rgba(168,85,247,0.2)",
-    date: "28 déc. 2024",
-    title: "420 femmes entrepreneures : bilan du programme de microcrédits",
-    desc: "Chiffres, portraits et perspectives pour 2025 du programme phare.",
-  },
-];
-
-const COMMUNIQUES = [
-  {
-    date: "15 jan. 2025",
-    title:
-      "Lancement du programme d'urgence nutritionnelle dans 6 nouvelles zones",
-    tag: "Communiqué",
-  },
-  {
-    date: "3 déc. 2024",
-    title: "Partenariat stratégique avec l'AFD pour 2025–2027",
-    tag: "Partenariat",
-  },
-  {
-    date: "18 nov. 2024",
-    title: "Résultats du rapport d'impact 2024 : +18% de bénéficiaires",
-    tag: "Rapport",
-  },
-  {
-    date: "4 oct. 2024",
-    title: "Ouverture de trois nouveaux bureaux régionaux",
-    tag: "Organisation",
-  },
-];
-
-const EVENEMENTS = [
-  {
-    emoji: "🎤",
-    date: "28 fév. 2025",
-    avenir: true,
-    title: "Conférence annuelle des partenaires 2025",
-    lieu: "Palais des Congrès, Capitale",
-    desc: "Bilan 2024 et feuille de route 2025 présentés devant 200+ partenaires.",
-  },
-  {
-    emoji: "🏃",
-    date: "15 mars 2025",
-    avenir: true,
-    title: "Course solidaire « Courons ensemble »",
-    lieu: "Parc Central",
-    desc: "Collecte de fonds ouverte au grand public. Inscriptions ouvertes.",
-  },
-  {
-    emoji: "🎓",
-    date: "10 jan. 2025",
-    avenir: false,
-    title: "Remise de diplômes — Programme formation",
-    lieu: "Centre communautaire Nord",
-    desc: "Célébration des 120 diplômés de la promotion 2024.",
-  },
-];
-
-const NEWSLETTER_ARCHIVES = [
-  "Décembre 2024 — Bilan de fin d'année",
-  "Novembre 2024 — Focus programme nutrition",
-  "Octobre 2024 — Nouveaux partenaires",
-  "Septembre 2024 — Rentrée solidaire",
-  "Août 2024 — Été sur le terrain",
-];
-
-const BENEVOLE_ROLES = [
-  { emoji: "🏥", role: "Bénévole terrain santé", dispo: "Mission 2–4 sem." },
-  { emoji: "💻", role: "Compétences numériques", dispo: "À distance possible" },
-  {
-    emoji: "📢",
-    role: "Ambassadeur / communication",
-    dispo: "Ponctuel ou régulier",
-  },
-  { emoji: "📦", role: "Logistique & collecte", dispo: "Événements" },
-];
-
-const WHY_GIVE = [
-  {
-    emoji: "🔍",
-    title: "Transparence totale",
-    desc: "72% de vos dons financent directement les projets terrain.",
-  },
-  {
-    emoji: "📊",
-    title: "Impact mesurable",
-    desc: "Rapports annuels certifiés, indicateurs vérifiables.",
-  },
-  {
-    emoji: "🧾",
-    title: "Déduction fiscale",
-    desc: "Don déductible à 66% de l'impôt sur le revenu.",
-  },
-  {
-    emoji: "💬",
-    title: "Suivi de votre don",
-    desc: "Espace donateur avec actualités de votre projet soutenu.",
-  },
-];
-
 function NotreImpact({ G }) {
+  const { t } = useTranslation();
+  const indicateurs = useMemo(
+    () => [
+      {
+        icon: "👥",
+        val: "42 000+",
+        label: t("home.impact.indicators.beneficiaries.label"),
+        evolution: t("home.impact.indicators.beneficiaries.evolution"),
+      },
+      {
+        icon: "🌍",
+        val: "6",
+        label: t("home.impact.indicators.regions.label"),
+        evolution: t("home.impact.indicators.regions.evolution"),
+      },
+      {
+        icon: "📋",
+        val: "62",
+        label: t("home.impact.indicators.projects.label"),
+        evolution: t("home.impact.indicators.projects.evolution"),
+      },
+      {
+        icon: "🤝",
+        val: "28",
+        label: t("home.impact.indicators.partners.label"),
+        evolution: t("home.impact.indicators.partners.evolution"),
+      },
+      {
+        icon: "💰",
+        val: "3,2M€",
+        label: t("home.impact.indicators.funds.label"),
+        evolution: t("home.impact.indicators.funds.evolution"),
+      },
+      {
+        icon: "⭐",
+        val: "94%",
+        label: t("home.impact.indicators.satisfaction.label"),
+        evolution: t("home.impact.indicators.satisfaction.evolution"),
+      },
+    ],
+    [t]
+  );
+
+  const rapportsImpact = useMemo(
+    () => [
+      {
+        year: "2024",
+        pages: 48,
+        featured: true,
+        desc: t("home.impact.reports.r2024.desc"),
+      },
+      {
+        year: "2023",
+        pages: 44,
+        featured: false,
+        desc: t("home.impact.reports.r2023.desc"),
+      },
+      {
+        year: "2022",
+        pages: 40,
+        featured: false,
+        desc: t("home.impact.reports.r2022.desc"),
+      },
+    ],
+    [t]
+  );
+
+  const temoignages = useMemo(
+    () => [
+      {
+        quote: t("home.impact.testimonials.t1.quote"),
+        nom: t("home.impact.testimonials.t1.name"),
+        role: t("home.impact.testimonials.t1.role"),
+        photo: "👩",
+      },
+      {
+        quote: t("home.impact.testimonials.t2.quote"),
+        nom: t("home.impact.testimonials.t2.name"),
+        role: t("home.impact.testimonials.t2.role"),
+        photo: "👨",
+      },
+      {
+        quote: t("home.impact.testimonials.t3.quote"),
+        nom: t("home.impact.testimonials.t3.name"),
+        role: t("home.impact.testimonials.t3.role"),
+        photo: "👩",
+      },
+    ],
+    [t]
+  );
+
+  const videos = useMemo(
+    () => [
+      {
+        thumb: "🎬",
+        categorie: t("home.impact.videos.v1.category"),
+        titre: t("home.impact.videos.v1.title"),
+        duree: "4:32",
+      },
+      {
+        thumb: "📽️",
+        categorie: t("home.impact.videos.v2.category"),
+        titre: t("home.impact.videos.v2.title"),
+        duree: "7:15",
+      },
+      {
+        thumb: "🎥",
+        categorie: t("home.impact.videos.v3.category"),
+        titre: t("home.impact.videos.v3.title"),
+        duree: "3:48",
+      },
+    ],
+    [t]
+  );
+
+  const evalEtapes = useMemo(
+    () => [
+      {
+        label: t("home.impact.evaluation.steps.s1.label"),
+        desc: t("home.impact.evaluation.steps.s1.desc"),
+      },
+      {
+        label: t("home.impact.evaluation.steps.s2.label"),
+        desc: t("home.impact.evaluation.steps.s2.desc"),
+      },
+      {
+        label: t("home.impact.evaluation.steps.s3.label"),
+        desc: t("home.impact.evaluation.steps.s3.desc"),
+      },
+      {
+        label: t("home.impact.evaluation.steps.s4.label"),
+        desc: t("home.impact.evaluation.steps.s4.desc"),
+      },
+    ],
+    [t]
+  );
+
   const [activeVideo, setActiveVideo] = useState(null);
 
   return (
@@ -1363,7 +1248,7 @@ function NotreImpact({ G }) {
           viewport={{ once: true }}
           style={{ textAlign: "center", marginBottom: "3.5rem" }}
         >
-          <SectionLabel color={G.gold}>Notre impact</SectionLabel>
+          <SectionLabel color={G.gold}>{t("home.impact.sectionLabel")}</SectionLabel>
           <h2
             style={{
               fontSize: "clamp(1.9rem,3.5vw,2.8rem)",
@@ -1374,7 +1259,7 @@ function NotreImpact({ G }) {
               lineHeight: 1.1,
             }}
           >
-            Des résultats{" "}
+            {t("home.impact.titlePrefix")}{" "}
             <span
               style={{
                 background: `linear-gradient(135deg,${G.gold},#a16207)`,
@@ -1383,7 +1268,7 @@ function NotreImpact({ G }) {
                 backgroundClip: "text",
               }}
             >
-              concrets & mesurables
+              {t("home.impact.titleHighlight")}
             </span>
           </h2>
           <p
@@ -1395,8 +1280,7 @@ function NotreImpact({ G }) {
               lineHeight: 1.75,
             }}
           >
-            La transparence est au cœur de notre engagement. Voici la preuve de
-            ce que nous accomplissons ensemble.
+            {t("home.impact.subtitle")}
           </p>
         </motion.div>
 
@@ -1422,7 +1306,7 @@ function NotreImpact({ G }) {
                 display: "inline-block",
               }}
             />
-            Résultats chiffrés & indicateurs clés
+            {t("home.impact.indicatorsTitle")}
           </h3>
           <div
             style={{
@@ -1431,7 +1315,7 @@ function NotreImpact({ G }) {
               gap: "1rem",
             }}
           >
-            {INDICATEURS.map((ind, i) => (
+            {indicateurs.map((ind, i) => (
               <motion.div
                 key={ind.label}
                 initial={{ opacity: 0, y: 18 }}
@@ -1523,7 +1407,7 @@ function NotreImpact({ G }) {
                 display: "inline-block",
               }}
             />
-            Rapports d'impact
+            {t("home.impact.reportsTitle")}
           </h3>
           <div
             style={{
@@ -1532,7 +1416,7 @@ function NotreImpact({ G }) {
               gap: "1rem",
             }}
           >
-            {RAPPORTS_IMPACT.map((r) => (
+            {rapportsImpact.map((r) => (
               <motion.div
                 key={r.year}
                 whileHover={{ y: -2 }}
@@ -1580,7 +1464,9 @@ function NotreImpact({ G }) {
                         marginBottom: "0.2rem",
                       }}
                     >
-                      {r.featured ? "⭐ Dernier rapport" : "Archives"}
+                      {r.featured
+                        ? t("home.impact.reports.latestBadge")
+                        : t("home.impact.reports.archiveBadge")}
                     </div>
                     <div
                       style={{
@@ -1589,7 +1475,7 @@ function NotreImpact({ G }) {
                         color: G.slate,
                       }}
                     >
-                      Rapport {r.year}
+                      {t("home.impact.reports.reportLabel")} {r.year}
                     </div>
                   </div>
                   <div
@@ -1603,7 +1489,7 @@ function NotreImpact({ G }) {
                       border: `1px solid ${G.border}`,
                     }}
                   >
-                    {r.pages} pages
+                    {r.pages} {t("home.impact.reports.pagesLabel")}
                   </div>
                 </div>
                 <p
@@ -1633,13 +1519,15 @@ function NotreImpact({ G }) {
                     transition: "all 0.2s",
                   }}
                 >
-                  📄 Télécharger (PDF)
+                  📄 {t("home.impact.reports.downloadLabel")}
                 </a>
               </motion.div>
             ))}
+       
           </div>
-        </motion.div>
+          </motion.div>
 
+        
         {/* ── Témoignages ── */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -1667,7 +1555,7 @@ function NotreImpact({ G }) {
                 display: "inline-block",
               }}
             />
-            Témoignages & success stories
+            {t("home.impact.testimonialsTitle")}
           </h3>
           <div
             style={{
@@ -1676,9 +1564,9 @@ function NotreImpact({ G }) {
               gap: "1rem",
             }}
           >
-            {TEMOIGNAGES.map((t, i) => (
+            {temoignages.map((item, i) => (
               <motion.div
-                key={t.nom}
+                key={item.nom}
                 initial={{ opacity: 0, x: i % 2 === 0 ? -16 : 16 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
@@ -1710,7 +1598,7 @@ function NotreImpact({ G }) {
                     margin: "0 0 1.25rem",
                   }}
                 >
-                  {t.quote}
+                  {item.quote}
                 </p>
                 <div
                   style={{
@@ -1732,7 +1620,7 @@ function NotreImpact({ G }) {
                       fontSize: "1.3rem",
                     }}
                   >
-                    {t.photo}
+                    {item.photo}
                   </div>
                   <div>
                     <div
@@ -1742,7 +1630,7 @@ function NotreImpact({ G }) {
                         color: G.slate,
                       }}
                     >
-                      {t.nom}
+                      {item.nom}
                     </div>
                     <div
                       style={{
@@ -1751,7 +1639,7 @@ function NotreImpact({ G }) {
                         color: G.slateMid,
                       }}
                     >
-                      {t.role}
+                      {item.role}
                     </div>
                   </div>
                 </div>
@@ -1787,7 +1675,7 @@ function NotreImpact({ G }) {
                 display: "inline-block",
               }}
             />
-            Vidéos & reportages
+            {t("home.impact.videosTitle")}
           </h3>
           <div
             style={{
@@ -1796,7 +1684,7 @@ function NotreImpact({ G }) {
               gap: "1rem",
             }}
           >
-            {VIDEOS.map((v, i) => (
+            {videos.map((v, i) => (
               <motion.div
                 key={v.titre}
                 whileHover={{ y: -3 }}
@@ -1893,7 +1781,7 @@ function NotreImpact({ G }) {
                         fontWeight: 700,
                       }}
                     >
-                      ▶ Lecture simulée — intégrez ici votre lecteur vidéo
+                      ▶ {t("home.impact.videos.playerPlaceholder")}
                     </motion.div>
                   )}
                 </div>
@@ -1928,7 +1816,7 @@ function NotreImpact({ G }) {
                 display: "inline-block",
               }}
             />
-            Évaluation & suivi des projets
+            {t("home.impact.evaluationTitle")}
           </h3>
           <div
             style={{
@@ -1947,7 +1835,7 @@ function NotreImpact({ G }) {
                 position: "relative",
               }}
             >
-              {EVAL_ETAPES.map((e, i) => (
+              {evalEtapes.map((e, i) => (
                 <motion.div
                   key={e.label}
                   initial={{ opacity: 0, y: 16 }}
@@ -1956,8 +1844,7 @@ function NotreImpact({ G }) {
                   transition={{ delay: i * 0.12 }}
                   style={{ padding: "1.5rem", position: "relative" }}
                 >
-                  {/* connector line */}
-                  {i < EVAL_ETAPES.length - 1 && (
+                  {i < evalEtapes.length - 1 && (
                     <div
                       style={{
                         position: "absolute",
@@ -2015,111 +1902,181 @@ function NotreImpact({ G }) {
             </div>
           </div>
         </motion.div>
+        
       </div>
     </section>
   );
 }
-
 /* ─── QuiSommesNous ──────────────────────────────────────── */
-const QSN_TABS = [
-  {
-    id: "histoire",
-    icon: "📖",
-    label: "Notre histoire",
-    content: {
-      title: "Notre histoire",
-      body: "Fondée en 2010, notre organisation est née de la volonté de citoyens engagés face aux défis de leur territoire. En plus d'une décennie d'actions concrètes, nous avons construit un réseau solide de partenaires, de bénévoles et de bénéficiaires qui partagent une même vision : un avenir plus juste et solidaire pour tous.",
-      highlight: "Plus de 10 ans d'engagement au service des communautés.",
-    },
-  },
-  {
-    id: "mission",
-    icon: "🎯",
-    label: "Mission & valeurs",
-    content: {
-      title: "Mission & valeurs",
-      body: "Notre mission est de promouvoir le développement durable et l'inclusion sociale à travers des programmes innovants et participatifs. Nous nous appuyons sur quatre valeurs fondamentales : l'intégrité, la solidarité, l'innovation et la transparence.",
-      values: ["Intégrité", "Solidarité", "Innovation", "Transparence"],
-    },
-  },
-  {
-    id: "gouvernance",
-    icon: "🏛️",
-    label: "Gouvernance",
-    content: {
-      title: "Gouvernance",
-      body: "Notre structure de gouvernance garantit une gestion rigoureuse et démocratique. Le Conseil d'administration, composé de 9 membres élus, supervise la stratégie globale, tandis que l'équipe dirigeante assure la mise en œuvre opérationnelle au quotidien.",
-      members: [
-        { role: "Présidente", name: "Amina Warsame" },
-        { role: "Vice-président", name: "Hassan Farah" },
-        { role: "Trésorière", name: "Hodan Elmi" },
-        { role: "Secrétaire général", name: "Yusuf Ibrahim" },
-      ],
-    },
-  },
-  {
-    id: "equipe",
-    icon: "👥",
-    label: "Équipe opérationnelle",
-    content: {
-      title: "Équipe opérationnelle",
-      body: "Notre équipe pluridisciplinaire de 24 collaborateurs permanents et 150+ bénévoles actifs met son expertise au service de nos programmes. Chaque membre est animé par un engagement profond envers notre mission.",
-      stats: [
-        { val: "24", label: "Permanents" },
-        { val: "150+", label: "Bénévoles" },
-        { val: "8", label: "Nationalités" },
-        { val: "12", label: "Programmes" },
-      ],
-    },
-  },
-  {
-    id: "statuts",
-    icon: "📋",
-    label: "Statuts & utilité publique",
-    content: {
-      title: "Statuts & reconnaissance d'utilité publique",
-      body: "Reconnue d'utilité publique depuis 2015 par décret, notre organisation bénéficie d'un cadre légal robuste qui renforce la confiance de nos partenaires et donateurs. Nos statuts sont disponibles en téléchargement ci-dessous.",
-      docs: [
-        { name: "Statuts constitutifs (PDF)", href: "#" },
-        { name: "Décret de reconnaissance (PDF)", href: "#" },
-        { name: "Récépissé de déclaration (PDF)", href: "#" },
-      ],
-    },
-  },
-  {
-    id: "rapport",
-    icon: "📊",
-    label: "Rapport annuel",
-    content: {
-      title: "Rapport annuel",
-      body: "Notre rapport annuel détaille l'ensemble de nos activités, nos résultats mesurables et l'utilisation des ressources. Il témoigne de notre engagement envers la redevabilité et la transparence vis-à-vis de nos parties prenantes.",
-      docs: [
-        { name: "Rapport annuel 2024 (PDF)", href: "#", featured: true },
-        { name: "Rapport annuel 2023 (PDF)", href: "#" },
-        { name: "Rapport annuel 2022 (PDF)", href: "#" },
-      ],
-    },
-  },
-  {
-    id: "finances",
-    icon: "💰",
-    label: "Transparence financière",
-    content: {
-      title: "Transparence financière",
-      body: "Nous publions chaque année nos comptes certifiés par un commissaire aux comptes indépendant. La répartition de nos ressources reflète notre engagement à maximiser l'impact direct sur nos bénéficiaires.",
-      budget: [
-        { label: "Actions terrain", pct: 72, color: "#16a34a" },
-        { label: "Fonctionnement", pct: 18, color: "#22c55e" },
-        { label: "Communication", pct: 6, color: "#86efac" },
-        { label: "Levée de fonds", pct: 4, color: "#bbf7d0" },
-      ],
-    },
-  },
-];
-
 function QuiSommesNous({ G }) {
+  const { t } = useTranslation();
+  console.log("typeof t =", typeof t);
+  console.log("t =", t);
+  const qsnTabs = useMemo(
+    () => [
+      {
+        id: "histoire",
+        icon: "📖",
+        label: t("home.about.tabs.histoire.label"),
+        content: {
+          title: t("home.about.tabs.histoire.title"),
+          body: t("home.about.tabs.histoire.body"),
+          highlight: t("home.about.tabs.histoire.highlight"),
+        },
+      },
+      {
+        id: "mission",
+        icon: "🎯",
+        label: t("home.about.tabs.mission.label"),
+        content: {
+          title: t("home.about.tabs.mission.title"),
+          body: t("home.about.tabs.mission.body"),
+          values: [
+            t("home.about.tabs.mission.values.integrity"),
+            t("home.about.tabs.mission.values.solidarity"),
+            t("home.about.tabs.mission.values.innovation"),
+            t("home.about.tabs.mission.values.transparency"),
+          ],
+        },
+      },
+      {
+        id: "gouvernance",
+        icon: "🏛️",
+        label: t("home.about.tabs.gouvernance.label"),
+        content: {
+          title: t("home.about.tabs.gouvernance.title"),
+          body: t("home.about.tabs.gouvernance.body"),
+          members: [
+            {
+              role: t("home.about.tabs.gouvernance.members.president.role"),
+              name: t("home.about.tabs.gouvernance.members.president.name"),
+            },
+            {
+              role: t("home.about.tabs.gouvernance.members.vicePresident.role"),
+              name: t("home.about.tabs.gouvernance.members.vicePresident.name"),
+            },
+            {
+              role: t("home.about.tabs.gouvernance.members.treasurer.role"),
+              name: t("home.about.tabs.gouvernance.members.treasurer.name"),
+            },
+            {
+              role: t("home.about.tabs.gouvernance.members.secretary.role"),
+              name: t("home.about.tabs.gouvernance.members.secretary.name"),
+            },
+          ],
+        },
+      },
+      {
+        id: "equipe",
+        icon: "👥",
+        label: t("home.about.tabs.equipe.label"),
+        content: {
+          title: t("home.about.tabs.equipe.title"),
+          body: t("home.about.tabs.equipe.body"),
+          stats: [
+            {
+              val: "24",
+              label: t("home.about.tabs.equipe.stats.permanent"),
+            },
+            {
+              val: "150+",
+              label: t("home.about.tabs.equipe.stats.volunteers"),
+            },
+            {
+              val: "8",
+              label: t("home.about.tabs.equipe.stats.nationalities"),
+            },
+            {
+              val: "12",
+              label: t("home.about.tabs.equipe.stats.programs"),
+            },
+          ],
+        },
+      },
+      {
+        id: "statuts",
+        icon: "📋",
+        label: t("home.about.tabs.statuts.label"),
+        content: {
+          title: t("home.about.tabs.statuts.title"),
+          body: t("home.about.tabs.statuts.body"),
+          docs: [
+            {
+              name: t("home.about.tabs.statuts.docs.constitutive"),
+              href: "#",
+            },
+            {
+              name: t("home.about.tabs.statuts.docs.decree"),
+              href: "#",
+            },
+            {
+              name: t("home.about.tabs.statuts.docs.receipt"),
+              href: "#",
+            },
+          ],
+        },
+      },
+      {
+        id: "rapport",
+        icon: "📊",
+        label: t("home.about.tabs.rapport.label"),
+        content: {
+          title: t("home.about.tabs.rapport.title"),
+          body: t("home.about.tabs.rapport.body"),
+          docs: [
+            {
+              name: t("home.about.tabs.rapport.docs.report2024"),
+              href: "#",
+              featured: true,
+            },
+            {
+              name: t("home.about.tabs.rapport.docs.report2023"),
+              href: "#",
+            },
+            {
+              name: t("home.about.tabs.rapport.docs.report2022"),
+              href: "#",
+            },
+          ],
+        },
+      },
+      {
+        id: "finances",
+        icon: "💰",
+        label: t("home.about.tabs.finances.label"),
+        content: {
+          title: t("home.about.tabs.finances.title"),
+          body: t("home.about.tabs.finances.body"),
+          budget: [
+            {
+              label: t("home.about.tabs.finances.budget.fieldActions"),
+              pct: 72,
+              color: "#16a34a",
+            },
+            {
+              label: t("home.about.tabs.finances.budget.operations"),
+              pct: 18,
+              color: "#22c55e",
+            },
+            {
+              label: t("home.about.tabs.finances.budget.communication"),
+              pct: 6,
+              color: "#86efac",
+            },
+            {
+              label: t("home.about.tabs.finances.budget.fundraising"),
+              pct: 4,
+              color: "#bbf7d0",
+            },
+          ],
+        },
+      },
+    ],
+    [t]
+  );
+
   const [active, setActive] = useState("histoire");
-  const tab = QSN_TABS.find((t) => t.id === active);
+  const tab = qsnTabs.find((tab) => tab.id === active);
 
   return (
     <section
@@ -2134,7 +2091,7 @@ function QuiSommesNous({ G }) {
           viewport={{ once: true }}
           style={{ textAlign: "center", marginBottom: "3.5rem" }}
         >
-          <SectionLabel>Qui sommes-nous</SectionLabel>
+          <SectionLabel>{t("home.about.sectionLabel")}</SectionLabel>
           <h2
             style={{
               fontSize: "clamp(1.9rem, 3.5vw, 2.8rem)",
@@ -2145,7 +2102,7 @@ function QuiSommesNous({ G }) {
               lineHeight: 1.1,
             }}
           >
-            À propos de{" "}
+            {t("home.about.titlePrefix")}{" "}
             <span
               style={{
                 background: `linear-gradient(135deg, ${G.green}, #15803d)`,
@@ -2154,7 +2111,7 @@ function QuiSommesNous({ G }) {
                 backgroundClip: "text",
               }}
             >
-              notre organisation
+              {t("home.about.titleHighlight")}
             </span>
           </h2>
           <p
@@ -2166,8 +2123,7 @@ function QuiSommesNous({ G }) {
               lineHeight: 1.75,
             }}
           >
-            Découvrez qui nous sommes, ce qui nous anime et comment nous
-            agissons pour un impact durable.
+            {t("home.about.subtitle")}
           </p>
         </motion.div>
 
@@ -2195,12 +2151,12 @@ function QuiSommesNous({ G }) {
               top: "88px",
             }}
           >
-            {QSN_TABS.map((tab) => {
-              const isActive = active === tab.id;
+            {qsnTabs.map((tabItem) => {
+              const isActive = active === tabItem.id;
               return (
                 <button
-                  key={tab.id}
-                  onClick={() => setActive(tab.id)}
+                  key={tabItem.id}
+                  onClick={() => setActive(tabItem.id)}
                   style={{
                     display: "flex",
                     alignItems: "center",
@@ -2233,9 +2189,9 @@ function QuiSommesNous({ G }) {
                   }}
                 >
                   <span style={{ fontSize: "1.1rem", flexShrink: 0 }}>
-                    {tab.icon}
+                    {tabItem.icon}
                   </span>
-                  <span style={{ lineHeight: 1.3 }}>{tab.label}</span>
+                  <span style={{ lineHeight: 1.3 }}>{tabItem.label}</span>
                   {isActive && (
                     <span
                       style={{
@@ -2539,18 +2495,130 @@ function QuiSommesNous({ G }) {
     </section>
   );
 }
-function Actualites({ G }) {
+function Actualites({ G}) {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState("blog");
   const [email, setEmail] = useState("");
   const [newsletterName, setNewsletterName] = useState("");
 
-  const TABS = [
-    { id: "blog", label: "📝 Blog / Articles" },
-    { id: "presse", label: "📣 Communiqués" },
-    { id: "events", label: "📅 Événements" },
-    { id: "newsletter", label: "📧 Newsletter" },
-    { id: "kit", label: "🗂 Espace presse" },
-  ];
+  const tabs = useMemo(
+    () => [
+      { id: "blog", label: t("home.news.tabs.blog") },
+      { id: "presse", label: t("home.news.tabs.presse") },
+      { id: "events", label: t("home.news.tabs.events") },
+      { id: "newsletter", label: t("home.news.tabs.newsletter") },
+      { id: "kit", label: t("home.news.tabs.kit") },
+    ],
+    [t]
+  );
+
+  const articles = useMemo(
+    () => [
+      {
+        emoji: "💧",
+        catBg: "#eff6ff",
+        catColor: "#3b82f6",
+        catBorder: "rgba(59,130,246,0.2)",
+        categorie: t("home.news.blog.a1.category"),
+        date: t("home.news.blog.a1.date"),
+        title: t("home.news.blog.a1.title"),
+        desc: t("home.news.blog.a1.desc"),
+      },
+      {
+        emoji: "📚",
+        catBg: "#f0fdf4",
+        catColor: "#16a34a",
+        catBorder: "rgba(22,163,74,0.2)",
+        categorie: t("home.news.blog.a2.category"),
+        date: t("home.news.blog.a2.date"),
+        title: t("home.news.blog.a2.title"),
+        desc: t("home.news.blog.a2.desc"),
+      },
+      {
+        emoji: "👩‍💼",
+        catBg: "#faf5ff",
+        catColor: "#a855f7",
+        catBorder: "rgba(168,85,247,0.2)",
+        categorie: t("home.news.blog.a3.category"),
+        date: t("home.news.blog.a3.date"),
+        title: t("home.news.blog.a3.title"),
+        desc: t("home.news.blog.a3.desc"),
+      },
+    ],
+    [t]
+  );
+
+  const communiques = useMemo(
+    () => [
+      {
+        tag: t("home.news.presse.c1.tag"),
+        date: t("home.news.presse.c1.date"),
+        title: t("home.news.presse.c1.title"),
+      },
+      {
+        tag: t("home.news.presse.c2.tag"),
+        date: t("home.news.presse.c2.date"),
+        title: t("home.news.presse.c2.title"),
+      },
+      {
+        tag: t("home.news.presse.c3.tag"),
+        date: t("home.news.presse.c3.date"),
+        title: t("home.news.presse.c3.title"),
+      },
+    ],
+    [t]
+  );
+
+  const evenements = useMemo(
+    () => [
+      {
+        emoji: "🎤",
+        avenir: true,
+        date: t("home.news.events.e1.date"),
+        title: t("home.news.events.e1.title"),
+        lieu: t("home.news.events.e1.lieu"),
+        desc: t("home.news.events.e1.desc"),
+      },
+      {
+        emoji: "🌱",
+        avenir: true,
+        date: t("home.news.events.e2.date"),
+        title: t("home.news.events.e2.title"),
+        lieu: t("home.news.events.e2.lieu"),
+        desc: t("home.news.events.e2.desc"),
+      },
+      {
+        emoji: "📊",
+        avenir: false,
+        date: t("home.news.events.e3.date"),
+        title: t("home.news.events.e3.title"),
+        lieu: t("home.news.events.e3.lieu"),
+        desc: t("home.news.events.e3.desc"),
+      },
+    ],
+    [t]
+  );
+
+  const newsletterArchives = useMemo(
+    () => [
+      t("home.news.newsletter.archives.n1"),
+      t("home.news.newsletter.archives.n2"),
+      t("home.news.newsletter.archives.n3"),
+      t("home.news.newsletter.archives.n4"),
+    ],
+    [t]
+  );
+
+  const kitFiles = useMemo(
+    () => [
+      { icon: "📦", name: t("home.news.kit.files.f1.name"), size: "8.4 Mo" },
+      { icon: "🖼", name: t("home.news.kit.files.f2.name"), size: "2.1 Mo" },
+      { icon: "📷", name: t("home.news.kit.files.f3.name"), size: "120 Mo" },
+      { icon: "📄", name: t("home.news.kit.files.f4.name"), size: "1.8 Mo" },
+      { icon: "📊", name: t("home.news.kit.files.f5.name"), size: "3.2 Mo" },
+    ],
+    [t]
+  );
 
   return (
     <section
@@ -2564,7 +2632,7 @@ function Actualites({ G }) {
           viewport={{ once: true }}
           style={{ textAlign: "center", marginBottom: "3.5rem" }}
         >
-          <SectionLabel>Actualités</SectionLabel>
+          <SectionLabel>{t("home.news.sectionLabel")}</SectionLabel>
           <h2
             style={{
               fontSize: "clamp(1.9rem,3.5vw,2.8rem)",
@@ -2575,7 +2643,7 @@ function Actualites({ G }) {
               lineHeight: 1.1,
             }}
           >
-            Restez{" "}
+            {t("home.news.titlePrefix")}{" "}
             <span
               style={{
                 background: `linear-gradient(135deg,${G.green},#15803d)`,
@@ -2584,7 +2652,7 @@ function Actualites({ G }) {
                 backgroundClip: "text",
               }}
             >
-              informés
+              {t("home.news.titleHighlight")}
             </span>
           </h2>
           <p
@@ -2596,8 +2664,7 @@ function Actualites({ G }) {
               lineHeight: 1.75,
             }}
           >
-            Suivez nos actualités, événements et accédez aux ressources presse
-            de notre organisation.
+            {t("home.news.subtitle")}
           </p>
         </motion.div>
 
@@ -2610,7 +2677,7 @@ function Actualites({ G }) {
             marginBottom: "2rem",
           }}
         >
-          {TABS.map((tab) => (
+          {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
@@ -2649,7 +2716,7 @@ function Actualites({ G }) {
                     gap: "1.1rem",
                   }}
                 >
-                  {ARTICLES.map((a) => (
+                  {articles.map((a) => (
                     <div
                       key={a.title}
                       style={{
@@ -2694,9 +2761,7 @@ function Actualites({ G }) {
                           >
                             {a.categorie}
                           </span>
-                          <span
-                            style={{ fontSize: "0.68rem", color: G.slateLight }}
-                          >
+                          <span style={{ fontSize: "0.68rem", color: G.slateLight }}>
                             {a.date}
                           </span>
                         </div>
@@ -2733,7 +2798,7 @@ function Actualites({ G }) {
                             cursor: "pointer",
                           }}
                         >
-                          Lire l'article →
+                          {t("home.news.blog.readMore")}
                         </button>
                       </div>
                     </div>
@@ -2752,7 +2817,7 @@ function Actualites({ G }) {
                       cursor: "pointer",
                     }}
                   >
-                    Voir tous les articles →
+                    {t("home.news.blog.viewAll")}
                   </button>
                 </div>
               </div>
@@ -2760,14 +2825,8 @@ function Actualites({ G }) {
 
             {/* Communiqués */}
             {activeTab === "presse" && (
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "0.75rem",
-                }}
-              >
-                {COMMUNIQUES.map((c) => (
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                {communiques.map((c) => (
                   <div
                     key={c.title}
                     style={{
@@ -2783,13 +2842,7 @@ function Actualites({ G }) {
                       boxShadow: "0 2px 12px rgba(0,0,0,0.04)",
                     }}
                   >
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "1rem",
-                      }}
-                    >
+                    <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
                       <div style={{ fontSize: "1.5rem" }}>📄</div>
                       <div>
                         <div
@@ -2813,19 +2866,11 @@ function Actualites({ G }) {
                           >
                             {c.tag}
                           </span>
-                          <span
-                            style={{ fontSize: "0.68rem", color: G.slateLight }}
-                          >
+                          <span style={{ fontSize: "0.68rem", color: G.slateLight }}>
                             {c.date}
                           </span>
                         </div>
-                        <div
-                          style={{
-                            fontSize: "0.9rem",
-                            fontWeight: 800,
-                            color: G.slate,
-                          }}
-                        >
+                        <div style={{ fontSize: "0.9rem", fontWeight: 800, color: G.slate }}>
                           {c.title}
                         </div>
                       </div>
@@ -2843,7 +2888,7 @@ function Actualites({ G }) {
                         whiteSpace: "nowrap",
                       }}
                     >
-                      Télécharger PDF
+                      {t("home.news.presse.downloadBtn")}
                     </button>
                   </div>
                 ))}
@@ -2859,7 +2904,7 @@ function Actualites({ G }) {
                   gap: "1.1rem",
                 }}
               >
-                {EVENEMENTS.map((ev) => (
+                {evenements.map((ev) => (
                   <div
                     key={ev.title}
                     style={{
@@ -2892,11 +2937,11 @@ function Actualites({ G }) {
                           border: `1px solid ${ev.avenir ? G.greenBorder : "rgba(184,134,11,0.2)"}`,
                         }}
                       >
-                        {ev.avenir ? "À venir" : "Passé"}
+                        {ev.avenir
+                          ? t("home.news.events.upcomingBadge")
+                          : t("home.news.events.pastBadge")}
                       </span>
-                      <span
-                        style={{ fontSize: "0.68rem", color: G.slateLight }}
-                      >
+                      <span style={{ fontSize: "0.68rem", color: G.slateLight }}>
                         {ev.date}
                       </span>
                     </div>
@@ -2943,7 +2988,9 @@ function Actualites({ G }) {
                         cursor: "pointer",
                       }}
                     >
-                      {ev.avenir ? "S'inscrire →" : "Voir le compte-rendu →"}
+                      {ev.avenir
+                        ? t("home.news.events.registerBtn")
+                        : t("home.news.events.reportBtn")}
                     </button>
                   </div>
                 ))}
@@ -2980,16 +3027,10 @@ function Actualites({ G }) {
                         display: "inline-block",
                       }}
                     />
-                    Archives Newsletter
+                    {t("home.news.newsletter.archivesTitle")}
                   </h3>
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: "0.65rem",
-                    }}
-                  >
-                    {NEWSLETTER_ARCHIVES.map((n, i) => (
+                  <div style={{ display: "flex", flexDirection: "column", gap: "0.65rem" }}>
+                    {newsletterArchives.map((n, i) => (
                       <div
                         key={n}
                         style={{
@@ -3021,7 +3062,7 @@ function Actualites({ G }) {
                             cursor: "pointer",
                           }}
                         >
-                          📄 Voir
+                          📄 {t("home.news.newsletter.viewBtn")}
                         </button>
                       </div>
                     ))}
@@ -3035,9 +3076,7 @@ function Actualites({ G }) {
                     padding: "1.75rem",
                   }}
                 >
-                  <div style={{ fontSize: "2rem", marginBottom: "0.75rem" }}>
-                    📬
-                  </div>
+                  <div style={{ fontSize: "2rem", marginBottom: "0.75rem" }}>📬</div>
                   <h4
                     style={{
                       fontSize: "1rem",
@@ -3046,7 +3085,7 @@ function Actualites({ G }) {
                       marginBottom: "0.4rem",
                     }}
                   >
-                    S'abonner à la newsletter
+                    {t("home.news.newsletter.subscribeTitle")}
                   </h4>
                   <p
                     style={{
@@ -3056,16 +3095,9 @@ function Actualites({ G }) {
                       marginBottom: "1.1rem",
                     }}
                   >
-                    Actualités, rapports et événements livrés dans votre boîte
-                    mail. Désabonnement en un clic.
+                    {t("home.news.newsletter.subscribeDesc")}
                   </p>
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: "0.65rem",
-                    }}
-                  >
+                  <div style={{ display: "flex", flexDirection: "column", gap: "0.65rem" }}>
                     <div>
                       <label
                         style={{
@@ -3076,12 +3108,12 @@ function Actualites({ G }) {
                           marginBottom: "0.3rem",
                         }}
                       >
-                        Prénom et nom
+                        {t("home.news.newsletter.nameLabel")}
                       </label>
                       <input
                         value={newsletterName}
                         onChange={(e) => setNewsletterName(e.target.value)}
-                        placeholder="Votre nom"
+                        placeholder={t("home.news.newsletter.namePlaceholder")}
                         style={{
                           width: "100%",
                           padding: "0.65rem 0.85rem",
@@ -3104,13 +3136,13 @@ function Actualites({ G }) {
                           marginBottom: "0.3rem",
                         }}
                       >
-                        Adresse email
+                        {t("home.news.newsletter.emailLabel")}
                       </label>
                       <input
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        placeholder="vous@exemple.com"
+                        placeholder={t("home.news.newsletter.emailPlaceholder")}
                         style={{
                           width: "100%",
                           padding: "0.65rem 0.85rem",
@@ -3135,17 +3167,11 @@ function Actualites({ G }) {
                         cursor: "pointer",
                       }}
                     >
-                      S'abonner gratuitement →
+                      {t("home.news.newsletter.subscribeBtn")}
                     </button>
                   </div>
-                  <p
-                    style={{
-                      fontSize: "0.68rem",
-                      color: G.slateLight,
-                      marginTop: "0.75rem",
-                    }}
-                  >
-                    🔒 Données confidentielles. Désabonnement à tout moment.
+                  <p style={{ fontSize: "0.68rem", color: G.slateLight, marginTop: "0.75rem" }}>
+                    {t("home.news.newsletter.privacyNote")}
                   </p>
                 </div>
               </div>
@@ -3153,13 +3179,7 @@ function Actualites({ G }) {
 
             {/* Kit presse */}
             {activeTab === "kit" && (
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: "1.5rem",
-                }}
-              >
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}>
                 <div>
                   <h3
                     style={{
@@ -3181,42 +3201,10 @@ function Actualites({ G }) {
                         display: "inline-block",
                       }}
                     />
-                    Ressources téléchargeables
+                    {t("home.news.kit.filesTitle")}
                   </h3>
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: "0.65rem",
-                    }}
-                  >
-                    {[
-                      {
-                        icon: "📦",
-                        name: "Kit presse complet (ZIP)",
-                        size: "8.4 Mo",
-                      },
-                      {
-                        icon: "🖼",
-                        name: "Logos HD (PNG / SVG / EPS)",
-                        size: "2.1 Mo",
-                      },
-                      {
-                        icon: "📷",
-                        name: "Photothèque terrain (40 photos)",
-                        size: "120 Mo",
-                      },
-                      {
-                        icon: "📄",
-                        name: "Dossier de presse 2024 (PDF)",
-                        size: "1.8 Mo",
-                      },
-                      {
-                        icon: "📊",
-                        name: "Infographies résultats 2024",
-                        size: "3.2 Mo",
-                      },
-                    ].map((d) => (
+                  <div style={{ display: "flex", flexDirection: "column", gap: "0.65rem" }}>
+                    {kitFiles.map((d) => (
                       <div
                         key={d.name}
                         style={{
@@ -3230,30 +3218,13 @@ function Actualites({ G }) {
                           gap: "1rem",
                         }}
                       >
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "0.75rem",
-                          }}
-                        >
+                        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
                           <span style={{ fontSize: "1.3rem" }}>{d.icon}</span>
                           <div>
-                            <div
-                              style={{
-                                fontSize: "0.85rem",
-                                fontWeight: 700,
-                                color: G.slate,
-                              }}
-                            >
+                            <div style={{ fontSize: "0.85rem", fontWeight: 700, color: G.slate }}>
                               {d.name}
                             </div>
-                            <div
-                              style={{
-                                fontSize: "0.68rem",
-                                color: G.slateLight,
-                              }}
-                            >
+                            <div style={{ fontSize: "0.68rem", color: G.slateLight }}>
                               {d.size}
                             </div>
                           </div>
@@ -3270,7 +3241,7 @@ function Actualites({ G }) {
                             cursor: "pointer",
                           }}
                         >
-                          ↓ DL
+                          {t("home.news.kit.downloadBtn")}
                         </button>
                       </div>
                     ))}
@@ -3297,7 +3268,7 @@ function Actualites({ G }) {
                         display: "inline-block",
                       }}
                     />
-                    Contact presse
+                    {t("home.news.kit.pressContactTitle")}
                   </h3>
                   <div
                     style={{
@@ -3309,44 +3280,20 @@ function Actualites({ G }) {
                       boxShadow: "0 2px 12px rgba(0,0,0,0.04)",
                     }}
                   >
-                    <div style={{ fontSize: "1.5rem", marginBottom: "0.6rem" }}>
-                      👤
+                    <div style={{ fontSize: "1.5rem", marginBottom: "0.6rem" }}>👤</div>
+                    <div style={{ fontSize: "0.9rem", fontWeight: 800, color: G.slate, marginBottom: "0.2rem" }}>
+                      {t("home.news.kit.pressContactRole")}
                     </div>
-                    <div
-                      style={{
-                        fontSize: "0.9rem",
-                        fontWeight: 800,
-                        color: G.slate,
-                        marginBottom: "0.2rem",
-                      }}
-                    >
-                      Responsable Communication
+                    <div style={{ fontSize: "0.82rem", color: G.slateMid, marginBottom: "0.75rem" }}>
+                      {t("home.news.kit.pressContactDept")}
                     </div>
-                    <div
-                      style={{
-                        fontSize: "0.82rem",
-                        color: G.slateMid,
-                        marginBottom: "0.75rem",
-                      }}
-                    >
-                      Service Relations Presse
-                    </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: "0.4rem",
-                        fontSize: "0.82rem",
-                      }}
-                    >
+                    <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem", fontSize: "0.82rem" }}>
                       <div style={{ color: G.green, fontWeight: 700 }}>
                         ✉ presse@organisation.org
                       </div>
-                      <div style={{ color: G.slateMid }}>
-                        📞 +253 XX XX XX XX
-                      </div>
+                      <div style={{ color: G.slateMid }}>📞 +253 XX XX XX XX</div>
                       <div style={{ color: G.slateLight }}>
-                        🕐 Disponible lun–ven, 8h–17h
+                        🕐 {t("home.news.kit.pressContactHours")}
                       </div>
                     </div>
                   </div>
@@ -3361,9 +3308,10 @@ function Actualites({ G }) {
                       lineHeight: 1.7,
                     }}
                   >
-                    <strong style={{ color: G.green }}>Accréditation :</strong>{" "}
-                    Pour toute demande d'entretien ou reportage terrain, merci
-                    de nous contacter 5 jours ouvrables à l'avance.
+                    <strong style={{ color: G.green }}>
+                      {t("home.news.kit.accreditationLabel")}
+                    </strong>{" "}
+                    {t("home.news.kit.accreditationDesc")}
                   </div>
                 </div>
               </div>
@@ -3377,36 +3325,124 @@ function Actualites({ G }) {
 }
 // Requires: import { Link } from 'react-router-dom';
 function Soutenir({ G }) {
+  const { t } = useTranslation();
   const [donType, setDonType] = useState("instantane");
   const [selectedAmount, setSelectedAmount] = useState("");
-  const [donStep, setDonStep] = useState("amounts"); // "amounts" | "wallet" | "otp" | "success"
+  const [donStep, setDonStep] = useState("amounts");
   const [selectedWallet, setSelectedWallet] = useState("");
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
   const [generatedOtp, setGeneratedOtp] = useState("");
-  const [benevoleForm, setBenevoleForm] = useState({
-    nom: "",
-    email: "",
-    competence: "",
-    dispo: "",
-  });
+  const [benevoleForm, setBenevoleForm] = useState({ nom: "", email: "", competence: "", dispo: "" });
   const [benevoleSubmitted, setBenevoleSubmitted] = useState(false);
 
-  const DON_TABS = [
-    { id: "instantane", label: "Don instantané" },
-    { id: "bancaire", label: "Don bancaire" },
-    { id: "carte", label: "Carte bancaire" },
-  ];
+  const donTabs = useMemo(
+    () => [
+      { id: "instantane", label: t("home.support.donTabs.instant") },
+      { id: "bancaire",   label: t("home.support.donTabs.bank")    },
+      { id: "carte",      label: t("home.support.donTabs.card")     },
+    ],
+    [t]
+  );
 
-  const AMOUNTS_Instantane = ["100$", "250$", "500$", "1000$", "2000$"];
+  const amountsInstantane = ["100$", "250$", "500$", "1000$", "2000$"];
 
-  const WALLETS = [
-    { id: "waafi", label: "Waafi", emoji: "📱" },
-    { id: "dmoney", label: "D-Money", emoji: "💳" },
-    { id: "cac", label: "CAC Pay", emoji: "🏦" },
-    { id: "saba", label: "Saba Pay", emoji: "💰" },
-    { id: "other", label: "Autre", emoji: "🔗" },
-  ];
+  const wallets = useMemo(
+    () => [
+      { id: "waafi",  label: "Waafi",   emoji: "📱" },
+      { id: "dmoney", label: "D-Money", emoji: "💳" },
+      { id: "cac",    label: "CAC Pay", emoji: "🏦" },
+      { id: "saba",   label: "Saba Pay", emoji: "💰" },
+      { id: "other",  label: t("home.support.wallets.other"), emoji: "🔗" },
+    ],
+    [t]
+  );
+
+  const whyGive = useMemo(
+    () => [
+      {
+        emoji: "🎯",
+        title: t("home.support.whyGive.w1.title"),
+        desc:  t("home.support.whyGive.w1.desc"),
+      },
+      {
+        emoji: "📊",
+        title: t("home.support.whyGive.w2.title"),
+        desc:  t("home.support.whyGive.w2.desc"),
+      },
+      {
+        emoji: "🔒",
+        title: t("home.support.whyGive.w3.title"),
+        desc:  t("home.support.whyGive.w3.desc"),
+      },
+      {
+        emoji: "🧾",
+        title: t("home.support.whyGive.w4.title"),
+        desc:  t("home.support.whyGive.w4.desc"),
+      },
+    ],
+    [t]
+  );
+
+  const mecenats = useMemo(
+    () => [
+      {
+        emoji: "🤝",
+        title: t("home.support.mecenats.m1.title"),
+        desc:  t("home.support.mecenats.m1.desc"),
+        cta:   t("home.support.mecenats.m1.cta"),
+      },
+      {
+        emoji: "💛",
+        title: t("home.support.mecenats.m2.title"),
+        desc:  t("home.support.mecenats.m2.desc"),
+        cta:   t("home.support.mecenats.m2.cta"),
+        badges: [
+          t("home.support.mecenats.m2.badge1"),
+          t("home.support.mecenats.m2.badge2"),
+        ],
+      },
+      {
+        emoji: "🌐",
+        title: t("home.support.mecenats.m3.title"),
+        desc:  t("home.support.mecenats.m3.desc"),
+        cta:   t("home.support.mecenats.m3.cta"),
+      },
+    ],
+    [t]
+  );
+
+  const benevoleRoles = useMemo(
+    () => [
+      { emoji: "⚕️", role: t("home.support.volunteer.roles.r1.role"), dispo: t("home.support.volunteer.roles.r1.dispo") },
+      { emoji: "💻", role: t("home.support.volunteer.roles.r2.role"), dispo: t("home.support.volunteer.roles.r2.dispo") },
+      { emoji: "📢", role: t("home.support.volunteer.roles.r3.role"), dispo: t("home.support.volunteer.roles.r3.dispo") },
+      { emoji: "🚚", role: t("home.support.volunteer.roles.r4.role"), dispo: t("home.support.volunteer.roles.r4.dispo") },
+    ],
+    [t]
+  );
+
+  const competenceOptions = useMemo(
+    () => [
+      t("home.support.volunteer.competences.health"),
+      t("home.support.volunteer.competences.education"),
+      t("home.support.volunteer.competences.it"),
+      t("home.support.volunteer.competences.communication"),
+      t("home.support.volunteer.competences.logistics"),
+      t("home.support.volunteer.competences.legal"),
+      t("home.support.volunteer.competences.other"),
+    ],
+    [t]
+  );
+
+  const dispoOptions = useMemo(
+    () => [
+      t("home.support.volunteer.dispo.occasional"),
+      t("home.support.volunteer.dispo.regular"),
+      t("home.support.volunteer.dispo.longterm"),
+    ],
+    [t]
+  );
 
   const handleAmountSelect = (amount) => {
     setSelectedAmount(amount);
@@ -3425,9 +3461,7 @@ function Soutenir({ G }) {
   };
 
   const handleConfirmOtp = () => {
-    if (otp === generatedOtp) {
-      setDonStep("success");
-    }
+    if (otp === generatedOtp) setDonStep("success");
   };
 
   const resetDon = () => {
@@ -3439,10 +3473,7 @@ function Soutenir({ G }) {
   };
 
   return (
-    <section
-      id="soutenir"
-      style={{ background: G.white, padding: "6rem 1.5rem" }}
-    >
+    <section id="soutenir" style={{ background: G.white, padding: "6rem 1.5rem" }}>
       <div style={{ maxWidth: 1200, margin: "0 auto" }}>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -3450,7 +3481,7 @@ function Soutenir({ G }) {
           viewport={{ once: true }}
           style={{ textAlign: "center", marginBottom: "3.5rem" }}
         >
-          <SectionLabel color={G.gold}>Soutenir</SectionLabel>
+          <SectionLabel color={G.gold}>{t("home.support.sectionLabel")}</SectionLabel>
           <h2
             style={{
               fontSize: "clamp(1.9rem,3.5vw,2.8rem)",
@@ -3461,7 +3492,7 @@ function Soutenir({ G }) {
               lineHeight: 1.1,
             }}
           >
-            Agissez à nos{" "}
+            {t("home.support.titlePrefix")}{" "}
             <span
               style={{
                 background: `linear-gradient(135deg,${G.gold},#a16207)`,
@@ -3470,267 +3501,85 @@ function Soutenir({ G }) {
                 backgroundClip: "text",
               }}
             >
-              côtés
+              {t("home.support.titleHighlight")}
             </span>
           </h2>
-          <p
-            style={{
-              color: G.slateMid,
-              maxWidth: 520,
-              margin: "0 auto",
-              fontSize: "0.97rem",
-              lineHeight: 1.75,
-            }}
-          >
-            Votre soutien — financier ou en temps — transforme des vies. Chaque
-            geste compte, quelle que soit sa forme.
+          <p style={{ color: G.slateMid, maxWidth: 520, margin: "0 auto", fontSize: "0.97rem", lineHeight: 1.75 }}>
+            {t("home.support.subtitle")}
           </p>
         </motion.div>
 
         {/* Pourquoi donner */}
-        <h3
-          style={{
-            fontSize: "1rem",
-            fontWeight: 800,
-            color: G.slate,
-            marginBottom: "1.25rem",
-            display: "flex",
-            alignItems: "center",
-            gap: "0.5rem",
-          }}
-        >
-          <span
-            style={{
-              width: 4,
-              height: 18,
-              background: G.gold,
-              borderRadius: 99,
-              display: "inline-block",
-            }}
-          />
-          Pourquoi donner ?
+        <h3 style={{ fontSize: "1rem", fontWeight: 800, color: G.slate, marginBottom: "1.25rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <span style={{ width: 4, height: 18, background: G.gold, borderRadius: 99, display: "inline-block" }} />
+          {t("home.support.whyGiveTitle")}
         </h3>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))",
-            gap: "0.75rem",
-            marginBottom: "3.5rem",
-          }}
-        >
-          {WHY_GIVE.map((w) => (
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: "0.75rem", marginBottom: "3.5rem" }}>
+          {whyGive.map((w) => (
             <motion.div
               key={w.title}
               whileHover={{ y: -2 }}
-              style={{
-                padding: "1.25rem",
-                borderRadius: "1rem",
-                border: `1px solid ${G.border}`,
-                background: G.offWhite,
-                display: "flex",
-                alignItems: "flex-start",
-                gap: "0.75rem",
-              }}
+              style={{ padding: "1.25rem", borderRadius: "1rem", border: `1px solid ${G.border}`, background: G.offWhite, display: "flex", alignItems: "flex-start", gap: "0.75rem" }}
             >
-              <div
-                style={{
-                  width: 36,
-                  height: 36,
-                  borderRadius: "50%",
-                  background: G.greenLight,
-                  border: `1px solid ${G.greenBorder}`,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: "1rem",
-                  flexShrink: 0,
-                }}
-              >
+              <div style={{ width: 36, height: 36, borderRadius: "50%", background: G.greenLight, border: `1px solid ${G.greenBorder}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1rem", flexShrink: 0 }}>
                 {w.emoji}
               </div>
               <div>
-                <div
-                  style={{
-                    fontSize: "0.88rem",
-                    fontWeight: 800,
-                    color: G.slate,
-                    marginBottom: "0.2rem",
-                  }}
-                >
-                  {w.title}
-                </div>
-                <div
-                  style={{
-                    fontSize: "0.78rem",
-                    color: G.slateMid,
-                    lineHeight: 1.6,
-                  }}
-                >
-                  {w.desc}
-                </div>
+                <div style={{ fontSize: "0.88rem", fontWeight: 800, color: G.slate, marginBottom: "0.2rem" }}>{w.title}</div>
+                <div style={{ fontSize: "0.78rem", color: G.slateMid, lineHeight: 1.6 }}>{w.desc}</div>
               </div>
             </motion.div>
           ))}
         </div>
 
         {/* Formulaire de don */}
-        <h3
-          style={{
-            fontSize: "1rem",
-            fontWeight: 800,
-            color: G.slate,
-            marginBottom: "1.25rem",
-            display: "flex",
-            alignItems: "center",
-            gap: "0.5rem",
-          }}
-        >
-          <span
-            style={{
-              width: 4,
-              height: 18,
-              background: G.gold,
-              borderRadius: 99,
-              display: "inline-block",
-            }}
-          />
-          Faire un don
+        <h3 style={{ fontSize: "1rem", fontWeight: 800, color: G.slate, marginBottom: "1.25rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <span style={{ width: 4, height: 18, background: G.gold, borderRadius: 99, display: "inline-block" }} />
+          {t("home.support.donTitle")}
         </h3>
-        <div
-          className="soutenir-grid"
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1.1fr 0.9fr",
-            gap: "1.5rem",
-            marginBottom: "3.5rem",
-            alignItems: "start",
-          }}
-        >
-          <div
-            style={{
-              borderRadius: "1.5rem",
-              border: `1px solid rgba(184,134,11,0.25)`,
-              background: G.white,
-              padding: "2rem",
-              boxShadow: "0 4px 24px rgba(0,0,0,0.05)",
-            }}
-          >
+        <div className="soutenir-grid" style={{ display: "grid", gridTemplateColumns: "1.1fr 0.9fr", gap: "1.5rem", marginBottom: "3.5rem", alignItems: "start" }}>
+          <div style={{ borderRadius: "1.5rem", border: `1px solid rgba(184,134,11,0.25)`, background: G.white, padding: "2rem", boxShadow: "0 4px 24px rgba(0,0,0,0.05)" }}>
             {/* Tabs */}
-            <div
-              style={{
-                display: "flex",
-                gap: "0.5rem",
-                marginBottom: "1.5rem",
-                flexWrap: "wrap",
-              }}
-            >
-              {DON_TABS.map((tab) => (
+            <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1.5rem", flexWrap: "wrap" }}>
+              {donTabs.map((tab) => (
                 <button
                   key={tab.id}
-                  onClick={() => {
-                    setDonType(tab.id);
-                    resetDon();
-                  }}
-                  style={{
-                    padding: "0.55rem 1.1rem",
-                    borderRadius: "99px",
-                    border: `1px solid ${donType === tab.id ? G.greenBorder : G.border}`,
-                    background:
-                      donType === tab.id ? G.greenLight : G.offWhite,
-                    color: donType === tab.id ? G.green : G.slateMid,
-                    fontWeight: 700,
-                    fontSize: "0.82rem",
-                    cursor: "pointer",
-                    transition: "all 0.2s",
-                  }}
+                  onClick={() => { setDonType(tab.id); resetDon(); }}
+                  style={{ padding: "0.55rem 1.1rem", borderRadius: "99px", border: `1px solid ${donType === tab.id ? G.greenBorder : G.border}`, background: donType === tab.id ? G.greenLight : G.offWhite, color: donType === tab.id ? G.green : G.slateMid, fontWeight: 700, fontSize: "0.82rem", cursor: "pointer", transition: "all 0.2s" }}
                 >
                   {tab.label}
                 </button>
               ))}
             </div>
 
-            {/* Don bancaire → redirect */}
+            {/* Don bancaire */}
             {donType === "bancaire" && (
               <div style={{ textAlign: "center", padding: "2rem 1rem" }}>
                 <div style={{ fontSize: "2.5rem", marginBottom: "1rem" }}>🏦</div>
-                <h4
-                  style={{
-                    fontSize: "1rem",
-                    fontWeight: 900,
-                    color: G.slate,
-                    marginBottom: "0.5rem",
-                  }}
-                >
-                  Don bancaire
+                <h4 style={{ fontSize: "1rem", fontWeight: 900, color: G.slate, marginBottom: "0.5rem" }}>
+                  {t("home.support.bankDon.title")}
                 </h4>
-                <p
-                  style={{
-                    color: G.slateMid,
-                    fontSize: "0.88rem",
-                    lineHeight: 1.7,
-                    marginBottom: "1.25rem",
-                  }}
-                >
-                  Pour effectuer un don par virement bancaire, veuillez vous inscrire ou vous connecter à votre espace donateur.
+                <p style={{ color: G.slateMid, fontSize: "0.88rem", lineHeight: 1.7, marginBottom: "1.25rem" }}>
+                  {t("home.support.bankDon.desc")}
                 </p>
-                <Link
-                  to="/register"
-                  style={{
-                    display: "inline-block",
-                    padding: "0.85rem 2rem",
-                    borderRadius: "0.875rem",
-                    background: `linear-gradient(135deg,#d97706,${G.gold})`,
-                    color: "white",
-                    fontWeight: 800,
-                    fontSize: "0.9rem",
-                    textDecoration: "none",
-                    boxShadow: "0 8px 24px -8px rgba(184,134,11,0.4)",
-                  }}
-                >
-                  S'inscrire / Se connecter →
+                <Link to="/register" style={{ display: "inline-block", padding: "0.85rem 2rem", borderRadius: "0.875rem", background: `linear-gradient(135deg,#d97706,${G.gold})`, color: "white", fontWeight: 800, fontSize: "0.9rem", textDecoration: "none", boxShadow: "0 8px 24px -8px rgba(184,134,11,0.4)" }}>
+                  {t("home.support.bankDon.cta")}
                 </Link>
               </div>
             )}
 
-            {/* Carte bancaire → redirect */}
+            {/* Carte bancaire */}
             {donType === "carte" && (
               <div style={{ textAlign: "center", padding: "2rem 1rem" }}>
                 <div style={{ fontSize: "2.5rem", marginBottom: "1rem" }}>💳</div>
-                <h4
-                  style={{
-                    fontSize: "1rem",
-                    fontWeight: 900,
-                    color: G.slate,
-                    marginBottom: "0.5rem",
-                  }}
-                >
-                  Paiement par carte bancaire
+                <h4 style={{ fontSize: "1rem", fontWeight: 900, color: G.slate, marginBottom: "0.5rem" }}>
+                  {t("home.support.cardDon.title")}
                 </h4>
-                <p
-                  style={{
-                    color: G.slateMid,
-                    fontSize: "0.88rem",
-                    lineHeight: 1.7,
-                    marginBottom: "1.25rem",
-                  }}
-                >
-                  Pour effectuer un don par carte bancaire, veuillez vous inscrire ou vous connecter à votre espace donateur.
+                <p style={{ color: G.slateMid, fontSize: "0.88rem", lineHeight: 1.7, marginBottom: "1.25rem" }}>
+                  {t("home.support.cardDon.desc")}
                 </p>
-                <Link
-                  to="/register"
-                  style={{
-                    display: "inline-block",
-                    padding: "0.85rem 2rem",
-                    borderRadius: "0.875rem",
-                    background: `linear-gradient(135deg,#d97706,${G.gold})`,
-                    color: "white",
-                    fontWeight: 800,
-                    fontSize: "0.9rem",
-                    textDecoration: "none",
-                    boxShadow: "0 8px 24px -8px rgba(184,134,11,0.4)",
-                  }}
-                >
-                  S'inscrire / Se connecter →
+                <Link to="/register" style={{ display: "inline-block", padding: "0.85rem 2rem", borderRadius: "0.875rem", background: `linear-gradient(135deg,#d97706,${G.gold})`, color: "white", fontWeight: 800, fontSize: "0.9rem", textDecoration: "none", boxShadow: "0 8px 24px -8px rgba(184,134,11,0.4)" }}>
+                  {t("home.support.cardDon.cta")}
                 </Link>
               </div>
             )}
@@ -3738,328 +3587,89 @@ function Soutenir({ G }) {
             {/* Don instantané */}
             {donType === "instantane" && (
               <>
-                {/* ÉTAPE 1 : Choix du montant */}
                 {donStep === "amounts" && (
                   <>
-                    <label
-                      style={{
-                        display: "block",
-                        fontSize: "0.75rem",
-                        fontWeight: 700,
-                        color: G.slate,
-                        marginBottom: "0.75rem",
-                      }}
-                    >
-                      Choisissez un montant
+                    <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: G.slate, marginBottom: "0.75rem" }}>
+                      {t("home.support.instant.chooseAmount")}
                     </label>
-                    <div
-                      style={{
-                        display: "flex",
-                        flexWrap: "wrap",
-                        gap: "0.5rem",
-                        marginBottom: "1.5rem",
-                      }}
-                    >
-                      {AMOUNTS_Instantane.map((a) => (
-                        <button
-                          key={a}
-                          onClick={() => handleAmountSelect(a)}
-                          style={{
-                            padding: "0.6rem 1rem",
-                            borderRadius: "0.75rem",
-                            border: `1px solid ${selectedAmount === a ? G.greenBorder : G.border}`,
-                            background:
-                              selectedAmount === a ? G.greenLight : G.offWhite,
-                            color: selectedAmount === a ? G.green : G.slate,
-                            fontWeight: 800,
-                            fontSize: "0.9rem",
-                            cursor: "pointer",
-                            transition: "all 0.2s",
-                          }}
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginBottom: "1.5rem" }}>
+                      {amountsInstantane.map((a) => (
+                        <button key={a} onClick={() => handleAmountSelect(a)}
+                          style={{ padding: "0.6rem 1rem", borderRadius: "0.75rem", border: `1px solid ${selectedAmount === a ? G.greenBorder : G.border}`, background: selectedAmount === a ? G.greenLight : G.offWhite, color: selectedAmount === a ? G.green : G.slate, fontWeight: 800, fontSize: "0.9rem", cursor: "pointer", transition: "all 0.2s" }}
                         >
                           {a}
                         </button>
                       ))}
                     </div>
-                    <div
-                      style={{
-                        padding: "0.85rem",
-                        borderRadius: "0.875rem",
-                        background: G.goldLight,
-                        border: `1px solid rgba(184,134,11,0.2)`,
-                        fontSize: "0.8rem",
-                        color: G.slateMid,
-                        lineHeight: 1.65,
-                      }}
-                    >
-                      💡 <strong style={{ color: G.gold }}>100$ =</strong> un
-                      complément nutritionnel pour un enfant pendant 1 mois.
-                      <br />
-                      💡 <strong style={{ color: G.gold }}>250$ =</strong>{" "}
-                      matériel scolaire pour 2 élèves sur toute l'année.
+                    <div style={{ padding: "0.85rem", borderRadius: "0.875rem", background: G.goldLight, border: `1px solid rgba(184,134,11,0.2)`, fontSize: "0.8rem", color: G.slateMid, lineHeight: 1.65 }}>
+                      💡 <strong style={{ color: G.gold }}>100$ =</strong> {t("home.support.instant.hint100")}<br />
+                      💡 <strong style={{ color: G.gold }}>250$ =</strong> {t("home.support.instant.hint250")}
                     </div>
                   </>
                 )}
 
-                {/* ÉTAPE 2 : Choix wallet + téléphone */}
                 {donStep === "wallet" && (
-                  <motion.div
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                  >
-                    <button
-                      onClick={resetDon}
-                      style={{
-                        background: "none",
-                        border: "none",
-                        color: G.slateMid,
-                        fontSize: "0.8rem",
-                        cursor: "pointer",
-                        marginBottom: "1rem",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "0.3rem",
-                        padding: 0,
-                      }}
-                    >
-                      ← Retour
+                  <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
+                    <button onClick={resetDon} style={{ background: "none", border: "none", color: G.slateMid, fontSize: "0.8rem", cursor: "pointer", marginBottom: "1rem", display: "flex", alignItems: "center", gap: "0.3rem", padding: 0 }}>
+                      ← {t("home.support.back")}
                     </button>
-
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "0.5rem",
-                        marginBottom: "1.25rem",
-                        padding: "0.6rem 1rem",
-                        borderRadius: "0.75rem",
-                        background: G.goldLight,
-                        border: `1px solid rgba(184,134,11,0.2)`,
-                        fontSize: "0.88rem",
-                      }}
-                    >
-                      <span style={{ fontWeight: 800, color: G.gold }}>Montant :</span>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1.25rem", padding: "0.6rem 1rem", borderRadius: "0.75rem", background: G.goldLight, border: `1px solid rgba(184,134,11,0.2)`, fontSize: "0.88rem" }}>
+                      <span style={{ fontWeight: 800, color: G.gold }}>{t("home.support.instant.amountLabel")} :</span>
                       <span style={{ fontWeight: 900, color: G.slate }}>{selectedAmount}</span>
                     </div>
-
-                    <label
-                      style={{
-                        display: "block",
-                        fontSize: "0.75rem",
-                        fontWeight: 700,
-                        color: G.slate,
-                        marginBottom: "0.65rem",
-                      }}
-                    >
-                      Choisissez votre wallet
+                    <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: G.slate, marginBottom: "0.65rem" }}>
+                      {t("home.support.instant.chooseWallet")}
                     </label>
-                    <div
-                      style={{
-                        display: "grid",
-                        gridTemplateColumns: "repeat(auto-fill, minmax(100px, 1fr))",
-                        gap: "0.5rem",
-                        marginBottom: "1.25rem",
-                      }}
-                    >
-                      {WALLETS.map((w) => (
-                        <button
-                          key={w.id}
-                          onClick={() => setSelectedWallet(w.id)}
-                          style={{
-                            padding: "0.65rem 0.5rem",
-                            borderRadius: "0.75rem",
-                            border: `1px solid ${selectedWallet === w.id ? G.greenBorder : G.border}`,
-                            background:
-                              selectedWallet === w.id ? G.greenLight : G.offWhite,
-                            color: selectedWallet === w.id ? G.green : G.slate,
-                            fontWeight: 700,
-                            fontSize: "0.78rem",
-                            cursor: "pointer",
-                            transition: "all 0.2s",
-                            textAlign: "center",
-                          }}
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(100px, 1fr))", gap: "0.5rem", marginBottom: "1.25rem" }}>
+                      {wallets.map((w) => (
+                        <button key={w.id} onClick={() => setSelectedWallet(w.id)}
+                          style={{ padding: "0.65rem 0.5rem", borderRadius: "0.75rem", border: `1px solid ${selectedWallet === w.id ? G.greenBorder : G.border}`, background: selectedWallet === w.id ? G.greenLight : G.offWhite, color: selectedWallet === w.id ? G.green : G.slate, fontWeight: 700, fontSize: "0.78rem", cursor: "pointer", transition: "all 0.2s", textAlign: "center" }}
                         >
-                          <div style={{ fontSize: "1.3rem", marginBottom: "0.2rem" }}>
-                            {w.emoji}
-                          </div>
+                          <div style={{ fontSize: "1.3rem", marginBottom: "0.2rem" }}>{w.emoji}</div>
                           {w.label}
                         </button>
                       ))}
                     </div>
-
-                    <label
-                      style={{
-                        display: "block",
-                        fontSize: "0.75rem",
-                        fontWeight: 700,
-                        color: G.slate,
-                        marginBottom: "0.3rem",
-                      }}
-                    >
-                      Numéro de téléphone
+                    <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: G.slate, marginBottom: "0.3rem" }}>
+                      {t("home.support.instant.phoneLabel")}
                     </label>
-                    <input
-                      type="tel"
-                      placeholder="ex: 77 00 00 00"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      style={{
-                        width: "100%",
-                        padding: "0.65rem 0.85rem",
-                        borderRadius: "0.625rem",
-                        border: `1px solid ${G.border}`,
-                        fontSize: "0.85rem",
-                        background: G.offWhite,
-                        outline: "none",
-                        boxSizing: "border-box",
-                        marginBottom: "1.2rem",
-                      }}
+                    <input type="tel" placeholder={t("home.support.instant.phonePlaceholder")} value={phone} onChange={(e) => setPhone(e.target.value)}
+                      style={{ width: "100%", padding: "0.65rem 0.85rem", borderRadius: "0.625rem", border: `1px solid ${G.border}`, fontSize: "0.85rem", background: G.offWhite, outline: "none", boxSizing: "border-box", marginBottom: "1.2rem" }}
                     />
-
-                    <button
-                      onClick={handleSendOtp}
-                      disabled={!selectedWallet || phone.length < 8}
-                      style={{
-                        width: "100%",
-                        padding: "0.9rem",
-                        borderRadius: "0.875rem",
-                        background:
-                          selectedWallet && phone.length >= 8
-                            ? `linear-gradient(135deg,#d97706,${G.gold})`
-                            : G.border,
-                        color: selectedWallet && phone.length >= 8 ? "white" : G.slateMid,
-                        fontWeight: 800,
-                        fontSize: "0.9rem",
-                        border: "none",
-                        cursor: selectedWallet && phone.length >= 8 ? "pointer" : "not-allowed",
-                        transition: "all 0.2s",
-                      }}
+                    <button onClick={handleSendOtp} disabled={!selectedWallet || phone.length < 8}
+                      style={{ width: "100%", padding: "0.9rem", borderRadius: "0.875rem", background: selectedWallet && phone.length >= 8 ? `linear-gradient(135deg,#d97706,${G.gold})` : G.border, color: selectedWallet && phone.length >= 8 ? "white" : G.slateMid, fontWeight: 800, fontSize: "0.9rem", border: "none", cursor: selectedWallet && phone.length >= 8 ? "pointer" : "not-allowed", transition: "all 0.2s" }}
                     >
-                      Envoyer le code OTP →
+                      {t("home.support.instant.sendOtpBtn")}
                     </button>
                   </motion.div>
                 )}
 
-                {/* ÉTAPE 3 : Saisie OTP */}
                 {donStep === "otp" && (
-                  <motion.div
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                  >
-                    <button
-                      onClick={() => setDonStep("wallet")}
-                      style={{
-                        background: "none",
-                        border: "none",
-                        color: G.slateMid,
-                        fontSize: "0.8rem",
-                        cursor: "pointer",
-                        marginBottom: "1rem",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "0.3rem",
-                        padding: 0,
-                      }}
-                    >
-                      ← Retour
+                  <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
+                    <button onClick={() => setDonStep("wallet")} style={{ background: "none", border: "none", color: G.slateMid, fontSize: "0.8rem", cursor: "pointer", marginBottom: "1rem", display: "flex", alignItems: "center", gap: "0.3rem", padding: 0 }}>
+                      ← {t("home.support.back")}
                     </button>
-
-                    <div
-                      style={{
-                        textAlign: "center",
-                        padding: "1rem",
-                        borderRadius: "0.875rem",
-                        background: G.greenLight,
-                        border: `1px solid ${G.greenBorder}`,
-                        marginBottom: "1.5rem",
-                      }}
-                    >
+                    <div style={{ textAlign: "center", padding: "1rem", borderRadius: "0.875rem", background: G.greenLight, border: `1px solid ${G.greenBorder}`, marginBottom: "1.5rem" }}>
                       <div style={{ fontSize: "1.75rem", marginBottom: "0.4rem" }}>📲</div>
-                      <p
-                        style={{
-                          fontSize: "0.85rem",
-                          color: G.slateMid,
-                          lineHeight: 1.65,
-                          margin: 0,
-                        }}
-                      >
-                        Un code à 6 chiffres a été envoyé au{" "}
-                        <strong style={{ color: G.slate }}>{phone}</strong>.
-                        <br />
-                        Saisissez-le ci-dessous pour confirmer votre don.
+                      <p style={{ fontSize: "0.85rem", color: G.slateMid, lineHeight: 1.65, margin: 0 }}>
+                        {t("home.support.otp.sentTo")} <strong style={{ color: G.slate }}>{phone}</strong>.<br />
+                        {t("home.support.otp.enterBelow")}
                       </p>
                     </div>
-
-                    <div
-                      style={{
-                        textAlign: "center",
-                        padding: "0.75rem 1rem",
-                        borderRadius: "0.75rem",
-                        background: "#fffbeb",
-                        border: "1px solid rgba(184,134,11,0.3)",
-                        marginBottom: "1rem",
-                        fontSize: "0.78rem",
-                        color: G.slateMid,
-                      }}
-                    >
-                      🧪 <strong style={{ color: G.gold }}>Mode test — votre OTP :</strong>{" "}
-                      <span style={{ fontWeight: 900, fontSize: "1.1rem", letterSpacing: "0.2em", color: G.slate }}>
-                        {generatedOtp}
-                      </span>
+                    <div style={{ textAlign: "center", padding: "0.75rem 1rem", borderRadius: "0.75rem", background: "#fffbeb", border: "1px solid rgba(184,134,11,0.3)", marginBottom: "1rem", fontSize: "0.78rem", color: G.slateMid }}>
+                      🧪 <strong style={{ color: G.gold }}>{t("home.support.otp.testMode")}</strong>{" "}
+                      <span style={{ fontWeight: 900, fontSize: "1.1rem", letterSpacing: "0.2em", color: G.slate }}>{generatedOtp}</span>
                     </div>
-                    <label
-                      style={{
-                        display: "block",
-                        fontSize: "0.75rem",
-                        fontWeight: 700,
-                        color: G.slate,
-                        marginBottom: "0.3rem",
-                      }}
-                    >
-                      Code OTP (6 chiffres)
+                    <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: G.slate, marginBottom: "0.3rem" }}>
+                      {t("home.support.otp.label")}
                     </label>
-                    <input
-                      type="number"
-                      placeholder="000000"
-                      maxLength={6}
-                      value={otp}
-                      onChange={(e) => setOtp(e.target.value.slice(0, 6))}
-                      style={{
-                        width: "100%",
-                        padding: "0.75rem 0.85rem",
-                        borderRadius: "0.625rem",
-                        border: `1px solid ${G.border}`,
-                        fontSize: "1.1rem",
-                        letterSpacing: "0.4em",
-                        textAlign: "center",
-                        background: G.offWhite,
-                        outline: "none",
-                        boxSizing: "border-box",
-                        marginBottom: "1.2rem",
-                        fontWeight: 800,
-                      }}
+                    <input type="number" placeholder="000000" maxLength={6} value={otp} onChange={(e) => setOtp(e.target.value.slice(0, 6))}
+                      style={{ width: "100%", padding: "0.75rem 0.85rem", borderRadius: "0.625rem", border: `1px solid ${G.border}`, fontSize: "1.1rem", letterSpacing: "0.4em", textAlign: "center", background: G.offWhite, outline: "none", boxSizing: "border-box", marginBottom: "1.2rem", fontWeight: 800 }}
                     />
-
-                    <button
-                      onClick={handleConfirmOtp}
-                      disabled={otp !== generatedOtp}
-                      style={{
-                        width: "100%",
-                        padding: "0.9rem",
-                        borderRadius: "0.875rem",
-                        background:
-                          otp === generatedOtp
-                            ? `linear-gradient(135deg,#d97706,${G.gold})`
-                            : G.border,
-                        color: otp === generatedOtp ? "white" : G.slateMid,
-                        fontWeight: 800,
-                        fontSize: "0.9rem",
-                        border: "none",
-                        cursor: otp === generatedOtp ? "pointer" : "not-allowed",
-                        transition: "all 0.2s",
-                      }}
+                    <button onClick={handleConfirmOtp} disabled={otp !== generatedOtp}
+                      style={{ width: "100%", padding: "0.9rem", borderRadius: "0.875rem", background: otp === generatedOtp ? `linear-gradient(135deg,#d97706,${G.gold})` : G.border, color: otp === generatedOtp ? "white" : G.slateMid, fontWeight: 800, fontSize: "0.9rem", border: "none", cursor: otp === generatedOtp ? "pointer" : "not-allowed", transition: "all 0.2s" }}
                     >
-                      🔒 Confirmer mon don de {selectedAmount} →
+                      🔒 {t("home.support.otp.confirmBtn")} {selectedAmount} →
                     </button>
 
                     <p
@@ -4079,65 +3689,26 @@ function Soutenir({ G }) {
                           setOtp("");
                         }}
                       >
-                        Renvoyer
+                        {t("home.support.otp.resend")}
                       </span>
                     </p>
                   </motion.div>
                 )}
 
-                {/* ÉTAPE 4 : Succès */}
                 {donStep === "success" && (
-                  <motion.div
-                    initial={{ scale: 0.9, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    style={{ textAlign: "center", padding: "2rem 1rem" }}
-                  >
+                  <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} style={{ textAlign: "center", padding: "2rem 1rem" }}>
                     <div style={{ fontSize: "3.5rem", marginBottom: "1rem" }}>🎉</div>
-                    <h4
-                      style={{
-                        fontSize: "1.2rem",
-                        fontWeight: 900,
-                        color: G.slate,
-                        marginBottom: "0.5rem",
-                      }}
-                    >
-                      Félicitations !
+                    <h4 style={{ fontSize: "1.2rem", fontWeight: 900, color: G.slate, marginBottom: "0.5rem" }}>
+                      {t("home.support.success.title")}
                     </h4>
-                    <p
-                      style={{
-                        color: G.slateMid,
-                        fontSize: "0.9rem",
-                        lineHeight: 1.7,
-                        marginBottom: "0.5rem",
-                      }}
-                    >
-                      Votre don de{" "}
-                      <strong style={{ color: G.slate }}>{selectedAmount}</strong> a
-                      bien été reçu. Merci pour votre générosité !
+                    <p style={{ color: G.slateMid, fontSize: "0.9rem", lineHeight: 1.7, marginBottom: "0.5rem" }}>
+                      {t("home.support.success.desc")} <strong style={{ color: G.slate }}>{selectedAmount}</strong>{t("home.support.success.thanks")}
                     </p>
-                    <p
-                      style={{
-                        color: G.slateMid,
-                        fontSize: "0.82rem",
-                        marginBottom: "1.5rem",
-                      }}
-                    >
-                      Un reçu fiscal vous sera envoyé par SMS sous 24h.
+                    <p style={{ color: G.slateMid, fontSize: "0.82rem", marginBottom: "1.5rem" }}>
+                      {t("home.support.success.receipt")}
                     </p>
-                    <button
-                      onClick={resetDon}
-                      style={{
-                        padding: "0.65rem 1.75rem",
-                        borderRadius: "0.75rem",
-                        background: G.greenLight,
-                        border: `1px solid ${G.greenBorder}`,
-                        color: G.green,
-                        fontWeight: 800,
-                        cursor: "pointer",
-                        fontSize: "0.85rem",
-                      }}
-                    >
-                      Faire un autre don
+                    <button onClick={resetDon} style={{ padding: "0.65rem 1.75rem", borderRadius: "0.75rem", background: G.greenLight, border: `1px solid ${G.greenBorder}`, color: G.green, fontWeight: 800, cursor: "pointer", fontSize: "0.85rem" }}>
+                      {t("home.support.success.anotherDon")}
                     </button>
                   </motion.div>
                 )}
@@ -4145,104 +3716,25 @@ function Soutenir({ G }) {
             )}
           </div>
 
-          {/* Colonne droite : cartes mécénat / parrainage / collecte */}
-          <div
-            style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
-          >
-            {[
-              {
-                emoji: "🤝",
-                title: "Mécénat d'entreprise",
-                desc: "Associez votre marque à des projets à fort impact. Déduction fiscale de 60% du don dans la limite de 0,5% du CA.",
-                cta: "Télécharger notre offre mécénat →",
-              },
-              {
-                emoji: "💛",
-                title: "Parrainage",
-                desc: "Parrainez un enfant, une famille ou un projet entier. Recevez des nouvelles régulières de votre filleul·e.",
-                cta: "Choisir un parrainage →",
-                badges: ["Enfant dès 15$/mois", "Projet dès 50$/mois"],
-              },
-              {
-                emoji: "🌐",
-                title: "Collecte en ligne",
-                desc: "Créez votre propre collecte pour un anniversaire, un défi sportif ou un événement. Outils clés en main fournis.",
-                cta: "Lancer ma collecte →",
-              },
-            ].map((c) => (
-              <motion.div
-                key={c.title}
-                whileHover={{ y: -2 }}
-                style={{
-                  borderRadius: "1.25rem",
-                  border: `1px solid ${G.border}`,
-                  background: G.white,
-                  padding: "1.5rem",
-                  boxShadow: "0 2px 12px rgba(0,0,0,0.04)",
-                }}
+          {/* Colonne droite : mécénat / parrainage / collecte */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+            {mecenats.map((c) => (
+              <motion.div key={c.title} whileHover={{ y: -2 }}
+                style={{ borderRadius: "1.25rem", border: `1px solid ${G.border}`, background: G.white, padding: "1.5rem", boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}
               >
-                <div style={{ fontSize: "1.5rem", marginBottom: "0.6rem" }}>
-                  {c.emoji}
-                </div>
-                <h4
-                  style={{
-                    fontSize: "0.97rem",
-                    fontWeight: 800,
-                    color: G.slate,
-                    marginBottom: "0.35rem",
-                  }}
-                >
-                  {c.title}
-                </h4>
-                <p
-                  style={{
-                    fontSize: "0.82rem",
-                    color: G.slateMid,
-                    lineHeight: 1.65,
-                    marginBottom: c.badges ? "0.75rem" : "0.9rem",
-                  }}
-                >
-                  {c.desc}
-                </p>
+                <div style={{ fontSize: "1.5rem", marginBottom: "0.6rem" }}>{c.emoji}</div>
+                <h4 style={{ fontSize: "0.97rem", fontWeight: 800, color: G.slate, marginBottom: "0.35rem" }}>{c.title}</h4>
+                <p style={{ fontSize: "0.82rem", color: G.slateMid, lineHeight: 1.65, marginBottom: c.badges ? "0.75rem" : "0.9rem" }}>{c.desc}</p>
                 {c.badges && (
-                  <div
-                    style={{
-                      display: "flex",
-                      gap: "0.5rem",
-                      flexWrap: "wrap",
-                      marginBottom: "0.9rem",
-                    }}
-                  >
+                  <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginBottom: "0.9rem" }}>
                     {c.badges.map((b, i) => (
-                      <span
-                        key={b}
-                        style={{
-                          fontSize: "0.72rem",
-                          fontWeight: 800,
-                          padding: "0.2rem 0.65rem",
-                          borderRadius: "99px",
-                          background: i === 0 ? G.greenLight : "#eff6ff",
-                          color: i === 0 ? G.green : "#3b82f6",
-                          border: `1px solid ${i === 0 ? G.greenBorder : "rgba(59,130,246,0.2)"}`,
-                        }}
-                      >
+                      <span key={b} style={{ fontSize: "0.72rem", fontWeight: 800, padding: "0.2rem 0.65rem", borderRadius: "99px", background: i === 0 ? G.greenLight : "#eff6ff", color: i === 0 ? G.green : "#3b82f6", border: `1px solid ${i === 0 ? G.greenBorder : "rgba(59,130,246,0.2)"}` }}>
                         {b}
                       </span>
                     ))}
                   </div>
                 )}
-                <button
-                  style={{
-                    padding: "0.55rem 1.1rem",
-                    borderRadius: "0.75rem",
-                    background: G.greenLight,
-                    color: G.green,
-                    border: `1px solid ${G.greenBorder}`,
-                    fontWeight: 700,
-                    fontSize: "0.8rem",
-                    cursor: "pointer",
-                  }}
-                >
+                <button style={{ padding: "0.55rem 1.1rem", borderRadius: "0.75rem", background: G.greenLight, color: G.green, border: `1px solid ${G.greenBorder}`, fontWeight: 700, fontSize: "0.8rem", cursor: "pointer" }}>
                   {c.cta}
                 </button>
               </motion.div>
@@ -4251,99 +3743,25 @@ function Soutenir({ G }) {
         </div>
 
         {/* Bénévolat */}
-        <h3
-          style={{
-            fontSize: "1rem",
-            fontWeight: 800,
-            color: G.slate,
-            marginBottom: "1.25rem",
-            display: "flex",
-            alignItems: "center",
-            gap: "0.5rem",
-          }}
-        >
-          <span
-            style={{
-              width: 4,
-              height: 18,
-              background: G.gold,
-              borderRadius: 99,
-              display: "inline-block",
-            }}
-          />
-          Bénévolat & s'impliquer
+        <h3 style={{ fontSize: "1rem", fontWeight: 800, color: G.slate, marginBottom: "1.25rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <span style={{ width: 4, height: 18, background: G.gold, borderRadius: 99, display: "inline-block" }} />
+          {t("home.support.volunteer.sectionTitle")}
         </h3>
-        <div
-          className="benevole-grid"
-          style={{
-            borderRadius: "1.5rem",
-            border: `1px solid ${G.border}`,
-            background: G.offWhite,
-            padding: "2.5rem",
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: "1.5rem",
-            alignItems: "start",
-          }}
-        >
+        <div className="benevole-grid" style={{ borderRadius: "1.5rem", border: `1px solid ${G.border}`, background: G.offWhite, padding: "2.5rem", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem", alignItems: "start" }}>
           <div>
-            <p
-              style={{
-                fontSize: "0.88rem",
-                color: G.slateMid,
-                lineHeight: 1.75,
-                marginBottom: "1.25rem",
-              }}
-            >
-              Rejoignez nos 150+ bénévoles actifs. Que vous soyez disponible
-              ponctuellement ou sur le long terme, il y a une place pour vous.
+            <p style={{ fontSize: "0.88rem", color: G.slateMid, lineHeight: 1.75, marginBottom: "1.25rem" }}>
+              {t("home.support.volunteer.intro")}
             </p>
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "0.6rem",
-              }}
-            >
-              {BENEVOLE_ROLES.map((b) => (
-                <div
-                  key={b.role}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "0.75rem",
-                    padding: "0.65rem 0.9rem",
-                    borderRadius: "0.75rem",
-                    border: `1px solid ${G.border}`,
-                    background: G.white,
-                  }}
-                >
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
+              {benevoleRoles.map((b) => (
+                <div key={b.role} style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.65rem 0.9rem", borderRadius: "0.75rem", border: `1px solid ${G.border}`, background: G.white }}>
                   <span style={{ fontSize: "1.1rem" }}>{b.emoji}</span>
                   <div style={{ flex: 1 }}>
-                    <div
-                      style={{
-                        fontSize: "0.85rem",
-                        fontWeight: 700,
-                        color: G.slate,
-                      }}
-                    >
-                      {b.role}
-                    </div>
-                    <div style={{ fontSize: "0.72rem", color: G.slateLight }}>
-                      {b.dispo}
-                    </div>
+                    <div style={{ fontSize: "0.85rem", fontWeight: 700, color: G.slate }}>{b.role}</div>
+                    <div style={{ fontSize: "0.72rem", color: G.slateLight }}>{b.dispo}</div>
                   </div>
-                  <button
-                    style={{
-                      fontSize: "0.72rem",
-                      fontWeight: 700,
-                      color: G.green,
-                      background: "none",
-                      border: "none",
-                      cursor: "pointer",
-                    }}
-                  >
-                    Candidater →
+                  <button style={{ fontSize: "0.72rem", fontWeight: 700, color: G.green, background: "none", border: "none", cursor: "pointer" }}>
+                    {t("home.support.volunteer.applyBtn")}
                   </button>
                 </div>
               ))}
@@ -4351,224 +3769,66 @@ function Soutenir({ G }) {
           </div>
 
           {benevoleSubmitted ? (
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              style={{
-                textAlign: "center",
-                padding: "2rem",
-                borderRadius: "1.25rem",
-                border: `1px solid ${G.greenBorder}`,
-                background: G.greenLight,
-              }}
+            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+              style={{ textAlign: "center", padding: "2rem", borderRadius: "1.25rem", border: `1px solid ${G.greenBorder}`, background: G.greenLight }}
             >
               <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>🙌</div>
-              <h4
-                style={{
-                  fontSize: "1rem",
-                  fontWeight: 900,
-                  color: G.slate,
-                  marginBottom: "0.5rem",
-                }}
-              >
-                Candidature envoyée !
+              <h4 style={{ fontSize: "1rem", fontWeight: 900, color: G.slate, marginBottom: "0.5rem" }}>
+                {t("home.support.volunteer.submittedTitle")}
               </h4>
               <p style={{ color: G.slateMid, fontSize: "0.85rem" }}>
-                Notre équipe vous recontactera sous 7 jours ouvrables.
+                {t("home.support.volunteer.submittedDesc")}
               </p>
-              <button
-                onClick={() => {
-                  setBenevoleSubmitted(false);
-                  setBenevoleForm({
-                    nom: "",
-                    email: "",
-                    competence: "",
-                    dispo: "",
-                  });
-                }}
-                style={{
-                  marginTop: "1rem",
-                  padding: "0.55rem 1.2rem",
-                  borderRadius: "0.75rem",
-                  background: G.white,
-                  border: `1px solid ${G.greenBorder}`,
-                  color: G.green,
-                  fontWeight: 700,
-                  cursor: "pointer",
-                  fontSize: "0.82rem",
-                }}
+              <button onClick={() => { setBenevoleSubmitted(false); setBenevoleForm({ nom: "", email: "", competence: "", dispo: "" }); }}
+                style={{ marginTop: "1rem", padding: "0.55rem 1.2rem", borderRadius: "0.75rem", background: G.white, border: `1px solid ${G.greenBorder}`, color: G.green, fontWeight: 700, cursor: "pointer", fontSize: "0.82rem" }}
               >
-                Fermer
+                {t("home.support.volunteer.closeBtn")}
               </button>
             </motion.div>
           ) : (
-            <div
-              style={{
-                borderRadius: "1.25rem",
-                border: `1px solid ${G.greenBorder}`,
-                background: G.greenLight,
-                padding: "1.75rem",
-              }}
-            >
-              <h4
-                style={{
-                  fontSize: "0.97rem",
-                  fontWeight: 900,
-                  color: G.slate,
-                  marginBottom: "1rem",
-                }}
-              >
-                Je veux m'impliquer
+            <div style={{ borderRadius: "1.25rem", border: `1px solid ${G.greenBorder}`, background: G.greenLight, padding: "1.75rem" }}>
+              <h4 style={{ fontSize: "0.97rem", fontWeight: 900, color: G.slate, marginBottom: "1rem" }}>
+                {t("home.support.volunteer.formTitle")}
               </h4>
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "0.75rem",
-                }}
-              >
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
                 {[
-                  {
-                    key: "nom",
-                    label: "Nom complet",
-                    type: "text",
-                    placeholder: "Votre nom",
-                  },
-                  {
-                    key: "email",
-                    label: "Email",
-                    type: "email",
-                    placeholder: "vous@exemple.com",
-                  },
+                  { key: "nom",   label: t("home.support.volunteer.nameLabel"),  type: "text",  placeholder: t("home.support.volunteer.namePlaceholder")  },
+                  { key: "email", label: t("home.support.volunteer.emailLabel"), type: "email", placeholder: t("home.support.volunteer.emailPlaceholder") },
                 ].map(({ key, label, type, placeholder }) => (
                   <div key={key}>
-                    <label
-                      style={{
-                        display: "block",
-                        fontSize: "0.75rem",
-                        fontWeight: 700,
-                        color: G.slate,
-                        marginBottom: "0.3rem",
-                      }}
-                    >
-                      {label}
-                    </label>
-                    <input
-                      type={type}
-                      placeholder={placeholder}
-                      value={benevoleForm[key]}
-                      onChange={(e) =>
-                        setBenevoleForm({
-                          ...benevoleForm,
-                          [key]: e.target.value,
-                        })
-                      }
-                      style={{
-                        width: "100%",
-                        padding: "0.65rem 0.85rem",
-                        borderRadius: "0.625rem",
-                        border: `1px solid ${G.border}`,
-                        fontSize: "0.85rem",
-                        background: G.white,
-                        outline: "none",
-                        boxSizing: "border-box",
-                      }}
+                    <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: G.slate, marginBottom: "0.3rem" }}>{label}</label>
+                    <input type={type} placeholder={placeholder} value={benevoleForm[key]}
+                      onChange={(e) => setBenevoleForm({ ...benevoleForm, [key]: e.target.value })}
+                      style={{ width: "100%", padding: "0.65rem 0.85rem", borderRadius: "0.625rem", border: `1px solid ${G.border}`, fontSize: "0.85rem", background: G.white, outline: "none", boxSizing: "border-box" }}
                     />
                   </div>
                 ))}
                 <div>
-                  <label
-                    style={{
-                      display: "block",
-                      fontSize: "0.75rem",
-                      fontWeight: 700,
-                      color: G.slate,
-                      marginBottom: "0.3rem",
-                    }}
-                  >
-                    Compétences ou domaine d'intérêt
+                  <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: G.slate, marginBottom: "0.3rem" }}>
+                    {t("home.support.volunteer.competenceLabel")}
                   </label>
-                  <select
-                    value={benevoleForm.competence}
-                    onChange={(e) =>
-                      setBenevoleForm({
-                        ...benevoleForm,
-                        competence: e.target.value,
-                      })
-                    }
-                    style={{
-                      width: "100%",
-                      padding: "0.65rem 0.85rem",
-                      borderRadius: "0.625rem",
-                      border: `1px solid ${G.border}`,
-                      fontSize: "0.85rem",
-                      background: G.white,
-                      outline: "none",
-                    }}
+                  <select value={benevoleForm.competence} onChange={(e) => setBenevoleForm({ ...benevoleForm, competence: e.target.value })}
+                    style={{ width: "100%", padding: "0.65rem 0.85rem", borderRadius: "0.625rem", border: `1px solid ${G.border}`, fontSize: "0.85rem", background: G.white, outline: "none" }}
                   >
-                    <option value="">Sélectionner...</option>
-                    <option>Santé / Médical</option>
-                    <option>Éducation</option>
-                    <option>Informatique / Numérique</option>
-                    <option>Communication / Réseaux sociaux</option>
-                    <option>Logistique / Terrain</option>
-                    <option>Juridique / Finances</option>
-                    <option>Autre</option>
+                    <option value="">{t("home.support.volunteer.selectPlaceholder")}</option>
+                    {competenceOptions.map((o) => <option key={o}>{o}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label
-                    style={{
-                      display: "block",
-                      fontSize: "0.75rem",
-                      fontWeight: 700,
-                      color: G.slate,
-                      marginBottom: "0.3rem",
-                    }}
-                  >
-                    Disponibilité
+                  <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: G.slate, marginBottom: "0.3rem" }}>
+                    {t("home.support.volunteer.dispoLabel")}
                   </label>
-                  <select
-                    value={benevoleForm.dispo}
-                    onChange={(e) =>
-                      setBenevoleForm({
-                        ...benevoleForm,
-                        dispo: e.target.value,
-                      })
-                    }
-                    style={{
-                      width: "100%",
-                      padding: "0.65rem 0.85rem",
-                      borderRadius: "0.625rem",
-                      border: `1px solid ${G.border}`,
-                      fontSize: "0.85rem",
-                      background: G.white,
-                      outline: "none",
-                    }}
+                  <select value={benevoleForm.dispo} onChange={(e) => setBenevoleForm({ ...benevoleForm, dispo: e.target.value })}
+                    style={{ width: "100%", padding: "0.65rem 0.85rem", borderRadius: "0.625rem", border: `1px solid ${G.border}`, fontSize: "0.85rem", background: G.white, outline: "none" }}
                   >
-                    <option value="">Sélectionner...</option>
-                    <option>Ponctuelle (quelques jours)</option>
-                    <option>Régulière (quelques heures/semaine)</option>
-                    <option>Mission longue (1 mois+)</option>
+                    <option value="">{t("home.support.volunteer.selectPlaceholder")}</option>
+                    {dispoOptions.map((o) => <option key={o}>{o}</option>)}
                   </select>
                 </div>
-                <button
-                  onClick={() => {
-                    if (benevoleForm.nom && benevoleForm.email)
-                      setBenevoleSubmitted(true);
-                  }}
-                  style={{
-                    padding: "0.85rem",
-                    borderRadius: "0.875rem",
-                    background: `linear-gradient(135deg,${G.greenMid},${G.green})`,
-                    color: "white",
-                    fontWeight: 800,
-                    fontSize: "0.9rem",
-                    border: "none",
-                    cursor: "pointer",
-                  }}
+                <button onClick={() => { if (benevoleForm.nom && benevoleForm.email) setBenevoleSubmitted(true); }}
+                  style={{ padding: "0.85rem", borderRadius: "0.875rem", background: `linear-gradient(135deg,${G.greenMid},${G.green})`, color: "white", fontWeight: 800, fontSize: "0.9rem", border: "none", cursor: "pointer" }}
                 >
-                  Envoyer ma candidature →
+                  {t("home.support.volunteer.submitBtn")}
                 </button>
               </div>
             </div>
@@ -4592,17 +3852,17 @@ export default function Home() {
   const { user } = useAuth();
 
   const NAV_LINKS = useMemo(
-    () => [
-      { id: "accueil", label: "Accueil" },
-      { id: "qui-sommes-nous", label: "Qui sommes-nous" },
-      { id: "nos-actions", label: "Nos actions" },
-      { id: "notre-impact", label: "Notre impact" },
-      { id: "actualites", label: "Actualités" },
-      { id: "soutenir", label: "Soutenir" },
-      { id: "contact", label: "Contact" },
-    ],
-    [],
-  );
+  () => [
+    { id: "accueil",        label: t("nav_home")    },
+    { id: "qui-sommes-nous",label: t("nav_about")   },
+    { id: "nos-actions",    label: t("nav_actions") },
+    { id: "notre-impact",   label: t("nav_impact")  },
+    { id: "actualites",     label: t("nav_news")    },
+    { id: "soutenir",       label: t("nav_support") },
+    { id: "contact",        label: t("nav_contact") },
+  ],
+  [t], // ← dépendance sur t, donc re-calcul à chaque changement de langue
+);
 
   const ABOUT_CARDS = useMemo(
     () => [
@@ -4656,6 +3916,7 @@ export default function Home() {
               justifyContent: "space-between",
               minHeight: 64,
               gap: "0.75rem",
+               minWidth: 0,
             }}
           >
             {/* Logo */}
@@ -4663,14 +3924,14 @@ export default function Home() {
 
             {/* Nav desktop */}
             <nav
-              className="desktop-nav"
-              style={{
-                display: "flex",
+                className="desktop-nav"
+                style={{
+                 display: "flex",
                 alignItems: "center",
-                gap: "0.15rem",
+                gap: "0.2rem",
                 flex: 1,
-                justifyContent: "center",
-                overflow: "hidden",
+               justifyContent: "flex-end",
+                minWidth: 0,
               }}
             >
               {NAV_LINKS.map(({ id, label }) => (
@@ -4678,7 +3939,6 @@ export default function Home() {
                   key={id}
                   href={`#${id}`}
                   style={{
-                    fontSize: "0.78rem",
                     padding: "0.4rem 0.6rem",
                     flexShrink: 0,
                     fontWeight: 600,
@@ -4686,6 +3946,7 @@ export default function Home() {
                     textDecoration: "none",
                     borderRadius: "0.5rem",
                     whiteSpace: "nowrap",
+                    fontSize: "clamp(0.7rem, 0.8vw, 0.78rem)",
                     transition: "color 0.2s, background 0.2s",
                   }}
                   onMouseEnter={(e) => {
@@ -5268,7 +4529,7 @@ export default function Home() {
         *, *::before, *::after { box-sizing: border-box; }
 
         /* ── Responsive breakpoints ── */
-        @media (max-width: 768px) {
+        @media (max-width:  980px) {
           .desktop-nav        { display: none !important; }
           .desktop-login-btn  { display: none !important; }
           .mobile-burger      { display: flex !important; }
@@ -5278,14 +4539,14 @@ export default function Home() {
           .benevole-grid      { grid-template-columns: 1fr !important; }
         }
 
-        @media (min-width: 769px) {
+        @media (min-width: 981px) {
           .mobile-burger { display: none !important; }
         }
 
         /* Tablet : 769–1024px — nav visible mais compacte */
-        @media (min-width: 769px) and (max-width: 1024px) {
+        @media (min-width: 769px) and (max-width: 980px) {
           .desktop-nav a {
-            font-size: 0.72rem !important;
+            font-size: 0.68rem  !important;
             padding: 0.35rem 0.45rem !important;
           }
         }

@@ -2,6 +2,7 @@ import prisma from "../../config/prisma.js";
 import { hashPassword, verifyPassword } from "../../utils/hash.js";
 import { signAccessToken, signRefreshToken } from "../../utils/tokens.js";
 import { auditLog } from "../../utils/audit.js";
+import { performance } from "node:perf_hooks";
 
 export async function createUser({ data, files, req }) {
   const isAdherent = data.accountType === "CLIENT_ADHERENT";
@@ -35,6 +36,7 @@ export async function createUser({ data, files, req }) {
     }
   }
 
+  const normalizedEmail = normalizeEmail(data.email);
   const passwordHash = await hashPassword(data.password);
 
   // ✅ fullName obligatoire dans Prisma -> pour association on met companyName
@@ -50,7 +52,7 @@ export async function createUser({ data, files, req }) {
       phone: data.phone,
       phone2: null,
 
-      email: data.email,
+      email: normalizedEmail,
       country: data.country,
       city: data.city,
       commune: isAssociation ? data.commune : null,
@@ -112,66 +114,148 @@ export async function createUser({ data, files, req }) {
   return user;
 }
 
-export async function loginUser({ email, password, req }) {
-  const user = await prisma.user.findUnique({ where: { email } });
+function roundMs(start, end = performance.now()) {
+  return Math.round((end - start) * 10) / 10;
+}
 
-  if (!user) {
-    const err = new Error("Identifiants invalides.");
-    err.status = 401;
-    throw err;
-  }
+function normalizeEmail(email) {
+  return String(email || "").trim().toLowerCase();
+}
 
-  if (user.status !== "ACTIVE") {
-    const err = new Error("Compte non actif. Vérifie ton OTP.");
-    err.status = 403;
-    throw err;
-  }
-
-  const ok = await verifyPassword(user.passwordHash, password);
-  if (!ok) {
-    const err = new Error("Identifiants invalides.");
-    err.status = 401;
-    throw err;
-  }
-
-  const accessToken = signAccessToken({ sub: user.id, role: user.role });
-  const refreshToken = signRefreshToken({ sub: user.id, role: user.role });
-
-  await auditLog({
-    userId: user.id,
-    action: "LOGIN",
-    entity: "User",
-    entityId: user.id,
-    req,
+function logLoginPerf({ totalStart, dbMs = 0, passwordVerifyMs = 0, tokenSignMs = 0, auditMs = 0, status, userId }) {
+  console.log("[perf] auth.login", {
+    status,
+    userId: userId || null,
+    totalMs: roundMs(totalStart),
+    dbFindUserMs: dbMs,
+    passwordVerifyMs,
+    tokenSignMs,
+    auditMs,
   });
+}
 
-  return {
-    accessToken,
-    refreshToken,
-    user: {
-      id: user.id,
-      fullName: user.fullName,
-      companyName: user.companyName,
-      phone: user.phone,
-      phone2: user.phone2,
-      email: user.email,
-      country: user.country,
-      city: user.city,
-      commune: user.commune,
-      associationName: user.companyName,
-      associationPhone: user.phone,
-      associationCountry: user.country,
-      associationStatusDocPath: user.associationStatusDocPath,
-      representativeType: user.representativeType,
-      representativeName: user.representativeName,
-      representativePhone: user.representativePhone,
-      representativeAddress: user.representativeAddress,
-      representativeEmail: user.representativeEmail,
-      role: user.role,
-      status: user.status,
-      accountType: user.accountType,
-    },
-  };
+export async function loginUser({ email, password, req }) {
+  const totalStart = performance.now();
+  let dbMs = 0;
+  let passwordVerifyMs = 0;
+  let tokenSignMs = 0;
+  let auditMs = 0;
+  let user;
+  const normalizedEmail = normalizeEmail(email);
+
+  try {
+    const dbStart = performance.now();
+    user = await prisma.user.findUnique({
+      where: { email: normalizedEmail },
+      select: {
+        id: true,
+        passwordHash: true,
+        fullName: true,
+        companyName: true,
+        phone: true,
+        phone2: true,
+        email: true,
+        country: true,
+        city: true,
+        commune: true,
+        associationStatusDocPath: true,
+        representativeType: true,
+        representativeName: true,
+        representativePhone: true,
+        representativeAddress: true,
+        representativeEmail: true,
+        role: true,
+        status: true,
+        accountType: true,
+      },
+    });
+    dbMs = roundMs(dbStart);
+
+    if (!user) {
+      const err = new Error("Identifiants invalides.");
+      err.status = 401;
+      throw err;
+    }
+
+    if (user.status !== "ACTIVE") {
+      const err = new Error("Compte non actif. Vérifie ton OTP.");
+      err.status = 403;
+      throw err;
+    }
+
+    const passwordVerifyStart = performance.now();
+    const ok = await verifyPassword(user.passwordHash, password);
+    passwordVerifyMs = roundMs(passwordVerifyStart);
+    if (!ok) {
+      const err = new Error("Identifiants invalides.");
+      err.status = 401;
+      throw err;
+    }
+
+    const tokenSignStart = performance.now();
+    const accessToken = signAccessToken({ sub: user.id, role: user.role });
+    const refreshToken = signRefreshToken({ sub: user.id, role: user.role });
+    tokenSignMs = roundMs(tokenSignStart);
+
+    const auditStart = performance.now();
+    await auditLog({
+      userId: user.id,
+      action: "LOGIN",
+      entity: "User",
+      entityId: user.id,
+      req,
+    });
+    auditMs = roundMs(auditStart);
+
+    logLoginPerf({
+      totalStart,
+      dbMs,
+      passwordVerifyMs,
+      tokenSignMs,
+      auditMs,
+      status: "success",
+      userId: user.id,
+    });
+
+    return {
+      accessToken,
+      refreshToken,
+      user: {
+        id: user.id,
+        fullName: user.fullName,
+        companyName: user.companyName,
+        phone: user.phone,
+        phone2: user.phone2,
+        email: user.email,
+        country: user.country,
+        city: user.city,
+        commune: user.commune,
+        associationName: user.companyName,
+        associationPhone: user.phone,
+        associationCountry: user.country,
+        associationStatusDocPath: user.associationStatusDocPath,
+        representativeType: user.representativeType,
+        representativeName: user.representativeName,
+        representativePhone: user.representativePhone,
+        representativeAddress: user.representativeAddress,
+        representativeEmail: user.representativeEmail,
+        role: user.role,
+        status: user.status,
+        accountType: user.accountType,
+      },
+    };
+  } catch (err) {
+    logLoginPerf({
+      totalStart,
+      dbMs,
+      passwordVerifyMs,
+      tokenSignMs,
+      auditMs,
+      status: err?.status ? `error_${err.status}` : "error",
+      userId: user?.id,
+    });
+    throw err;
+  }
 }
 
 export async function getMe({ userId }) {
@@ -203,4 +287,54 @@ export async function getMe({ userId }) {
   });
 
   return user;
+}
+
+export async function changePassword({
+  userId,
+  currentPassword,
+  newPassword,
+  req,
+}) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      email: true,
+      passwordHash: true,
+    },
+  });
+
+  if (!user) {
+    const err = new Error("Utilisateur introuvable.");
+    err.status = 404;
+    throw err;
+  }
+
+  const isCurrentPasswordValid = await verifyPassword(
+    user.passwordHash,
+    currentPassword,
+  );
+
+  if (!isCurrentPasswordValid) {
+    const err = new Error("Mot de passe actuel incorrect.");
+    err.status = 400;
+    throw err;
+  }
+
+  const passwordHash = await hashPassword(newPassword);
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { passwordHash },
+    select: { id: true },
+  });
+
+  await auditLog({
+    userId: user.id,
+    action: "PASSWORD_CHANGED",
+    entity: "User",
+    entityId: user.id,
+    req,
+    meta: { email: user.email },
+  });
 }

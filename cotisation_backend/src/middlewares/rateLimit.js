@@ -19,3 +19,14 @@ export const otpLimiter = rateLimit({
   legacyHeaders: false,
   message: { message: "Too many OTP requests. Try again later." },
 });
+
+/**
+ * Limiteur pour les changements de mot de passe authentifiés.
+ */
+export const changePasswordLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000, // 10 min
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: "Trop de tentatives. Réessaie plus tard." },
+});
