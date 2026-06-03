@@ -336,13 +336,56 @@
       "completed": "Dépenses effectuées",
       "monthCount": "Dépenses du mois",
       "totalAmount": "Montant total",
-      "monthAmount": "Montant du mois"
+      "monthAmount": "Montant du mois",
+      "label":       "Label",
+  "quantity":    "Quantity",
+  "unitPrice":   "Unit price",
+  "beneficiary": "Beneficiary"
     }
   },
+  "expenseManager": {
+  "charts": {
+    "byStatus":    "Expenses by status",
+    "noByStatus":  "No expenses by status",
+    "monthVsTotal":"Month / total expenses",
+    "noAmounts":   "No expense amounts"
+  }
+},
   "superAdmin": {
-    "dashboardTitle": "Dashboard global",
+    "dashboardTitle": "global Dashboard",
     "dashboardSubtitle": "Vue utilisateurs, cotisations, dépenses et ordres de paiement.",
-    "allExpenses": "Toutes les dépenses"
+    "allExpenses": "Toutes les dépenses","roleLabel": "Super Admin",
+  "createdBy": "Created by",
+  "latestUsers": "Latest registered users",
+  "latestSubscriptions": "Latest subscriptions",
+  "latestExpenses": "Latest expenses",
+  "latestPaymentOrders": "Latest payment orders",
+  "stats": {
+    "users": "Users",
+    "adherents": "Members",
+    "associations": "Associations",
+    "subscriptions": "Subscriptions",
+    "monthlySubscriptions": "Monthly subscriptions",
+    "annualSubscriptions": "Annual subscriptions",
+    "totalCotisation": "Total contributions",
+    "totalExpenses": "Total expenses",
+    "approvedExpenses": "Approved expenses",
+    "rejectedExpenses": "Rejected expenses",
+    "pendingExpenses": "Pending expenses",
+    "completedExpenses": "Completed expenses",
+    "paymentOrders": "Payment orders",
+    "paymentOrdersAmount": "Payment orders amount"
+  },
+  "charts": {
+    "expensesByStatus":    "Expenses by status",
+    "noExpensesByStatus":  "No expenses by status",
+    "ordersByStatus":      "Payment orders by status",
+    "noOrdersByStatus":    "No payment orders by status",
+    "subscriptions":       "Monthly / annual subscriptions",
+    "noSubscriptions":     "No subscriptions",
+    "monthly":             "Monthly",
+    "annual":              "Annual"
+  }
   },
   "validation": {
     "approve": "Approuver",

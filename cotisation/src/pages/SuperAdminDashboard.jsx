@@ -112,32 +112,22 @@ export default function SuperAdminDashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-white via-emerald-50 to-white">
-      {/* Header */}
-      <header className="border-b border-emerald-100 bg-white/80 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
-          <Brand />
-          <div className="flex items-center gap-3">
-            <LanguageSwitcher />
-            <span className="hidden text-xs font-bold text-slate-600 md:block">
-              {user?.fullName || user?.email} • {t("superAdmin.roleLabel")}
-            </span>
-            <button onClick={logout} className="rounded-xl border border-emerald-200 px-3 py-2 text-xs font-bold">
-              {t("common.logout")}
-            </button>
-          </div>
-        </div>
-      </header>
+      <DashboardHeader
+        maxWidth="max-w-7xl"
+        userLabel={`${user?.fullName || user?.email || ""} • ${t("superAdmin.roleLabel")}`}
+        onLogout={logout}
+      />
 
       <main className="mx-auto max-w-7xl px-4 py-8">
-        {/* Tabs */}
-        <div className="mb-6 flex flex-wrap gap-2">
-          <button onClick={() => setTab("dashboard")} className={`rounded-xl px-4 py-2 text-sm font-black ${tab === "dashboard" ? "bg-emerald-600 text-white" : "bg-white text-slate-700"}`}>
-            {t("common.dashboard")}
-          </button>
-          <button onClick={() => setTab("expenses")} className={`rounded-xl px-4 py-2 text-sm font-black ${tab === "expenses" ? "bg-emerald-600 text-white" : "bg-white text-slate-700"}`}>
-            {t("expenses.listTab")}
-          </button>
-        </div>
+        <DashboardTabs
+          className="mb-6"
+          tabs={[
+            { id: "dashboard", label: t("common.dashboard") },
+            { id: "expenses", label: t("expenses.listTab") },
+          ]}
+          activeTab={tab}
+          onChange={setTab}
+        />
 
         {/* Dashboard tab */}
         {tab === "dashboard" && (
