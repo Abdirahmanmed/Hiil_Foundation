@@ -1,5 +1,5 @@
 import prisma from "../../config/prisma.js";
-import { hashPassword, verifyPassword } from "../../utils/hash.js";
+import { hashInviteToken, hashPassword, verifyPassword } from "../../utils/hash.js";
 import { signAccessToken, signRefreshToken } from "../../utils/tokens.js";
 import { auditLog } from "../../utils/audit.js";
 import { performance } from "node:perf_hooks";
@@ -337,4 +337,87 @@ export async function changePassword({
     req,
     meta: { email: user.email },
   });
+}
+
+/**
+ * Activation d'un compte interne par son titulaire.
+ *
+ * C'est le seul chemin par lequel un compte cree par un tiers obtient un mot de
+ * passe : le createur n'en a jamais connu aucun. Le jeton est a usage unique et
+ * il est efface dans la meme transaction que l'ecriture du mot de passe.
+ */
+export async function acceptInvitation({ token, password, req }) {
+  const invalid = () => {
+    const err = new Error("Lien d'invitation invalide ou expiré.");
+    err.status = 400;
+    return err;
+  };
+
+  const user = await prisma.user.findUnique({
+    where: { inviteTokenHash: hashInviteToken(token) },
+    select: {
+      id: true,
+      email: true,
+      role: true,
+      status: true,
+      inviteTokenExpiresAt: true,
+    },
+  });
+
+  if (!user) throw invalid();
+
+  if (!user.inviteTokenExpiresAt || user.inviteTokenExpiresAt < new Date()) {
+    await auditLog({
+      userId: user.id,
+      action: "INVITE_ACCEPT_FAILED",
+      entity: "User",
+      entityId: user.id,
+      req,
+      meta: { reason: "EXPIRED" },
+    });
+    throw invalid();
+  }
+
+  if (user.status !== "PENDING_VERIFICATION") {
+    await auditLog({
+      userId: user.id,
+      action: "INVITE_ACCEPT_FAILED",
+      entity: "User",
+      entityId: user.id,
+      req,
+      meta: { reason: "STATUS", status: user.status },
+    });
+    throw invalid();
+  }
+
+  const passwordHash = await hashPassword(password);
+
+  // updateMany conditionne sur le hash du jeton : deux requetes concurrentes ne
+  // peuvent pas activer le compte deux fois, c'est Postgres qui arbitre.
+  const { count } = await prisma.user.updateMany({
+    where: {
+      id: user.id,
+      inviteTokenHash: hashInviteToken(token),
+      status: "PENDING_VERIFICATION",
+    },
+    data: {
+      passwordHash,
+      status: "ACTIVE",
+      inviteTokenHash: null,
+      inviteTokenExpiresAt: null,
+    },
+  });
+
+  if (count === 0) throw invalid();
+
+  await auditLog({
+    userId: user.id,
+    action: "INVITE_ACCEPTED",
+    entity: "User",
+    entityId: user.id,
+    req,
+    meta: { role: user.role },
+  });
+
+  return { email: user.email, role: user.role };
 }

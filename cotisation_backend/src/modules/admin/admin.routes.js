@@ -10,6 +10,7 @@ import {
   setUserStatus,
   setUserRole,
   resetUserOtp,
+  resendInvite,
   setSubStatus,
   forceConsent,
   audit,
@@ -32,6 +33,7 @@ router.post("/users", createInternalUser);
 router.patch("/users/:userId/status", setUserStatus);
 router.patch("/users/:userId/role", requireRole("SUPER_ADMIN"), setUserRole);
 router.post("/users/:userId/otp/reset", resetUserOtp);
+router.post("/users/:userId/invite/resend", resendInvite);
 
 // ACTIONS SUBSCRIPTIONS
 router.patch("/subscriptions/:subscriptionId/status", setSubStatus);

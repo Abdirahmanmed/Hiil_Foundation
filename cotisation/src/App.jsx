@@ -15,6 +15,7 @@ const ExpenseManagerDashboard = lazy(() => import("./pages/ExpenseManagerDashboa
 const SuperAdminDashboard = lazy(() => import("./pages/SuperAdminDashboard"));
 const TreasuryDashboard = lazy(() => import("./pages/TreasuryDashboard"));
 const InviteCommunity = lazy(() => import("./pages/InviteCommunity"));
+const SetPassword = lazy(() => import("./pages/SetPassword"));
 
 function RTLHandler() {
   const { i18n } = useTranslation();
@@ -39,6 +40,8 @@ export default function App() {
             <Route path="/register" element={<PublicOnlyRoute><Register /></PublicOnlyRoute>} />
             <Route path="/otp" element={<PublicOnlyRoute><OtpVerify /></PublicOnlyRoute>} />
             <Route path="/login" element={<PublicOnlyRoute><Login /></PublicOnlyRoute>} />
+            {/* Activation d'un compte interne : le titulaire n'est pas encore connecte */}
+            <Route path="/activation" element={<PublicOnlyRoute><SetPassword /></PublicOnlyRoute>} />
 
           <Route
             path="/client"

@@ -12,6 +12,12 @@ export async function loginApi(payload) {
   return res.data;
 }
 
+// Activation d'un compte interne par son titulaire (route publique).
+export async function acceptInviteApi(payload) {
+  const res = await http.post("/api/auth/invite/accept", payload);
+  return res.data;
+}
+
 export async function changePassword(payload) {
   const res = await http.patch("/api/auth/change-password", payload);
   return res.data;

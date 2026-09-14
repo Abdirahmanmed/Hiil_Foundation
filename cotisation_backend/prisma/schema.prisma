@@ -140,6 +140,12 @@ model User {
   otpSendCountHour   Int       @default(0)
   otpSendWindowStart DateTime?
 
+  // ✅ Invitation d'un compte interne (ADMIN / GESTIONNAIRE_DEPENSE / EQUIPE_TRESORERIE).
+  // Le createur du compte ne choisit PAS le mot de passe : le titulaire le fixe
+  // lui-meme via ce jeton, envoye a sa propre adresse email.
+  inviteTokenHash      String?   @unique
+  inviteTokenExpiresAt DateTime?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

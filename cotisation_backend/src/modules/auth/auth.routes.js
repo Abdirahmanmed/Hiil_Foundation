@@ -1,8 +1,17 @@
 import { Router } from "express";
 import { upload, validateUploadedFiles } from "../../utils/upload.js";
 import { auth } from "../../middlewares/auth.js";
-import { changePasswordLimiter } from "../../middlewares/rateLimit.js";
-import { register, login, me, changePassword } from "./auth.controller.js";
+import {
+  changePasswordLimiter,
+  inviteAcceptLimiter,
+} from "../../middlewares/rateLimit.js";
+import {
+  register,
+  login,
+  me,
+  changePassword,
+  acceptInvite,
+} from "./auth.controller.js";
 
 const router = Router();
 
@@ -20,6 +29,9 @@ router.post(
 );
 
 router.post("/login", login);
+
+// Publique : le titulaire d'un compte interne n'est pas encore connecte.
+router.post("/invite/accept", inviteAcceptLimiter, acceptInvite);
 router.get("/me", auth, me);
 router.patch("/change-password", auth, changePasswordLimiter, changePassword);
 

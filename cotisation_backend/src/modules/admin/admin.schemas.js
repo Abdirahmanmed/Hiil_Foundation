@@ -8,20 +8,24 @@ export const setUserRoleSchema = z.object({
   role: z.enum(["ADMIN", "GESTIONNAIRE_DEPENSE", "EQUIPE_TRESORERIE"]),
 });
 
-export const createInternalUserSchema = z
-  .object({
-    fullName: z.string().trim().min(1),
-    email: z.string().trim().email(),
-    phone: z.string().trim().min(1),
-    role: z.enum(["ADMIN", "GESTIONNAIRE_DEPENSE", "EQUIPE_TRESORERIE"]),
-    status: z.enum(["ACTIVE", "SUSPENDED"]).default("ACTIVE"),
-    password: z.string().min(8),
-    confirmPassword: z.string().min(8),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    path: ["confirmPassword"],
-    message: "Les mots de passe sont différents",
-  });
+/**
+ * Creation d'un compte interne.
+ *
+ * Ni `password`, ni `confirmPassword`, ni `status` : le createur d'un compte ne
+ * doit jamais en connaitre le secret. Sans cette regle, l'ADMIN qui cree le
+ * gestionnaire de depense ET le tresorier peut se connecter sous leurs deux
+ * identites, et la separation des pouvoirs — la raison d'etre du produit —
+ * n'existe plus que sur le papier.
+ *
+ * Le compte nait en PENDING_VERIFICATION ; son titulaire fixe son mot de passe
+ * via le jeton d'invitation envoye a sa propre adresse email.
+ */
+export const createInternalUserSchema = z.object({
+  fullName: z.string().trim().min(1),
+  email: z.string().trim().email(),
+  phone: z.string().trim().min(1),
+  role: z.enum(["ADMIN", "GESTIONNAIRE_DEPENSE", "EQUIPE_TRESORERIE"]),
+});
 
 export const resetUserOtpSchema = z.object({});
 

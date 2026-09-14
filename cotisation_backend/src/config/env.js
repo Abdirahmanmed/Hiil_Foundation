@@ -108,6 +108,14 @@ export const env = {
   // CORS
   CORS_ORIGIN: process.env.CORS_ORIGIN || "http://localhost:5173",
 
+  // Base des liens envoyes par email (invitation d'un compte interne).
+  // Par defaut l'origine du front, qui est deja connue via CORS_ORIGIN.
+  APP_PUBLIC_URL: (
+    process.env.APP_PUBLIC_URL ||
+    process.env.CORS_ORIGIN ||
+    "http://localhost:5173"
+  ).replace(/\/+$/, ""),
+
   // OTP
   OTP_TTL_MINUTES: Number(process.env.OTP_TTL_MINUTES || 10),
   OTP_MAX_ATTEMPTS: Number(process.env.OTP_MAX_ATTEMPTS || 5),

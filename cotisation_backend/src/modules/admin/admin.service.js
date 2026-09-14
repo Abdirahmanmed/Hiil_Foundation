@@ -1,6 +1,9 @@
+import crypto from "node:crypto";
+
 import prisma from "../../config/prisma.js";
 import { auditLog } from "../../utils/audit.js";
-import { hashPassword } from "../../utils/hash.js";
+import { hashInviteToken, hashUnusablePassword } from "../../utils/hash.js";
+import { sendInternalInviteMail } from "../../services/mail.service.js";
 
 const VISIBLE_INTERNAL_USER_ROLES = [
   "ADMIN",
@@ -298,17 +301,42 @@ function assertCanCreateInternalUser({ adminRole, role }) {
   }
 }
 
+// Duree de validite du lien d'invitation d'un compte interne.
+const INVITE_TTL_HOURS = 168; // 7 jours
+
+/**
+ * Fabrique un jeton d'invitation et le renvoie EN CLAIR a l'appelant, qui doit
+ * l'envoyer par email au titulaire. Seul son hash est conserve en base.
+ */
+async function issueInvitation(userId) {
+  const token = crypto.randomBytes(32).toString("base64url");
+  const expiresAt = new Date(Date.now() + INVITE_TTL_HOURS * 60 * 60 * 1000);
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: {
+      inviteTokenHash: hashInviteToken(token),
+      inviteTokenExpiresAt: expiresAt,
+    },
+  });
+
+  return { token, expiresAt };
+}
+
 export async function createInternalUser({ adminId, adminRole, data, req }) {
   assertCanCreateInternalUser({ adminRole, role: data.role });
 
-  const passwordHash = await hashPassword(data.password);
+  // Mot de passe inutilisable : le titulaire fixera le sien via l'invitation.
+  // Le createur du compte ne connait aucun secret permettant de s'y connecter.
+  const passwordHash = await hashUnusablePassword();
+
   const created = await prisma.user.create({
     data: {
       fullName: data.fullName,
       email: data.email.toLowerCase(),
       phone: data.phone,
       role: data.role,
-      status: data.status || "ACTIVE",
+      status: "PENDING_VERIFICATION",
       passwordHash,
       country: "N/A",
       city: "N/A",
@@ -322,10 +350,73 @@ export async function createInternalUser({ adminId, adminRole, data, req }) {
     entity: "User",
     entityId: created.id,
     req,
-    meta: { role: created.role, status: created.status },
+    meta: { role: created.role, status: created.status, invited: true },
   });
 
-  return created;
+  // L'envoi de l'email ne doit pas faire echouer la creation : si Brevo tombe,
+  // le compte existe et l'invitation se renvoie depuis l'interface.
+  let invitationSent = true;
+  try {
+    const { token, expiresAt } = await issueInvitation(created.id);
+    await sendInternalInviteMail({
+      email: created.email,
+      fullName: created.fullName,
+      role: created.role,
+      token,
+      expiresAt,
+    });
+  } catch (err) {
+    invitationSent = false;
+    console.error("[invite] envoi impossible:", err?.message);
+    await auditLog({
+      userId: adminId,
+      action: "USER_INVITE_SEND_FAILED",
+      entity: "User",
+      entityId: created.id,
+      req,
+      meta: { reason: err?.message },
+    });
+  }
+
+  return { ...created, invitationSent };
+}
+
+export async function resendInternalUserInvitation({ adminId, adminRole, userId, req }) {
+  await assertCanActOnTarget({
+    adminId,
+    adminRole,
+    userId,
+    action: "USER_INVITE_RESEND",
+    req,
+  });
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true, email: true, fullName: true, role: true, status: true },
+  });
+
+  if (user.status !== "PENDING_VERIFICATION") {
+    throw createHttpError("Ce compte est déjà activé", 409);
+  }
+
+  const { token, expiresAt } = await issueInvitation(userId);
+  await sendInternalInviteMail({
+    email: user.email,
+    fullName: user.fullName,
+    role: user.role,
+    token,
+    expiresAt,
+  });
+
+  await auditLog({
+    userId: adminId,
+    action: "USER_INVITE_RESENT",
+    entity: "User",
+    entityId: userId,
+    req,
+  });
+
+  return { invitationSent: true, expiresAt };
 }
 
 /**

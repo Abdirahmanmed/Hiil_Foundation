@@ -308,6 +308,57 @@ export async function sendOtpMail({ email, code }) {
 
 export const sendOtpEmail = sendOtpMail;
 
+const INTERNAL_ROLE_LABELS = {
+  ADMIN: "Administrateur",
+  GESTIONNAIRE_DEPENSE: "Gestionnaire de dépense",
+  EQUIPE_TRESORERIE: "Équipe trésorerie",
+};
+
+/**
+ * Invitation d'un compte interne : le titulaire fixe lui-meme son mot de passe.
+ * Le lien contient le jeton en clair — il n'existe nulle part ailleurs, seul son
+ * hash est conserve en base.
+ */
+export async function sendInternalInviteMail({ email, fullName, role, token, expiresAt }) {
+  const link = `${env.APP_PUBLIC_URL}/activation?token=${encodeURIComponent(token)}`;
+  const roleLabel = INTERNAL_ROLE_LABELS[role] || role;
+  const deadline = expiresAt.toLocaleDateString("fr-FR", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+
+  const text = [
+    `Bonjour ${fullName},`,
+    ``,
+    `Un compte ${roleLabel} vient d'être créé pour vous sur ${env.EMAIL_FROM_NAME}.`,
+    `Définissez votre mot de passe avec ce lien :`,
+    link,
+    ``,
+    `Ce lien est valable jusqu'au ${deadline}.`,
+    `Personne d'autre que vous ne connaît le mot de passe de ce compte : c'est vous qui le choisissez.`,
+    ``,
+    `Si vous n'attendiez pas cet email, ignorez-le et prévenez l'administration.`,
+  ].join("\n");
+
+  const html = `
+    <p>Bonjour ${escapeHtml(fullName)},</p>
+    <p>Un compte <strong>${escapeHtml(roleLabel)}</strong> vient d'être créé pour vous sur ${escapeHtml(env.EMAIL_FROM_NAME)}.</p>
+    <p><a href="${escapeHtml(link)}">Définir mon mot de passe</a></p>
+    <p>Ce lien est valable jusqu'au <strong>${escapeHtml(deadline)}</strong>.</p>
+    <p>Personne d'autre que vous ne connaît le mot de passe de ce compte : c'est vous qui le choisissez.</p>
+    <p style="color:#666">Si vous n'attendiez pas cet email, ignorez-le et prévenez l'administration.</p>
+  `;
+
+  return sendEmail({
+    to: email,
+    subject: `Activez votre compte ${roleLabel}`,
+    html,
+    text,
+    context: "InternalInvite",
+  });
+}
+
 export async function verifyMailer() {
   if (env.BREVO_API_KEY) {
     console.log(`Brevo Transactional Email API configured for ${env.EMAIL_FROM}`);

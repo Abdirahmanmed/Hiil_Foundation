@@ -108,6 +108,20 @@ export async function resetUserOtp(req, res, next) {
   }
 }
 
+export async function resendInvite(req, res, next) {
+  try {
+    const result = await adminService.resendInternalUserInvitation({
+      adminId: req.user.id,
+      adminRole: req.user.role,
+      userId: req.params.userId,
+      req,
+    });
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
+}
+
 /* ===== ACTIONS SUBSCRIPTIONS ===== */
 
 export async function setSubStatus(req, res, next) {

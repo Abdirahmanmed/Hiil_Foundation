@@ -87,14 +87,14 @@ export default function AdminDashboard() {
   const [userSearch, setUserSearch] = useState("");
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [createUserOpen, setCreateUserOpen] = useState(false);
+  // Aucun mot de passe ici : le titulaire du compte le fixe lui-meme via le lien
+  // d'invitation envoye a son email. Le createur ne doit connaitre aucun secret
+  // permettant de se connecter sous l'identite du compte qu'il cree.
   const [createUserForm, setCreateUserForm] = useState({
     fullName: "",
     email: "",
     phone: "",
     role: "GESTIONNAIRE_DEPENSE",
-    status: "ACTIVE",
-    password: "",
-    confirmPassword: "",
   });
 
   // Adhérents
@@ -269,17 +269,29 @@ export default function AdminDashboard() {
 
   const mCreateUser = useMutation({
     mutationFn: createAdminUser,
-    onSuccess: () => {
-      toast.success(t("user_created_success"));
+    onSuccess: (data) => {
+      if (data?.user?.invitationSent === false) {
+        toast.error(
+          t(
+            "admin.inviteSendFailed",
+            "Compte créé, mais l'email d'invitation n'est pas parti. Renvoyez-le depuis la fiche.",
+          ),
+          { duration: 8000 },
+        );
+      } else {
+        toast.success(
+          t(
+            "admin.inviteSent",
+            "Compte créé. Une invitation a été envoyée à son adresse email.",
+          ),
+        );
+      }
       setCreateUserOpen(false);
       setCreateUserForm({
         fullName: "",
         email: "",
         phone: "",
         role: user?.role === "SUPER_ADMIN" ? "ADMIN" : "GESTIONNAIRE_DEPENSE",
-        status: "ACTIVE",
-        password: "",
-        confirmPassword: "",
       });
       qUsers.refetch();
       qStats.refetch();
@@ -299,10 +311,6 @@ export default function AdminDashboard() {
     e.preventDefault();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(createUserForm.email)) {
       toast.error(t("email_invalid"));
-      return;
-    }
-    if (createUserForm.password !== createUserForm.confirmPassword) {
-      toast.error(t("password_mismatch"));
       return;
     }
     mCreateUser.mutate(createUserForm);
@@ -800,63 +808,27 @@ export default function AdminDashboard() {
             />
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
-            <div>
-              <div className="mb-1 text-xs font-black text-slate-600">
-                {t("role")}
-              </div>
-              <Select
-                value={createUserForm.role}
-                onChange={(e) => updateCreateUserForm("role", e.target.value)}
-              >
-                {createUserRoleOptions.map((role) => (
-                  <option key={role} value={role}>
-                    {role}
-                  </option>
-                ))}
-              </Select>
-            </div>
-
-            <div>
-              <div className="mb-1 text-xs font-black text-slate-600">
-                {t("status")}
-              </div>
-              <Select
-                value={createUserForm.status}
-                onChange={(e) => updateCreateUserForm("status", e.target.value)}
-              >
-                <option value="ACTIVE">ACTIVE</option>
-                <option value="SUSPENDED">SUSPENDED</option>
-              </Select>
-            </div>
-          </div>
-
           <div>
             <div className="mb-1 text-xs font-black text-slate-600">
-              {t("password")}
+              {t("role")}
             </div>
-            <Input
-              type="password"
-              minLength={8}
-              value={createUserForm.password}
-              onChange={(e) => updateCreateUserForm("password", e.target.value)}
-              required
-            />
+            <Select
+              value={createUserForm.role}
+              onChange={(e) => updateCreateUserForm("role", e.target.value)}
+            >
+              {createUserRoleOptions.map((role) => (
+                <option key={role} value={role}>
+                  {role}
+                </option>
+              ))}
+            </Select>
           </div>
 
-          <div>
-            <div className="mb-1 text-xs font-black text-slate-600">
-              {t("confirm_password")}
-            </div>
-            <Input
-              type="password"
-              minLength={8}
-              value={createUserForm.confirmPassword}
-              onChange={(e) =>
-                updateCreateUserForm("confirmPassword", e.target.value)
-              }
-              required
-            />
+          <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-900">
+            {t(
+              "admin.inviteNotice",
+              "Le compte sera créé en attente d'activation. Son titulaire recevra un lien par email pour choisir lui-même son mot de passe — vous ne le connaîtrez pas.",
+            )}
           </div>
 
           <button

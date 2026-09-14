@@ -31,6 +31,19 @@ export const changePasswordLimiter = rateLimit({
   message: { message: "Trop de tentatives. Réessaie plus tard." },
 });
 
+/**
+ * Acceptation d'une invitation : route publique qui prend un jeton en entree.
+ * Stricte, parce qu'il n'y a aucune authentification en amont pour freiner un
+ * essai de jetons a la chaine.
+ */
+export const inviteAcceptLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 min
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: "Trop de tentatives. Réessaie plus tard." },
+});
+
 export const cacPaymentConfirmLimiter = rateLimit({
   windowMs: 10 * 60 * 1000, // 10 min
   max: 5,

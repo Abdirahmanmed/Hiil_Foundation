@@ -2,6 +2,7 @@ import {
   registerSchema,
   loginSchema,
   changePasswordSchema,
+  acceptInviteSchema,
 } from "./auth.schemas.js";
 import * as authService from "./auth.service.js";
 import { sendEmailOtp } from "../otp/otp.service.js";
@@ -114,6 +115,23 @@ export async function changePassword(req, res, next) {
     });
 
     return res.json({ message: "Mot de passe modifié avec succès." });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function acceptInvite(req, res, next) {
+  try {
+    const data = acceptInviteSchema.parse(req.body);
+    const result = await authService.acceptInvitation({
+      token: data.token,
+      password: data.password,
+      req,
+    });
+    res.json({
+      message: "Compte activé. Vous pouvez maintenant vous connecter.",
+      ...result,
+    });
   } catch (err) {
     next(err);
   }
