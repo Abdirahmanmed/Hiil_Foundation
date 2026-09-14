@@ -1,5 +1,10 @@
 import * as service from "./paymentOrders.service.js";
-import { createPaymentOrderSchema, paymentOrderIdParamsSchema } from "./paymentOrders.schemas.js";
+import {
+  createPaymentOrderSchema,
+  paymentOrderIdParamsSchema,
+  cancelPaymentOrderSchema,
+  executePaymentOrderSchema,
+} from "./paymentOrders.schemas.js";
 
 export async function create(req, res, next) {
   try {
@@ -35,6 +40,38 @@ export async function markPrinted(req, res, next) {
     const params = paymentOrderIdParamsSchema.parse(req.params);
     const paymentOrder = await service.markPaymentOrderPrinted({ user: req.user, id: params.id, req });
     res.json({ paymentOrder });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function cancel(req, res, next) {
+  try {
+    const params = paymentOrderIdParamsSchema.parse(req.params);
+    const body = cancelPaymentOrderSchema.parse(req.body);
+    const result = await service.cancelPaymentOrder({
+      user: req.user,
+      id: params.id,
+      reason: body.reason,
+      req,
+    });
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function markExecuted(req, res, next) {
+  try {
+    const params = paymentOrderIdParamsSchema.parse(req.params);
+    const body = executePaymentOrderSchema.parse(req.body || {});
+    const result = await service.markPaymentOrderExecuted({
+      user: req.user,
+      id: params.id,
+      executedAt: body.executedAt,
+      req,
+    });
+    res.json(result);
   } catch (err) {
     next(err);
   }

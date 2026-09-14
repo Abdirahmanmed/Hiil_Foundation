@@ -70,7 +70,8 @@ export async function getTreasuryDashboard() {
     prisma.expense.aggregate({ where: { createdAt: { gte: monthStart } }, _sum: { amount: true }, _count: true }),
     prisma.expense.groupBy({ by: ["status"], _count: { status: true }, _sum: { amount: true } }),
     prisma.expense.findMany({ where: { status: "APPROUVER" }, orderBy: { createdAt: "desc" }, take: 5, select: expensePublicSelect() }),
-    prisma.paymentOrder.aggregate({ _sum: { amount: true }, _count: true }),
+    // « Engagé » exclut les ordres annulés : un ordre annulé n'engage plus rien.
+    prisma.paymentOrder.aggregate({ where: { status: { not: "ANNULE" } }, _sum: { amount: true }, _count: true }),
     prisma.paymentOrder.aggregate({ where: { createdAt: { gte: monthStart } }, _sum: { amount: true }, _count: true }),
     prisma.paymentOrder.groupBy({ by: ["status"], _count: { status: true }, _sum: { amount: true } }),
     prisma.paymentOrder.findMany({ orderBy: { createdAt: "desc" }, take: 5, select: paymentOrderPublicSelect() }),
@@ -101,6 +102,15 @@ export async function getTreasuryDashboard() {
     monthPaymentOrdersAmount: monthPaymentOrders._sum.amount || 0,
     createdPaymentOrders: orderStatusCounts.CREE?.count || 0,
     printedPaymentOrders: orderStatusCounts.IMPRIME?.count || 0,
+    // « Engagé » et « réellement payé » sont deux chiffres différents, et les
+    // confondre était un mensonge de fond : une dépense basculait en EFFECTUER
+    // à la seconde où le bon était créé, alors que le virement part des jours
+    // plus tard — et parfois jamais.
+    executedPaymentOrders: orderStatusCounts.EXECUTE?.count || 0,
+    cancelledPaymentOrders: orderStatusCounts.ANNULE?.count || 0,
+    engagedAmount:
+      (totalPaymentOrders._sum.amount || 0),
+    paidAmount: orderStatusCounts.EXECUTE?.amount || 0,
     paymentOrdersByStatus: paymentOrdersByStatus.map((row) => ({ status: row.status, count: row._count.status, amount: row._sum.amount || 0 })),
     latestApprovedExpenses,
     latestPaymentOrders,

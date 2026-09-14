@@ -84,6 +84,8 @@ export async function createPaymentOrder({ user, data, req }) {
         bankAccountHolder: data.paymentMethod === "CASH" ? null : data.bankAccountHolder,
         referenceNumber,
         status: "CREE",
+        // Porte la contrainte d'unicite : un seul ordre ACTIF par depense.
+        activeExpenseId: expense.id,
       },
       include: includeOrder(),
     });
@@ -118,6 +120,147 @@ export async function createPaymentOrder({ user, data, req }) {
   return order;
 }
 
+/**
+ * Annulation d'un ordre de paiement.
+ *
+ * Sans elle, un ordre emis avec un mauvais numero de compte figeait la depense
+ * en EFFECTUER a vie — et la contrainte d'unicite rendait ce blocage absolu. En
+ * pratique la tresorerie contournerait en creant une fausse depense, ce qui
+ * pollue la comptabilite pour toujours.
+ *
+ * Mais annuler est un pouvoir, donc il est borne :
+ *   CREE     — jamais imprime, la tresorerie annule seule
+ *   IMPRIME  — le document est parti a la banque : SUPER_ADMIN uniquement
+ *   EXECUTE  — l'argent est sorti : jamais. On enregistre un remboursement.
+ * Sans ces bornes, la tresorerie pourrait seule annuler un ordre deja remis,
+ * repasser la depense en APPROUVER et en emettre un autre vers un autre
+ * beneficiaire, autant de fois qu'elle veut.
+ */
+export async function cancelPaymentOrder({ user, id, reason, req }) {
+  return prisma.$transaction(async (tx) => {
+    const order = await tx.paymentOrder.findUnique({
+      where: { id },
+      select: { id: true, status: true, expenseId: true, referenceNumber: true },
+    });
+
+    if (!order) {
+      const err = new Error("Ordre de paiement introuvable");
+      err.status = 404;
+      throw err;
+    }
+
+    if (order.status === "ANNULE") {
+      const err = new Error("Cet ordre est déjà annulé");
+      err.status = 409;
+      throw err;
+    }
+
+    if (order.status === "EXECUTE") {
+      const err = new Error(
+        "Cet ordre a été exécuté : l'argent est sorti. Enregistrez un remboursement, pas une annulation.",
+      );
+      err.status = 409;
+      throw err;
+    }
+
+    if (order.status === "IMPRIME" && user.role !== "SUPER_ADMIN") {
+      const err = new Error(
+        "Cet ordre a déjà été imprimé : seul le Super Admin peut l'annuler.",
+      );
+      err.status = 403;
+      throw err;
+    }
+
+    await tx.paymentOrder.update({
+      where: { id },
+      data: {
+        status: "ANNULE",
+        // Libere la contrainte : une reemission redevient possible.
+        activeExpenseId: null,
+        cancelledAt: new Date(),
+        cancelledById: user.id,
+        cancellationReason: reason,
+      },
+    });
+
+    // La depense redevient decaissable, elle ne repart pas a l'approbation :
+    // la decision du Super Admin tient toujours, c'est l'execution qui a rate.
+    await tx.expense.updateMany({
+      where: { id: order.expenseId, status: "EFFECTUER" },
+      data: { status: "APPROUVER" },
+    });
+
+    await tx.auditLog.create({
+      data: {
+        userId: user.id,
+        action: "PAYMENT_ORDER_CANCELLED",
+        entity: "PaymentOrder",
+        entityId: id,
+        meta: {
+          reason,
+          previousStatus: order.status,
+          referenceNumber: order.referenceNumber,
+          expenseId: order.expenseId,
+        },
+        ip: req?.ip || null,
+        userAgent: req?.get?.("user-agent")?.slice(0, 500) || null,
+      },
+    });
+
+    return { message: "Ordre annulé. La dépense est de nouveau décaissable." };
+  });
+}
+
+/**
+ * L'argent a reellement quitte la banque.
+ *
+ * Corrige un mensonge de fond du tableau de bord : une depense passait en
+ * EFFECTUER a la seconde ou le bon etait cree, avant meme d'etre imprime, alors
+ * que le virement part des jours plus tard. « Engage » et « reellement paye »
+ * sont deux chiffres differents.
+ */
+export async function markPaymentOrderExecuted({ user, id, executedAt, req }) {
+  return prisma.$transaction(async (tx) => {
+    const { count } = await tx.paymentOrder.updateMany({
+      where: { id, status: { in: ["CREE", "IMPRIME"] } },
+      data: { status: "EXECUTE", executedAt: executedAt || new Date() },
+    });
+
+    if (count === 0) {
+      const existe = await tx.paymentOrder.findUnique({
+        where: { id },
+        select: { status: true },
+      });
+      if (!existe) {
+        const err = new Error("Ordre de paiement introuvable");
+        err.status = 404;
+        throw err;
+      }
+      const err = new Error(
+        existe.status === "EXECUTE"
+          ? "Cet ordre est déjà marqué exécuté"
+          : "Un ordre annulé ne peut pas être exécuté",
+      );
+      err.status = 409;
+      throw err;
+    }
+
+    await tx.auditLog.create({
+      data: {
+        userId: user.id,
+        action: "PAYMENT_ORDER_EXECUTED",
+        entity: "PaymentOrder",
+        entityId: id,
+        meta: { executedAt: executedAt || null },
+        ip: req?.ip || null,
+        userAgent: req?.get?.("user-agent")?.slice(0, 500) || null,
+      },
+    });
+
+    return { message: "Ordre marqué exécuté." };
+  });
+}
+
 export async function listPaymentOrders() {
   return prisma.paymentOrder.findMany({ orderBy: { createdAt: "desc" }, include: includeOrder() });
 }
@@ -142,14 +285,23 @@ export async function markPaymentOrderPrinted({ user, id, req }) {
     throw err;
   }
 
-  const updated =
-    order.status === "IMPRIME"
-      ? order
-      : await prisma.paymentOrder.update({
-          where: { id },
-          data: { status: "IMPRIME" },
-          include: includeOrder(),
-        });
+  if (order.status === "ANNULE" || order.status === "EXECUTE") {
+    const err = new Error("Cet ordre n'est plus imprimable");
+    err.status = 409;
+    throw err;
+  }
+
+  // updateMany conditionne sur le statut source plutot qu'un update apres
+  // lecture : deux impressions simultanees ne peuvent pas se marcher dessus.
+  await prisma.paymentOrder.updateMany({
+    where: { id, status: "CREE" },
+    data: { status: "IMPRIME" },
+  });
+
+  const updated = await prisma.paymentOrder.findUnique({
+    where: { id },
+    include: includeOrder(),
+  });
 
   await auditLog({ userId: user.id, action: "PAYMENT_ORDER_PRINT_MARKED", entity: "PaymentOrder", entityId: id, req, meta: { referenceNumber: updated.referenceNumber } });
   return updated;

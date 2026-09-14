@@ -32,3 +32,15 @@ export const createPaymentOrderSchema = z.object({
 export const paymentOrderIdParamsSchema = z.object({
   id: z.string().min(1),
 });
+
+// Annuler un ordre libere la depense pour une reemission : le motif est ce qui
+// permet, plus tard, de distinguer une erreur de saisie d'un detournement.
+export const cancelPaymentOrderSchema = z.object({
+  reason: z.string().trim().min(3, "Motif requis").max(500),
+});
+
+// La date de sortie bancaire reelle. Par defaut maintenant, mais la tresorerie
+// constate souvent le virement quelques jours plus tard sur son releve.
+export const executePaymentOrderSchema = z.object({
+  executedAt: z.coerce.date().optional(),
+});

@@ -13,7 +13,7 @@ import { statusRowsToChart } from "../components/chartUtils";
 import { useAuth } from "../context/AuthContext";
 import { getExpenses } from "../api/expenses.api";
 import { getTreasuryDashboard } from "../api/treasury.api";
-import { createPaymentOrder, getPaymentOrderPrint, getPaymentOrders, markPaymentOrderPrinted } from "../api/paymentOrders.api";
+import { cancelPaymentOrder, createPaymentOrder, getPaymentOrderPrint, getPaymentOrders, markPaymentOrderExecuted, markPaymentOrderPrinted } from "../api/paymentOrders.api";
 import { useTranslation } from "react-i18next";
 import { logPerf } from "../utils/perf";
 
@@ -69,6 +69,41 @@ export default function TreasuryDashboard() {
   const createMut = useMutation({ mutationFn: createPaymentOrder, onSuccess: () => { toast.success(t("create_payment_order") + " ✅"); setSelectedExpense(null); qc.invalidateQueries({ queryKey: ["expenses"] }); qc.invalidateQueries({ queryKey: ["payment-orders"] }); qc.invalidateQueries({ queryKey: ["treasury-dashboard"] }); }, onError: (e) => toast.error(e?.response?.data?.message || t("sub_create_error")) });
   const printMut = useMutation({ mutationFn: getPaymentOrderPrint, onSuccess: (data) => setPrintOrder(data.paymentOrder), onError: (e) => toast.error(e?.response?.data?.message || t("error_generic")) });
   const markPrintedMut = useMutation({ mutationFn: markPaymentOrderPrinted, onSuccess: (data) => { setPrintOrder(data.paymentOrder); qc.invalidateQueries({ queryKey: ["payment-orders"] }); qc.invalidateQueries({ queryKey: ["treasury-dashboard"] }); window.print(); }, onError: (e) => toast.error(e?.response?.data?.message || t("error_generic")) });
+
+  const executeMut = useMutation({
+    mutationFn: ({ id, executedAt }) => markPaymentOrderExecuted(id, executedAt),
+    onSuccess: (d) => { toast.success(d?.message || t("treasury.markExecuted", "Marquer payé")); qc.invalidateQueries({ queryKey: ["payment-orders"] }); qc.invalidateQueries({ queryKey: ["treasury-dashboard"] }); },
+    onError: (e) => toast.error(e?.response?.data?.message || t("error_generic")),
+  });
+
+  const cancelMut = useMutation({
+    mutationFn: ({ id, reason }) => cancelPaymentOrder(id, reason),
+    onSuccess: (d) => { toast.success(d?.message || t("treasury.cancel", "Annuler")); qc.invalidateQueries({ queryKey: ["payment-orders"] }); qc.invalidateQueries({ queryKey: ["expenses"] }); qc.invalidateQueries({ queryKey: ["treasury-dashboard"] }); },
+    onError: (e) => toast.error(e?.response?.data?.message || t("error_generic")),
+  });
+
+  function askExecuted(order) {
+    const saisie = window.prompt(
+      t("treasury.executedPrompt", "Date de sortie bancaire (AAAA-MM-JJ). Laisser vide pour aujourd'hui :"),
+      "",
+    );
+    if (saisie === null) return;
+    executeMut.mutate({ id: order.id, executedAt: saisie.trim() || undefined });
+  }
+
+  function askCancel(order) {
+    // Le serveur tranche selon l'état : un ordre imprimé exige le Super Admin,
+    // un ordre exécuté ne s'annule jamais. Le message d'erreur le dira.
+    const reason = window.prompt(
+      t("treasury.cancelPrompt", "Motif de l'annulation (3 caractères minimum) :"),
+    );
+    if (reason === null) return;
+    if (reason.trim().length < 3) {
+      toast.error(t("treasury.reasonTooShort", "Motif trop court."));
+      return;
+    }
+    cancelMut.mutate({ id: order.id, reason: reason.trim() });
+  }
 
   function openOrder(expense) {
     const paymentCountry = expense.beneficiaryCountry || "DJIBOUTI";
@@ -287,9 +322,23 @@ export default function TreasuryDashboard() {
                       <td className="px-4 py-3 font-black">{fmtMoney(o.amount)}</td>
                       <td className="px-4 py-3"><Badge tone={statusTones[o.status]}>{t(`enumStatus.${o.status}`, o.status)}</Badge></td>
                       <td className="px-4 py-3">
-                        <button onClick={() => printMut.mutate(o.id)} className="rounded-xl border border-emerald-200 px-3 py-2 text-xs font-black">
-                          {t("treasury.table.print")}
-                        </button>
+                        <div className="flex flex-wrap gap-2">
+                          <button onClick={() => printMut.mutate(o.id)} className="rounded-xl border border-emerald-200 px-3 py-2 text-xs font-black">
+                            {t("treasury.table.print")}
+                          </button>
+                          {/* Un ordre exécuté ou annulé est terminal : plus
+                              aucune action possible dessus. */}
+                          {o.status !== "EXECUTE" && o.status !== "ANNULE" ? (
+                            <>
+                              <button onClick={() => askExecuted(o)} className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-black text-emerald-800">
+                                {t("treasury.markExecuted", "Marquer payé")}
+                              </button>
+                              <button onClick={() => askCancel(o)} className="rounded-xl border border-red-200 px-3 py-2 text-xs font-black text-red-700">
+                                {t("treasury.cancel", "Annuler")}
+                              </button>
+                            </>
+                          ) : null}
+                        </div>
                       </td>
                     </tr>
                   ))}

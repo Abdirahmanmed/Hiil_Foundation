@@ -97,6 +97,11 @@ enum Currency {
 enum PaymentOrderStatus {
   CREE
   IMPRIME
+  // L'argent a réellement quitté la banque. Jusqu'ici une dépense passait en
+  // EFFECTUER à la seconde où le bon était créé, avant même d'être imprimé,
+  // alors que le virement part des jours plus tard — et parfois jamais.
+  EXECUTE
+  ANNULE
 }
 
 enum PublicSubmissionKind {
@@ -157,7 +162,8 @@ model User {
   otps          Otp[]
   subscriptions Subscription[]
   auditLogs     AuditLog[]
-  paymentOrders PaymentOrder[]
+  paymentOrders          PaymentOrder[] @relation("PaymentOrderCreatedBy")
+  cancelledPaymentOrders PaymentOrder[] @relation("PaymentOrderCancelledBy")
 
   // Trois liens distincts vers Expense : engager, approuver et rejeter sont
   // trois actes differents, portes par trois roles differents.
@@ -307,7 +313,26 @@ model PaymentOrder {
   expense   Expense @relation(fields: [expenseId], references: [id], onDelete: Restrict)
 
   createdById String
-  createdBy   User   @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  createdBy   User   @relation("PaymentOrderCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+
+  // Vaut expenseId tant que l'ordre est actif, NULL une fois annulé.
+  // PostgreSQL autorise plusieurs NULL dans un index UNIQUE : un seul ordre
+  // ACTIF par dépense, et la réémission après annulation reste possible.
+  // Sans cette contrainte, deux requêtes simultanées produisaient deux ordres
+  // pour la même dépense, chacun imprimable et remis à la banque.
+  activeExpenseId String? @unique
+
+  // Sortie bancaire réellement constatée.
+  executedAt DateTime?
+
+  // Annulation. Bornée par rôle : un ordre CREE (jamais imprimé) est annulable
+  // par la trésorerie, un ordre IMPRIME ne l'est que par le Super Admin, un
+  // ordre EXECUTE ne l'est jamais — on enregistre un remboursement, pas une
+  // annulation.
+  cancelledAt        DateTime?
+  cancelledById      String?
+  cancelledBy        User?     @relation("PaymentOrderCancelledBy", fields: [cancelledById], references: [id], onDelete: SetNull)
+  cancellationReason String?
 
   // Conservé nullable pour l'audit des ordres émis avant la suppression du
   // jeton d'approbation. Plus jamais alimenté.

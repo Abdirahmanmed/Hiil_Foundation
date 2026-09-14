@@ -42,8 +42,22 @@ leur rejeu est sans effet.
 npx prisma migrate deploy
 ```
 
-Attendu : `20260603133541_cac`, `20260914000000_add_internal_user_invitation` et
-`20260914010000_add_public_submissions` appliquées, `All migrations have been successfully applied`.
+Attendu : toutes les migrations `20260603133541_cac` et `202609140*` appliquées,
+`All migrations have been successfully applied`.
+
+> **Une seule migration peut échouer, et c'est volontaire.**
+> `20260914050000_payment_order_lifecycle` pose un index UNIQUE sur l'ordre de paiement *actif* d'une
+> dépense. Si deux ordres actifs existent pour une même dépense, la migration s'arrête. C'est le
+> comportement voulu : deux bons imprimés pour une même dépense sont un incident de paiement, il se
+> tranche avec la trésorerie avant de migrer, pas après. Vérifié au moment de l'écriture : **0 ordre
+> de paiement en production**, donc aucun doublon possible. Pour le contrôler quand même :
+>
+> ```sql
+> SELECT "expenseId", count(*), array_agg("referenceNumber"), array_agg(status)
+> FROM "PaymentOrder" GROUP BY 1 HAVING count(*) > 1;
+> ```
+>
+> Ne supprime rien automatiquement si cette requête renvoie des lignes.
 
 > Le backend n'applique **pas** les migrations tout seul au démarrage : il n'y a ni `postinstall`, ni
 > `prestart`, ni `release command`. Si tu déploies le code sans lancer cette commande, la création
