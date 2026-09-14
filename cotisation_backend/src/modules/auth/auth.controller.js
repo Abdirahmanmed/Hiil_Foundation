@@ -3,6 +3,8 @@ import {
   loginSchema,
   changePasswordSchema,
   acceptInviteSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
 } from "./auth.schemas.js";
 import * as authService from "./auth.service.js";
 import { sendEmailOtp } from "../otp/otp.service.js";
@@ -130,6 +132,38 @@ export async function acceptInvite(req, res, next) {
     });
     res.json({
       message: "Compte activé. Vous pouvez maintenant vous connecter.",
+      ...result,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function forgotPassword(req, res, next) {
+  try {
+    const body = forgotPasswordSchema.parse(req.body);
+    await authService.requestPasswordReset({ email: body.email, req });
+    // Réponse toujours identique : cette route ne doit pas permettre de
+    // savoir quelles adresses ont un compte.
+    res.json({
+      message:
+        "Si un compte existe pour cette adresse, un email vient d'être envoyé.",
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function resetPassword(req, res, next) {
+  try {
+    const body = resetPasswordSchema.parse(req.body);
+    const result = await authService.resetPassword({
+      token: body.token,
+      password: body.password,
+      req,
+    });
+    res.json({
+      message: "Mot de passe réinitialisé. Reconnectez-vous.",
       ...result,
     });
   } catch (err) {

@@ -22,6 +22,7 @@ const initialForm = {
   quantity: 1,
   unitPrice: 1,
   amount: 1,
+  currency: "FRANC",
   beneficiaryName: "",
   beneficiaryCountry: "DJIBOUTI",
   beneficiaryCity: "",
@@ -294,6 +295,16 @@ export default function ExpenseManagerDashboard() {
             <span className="text-xs font-normal text-slate-500">
               {t("expenses.amountDerived", "Calculé : quantité × prix unitaire")}
             </span>
+          </Field>
+          {/* La devise de la dépense. L'ordre de paiement en héritera : sans
+              elle, les tableaux de bord additionnaient francs, birrs et dollars
+              en un total qui n'existe pas. */}
+          <Field label={t("expenses.currency", "Devise")}>
+            <Select value={form.currency} onChange={(e) => setField("currency", e.target.value)}>
+              <option value="FRANC">{t("currencies.FRANC")}</option>
+              <option value="DOLLAR">{t("currencies.DOLLAR")}</option>
+              <option value="BIRR_ETHIOPIEN">{t("currencies.BIRR_ETHIOPIEN")}</option>
+            </Select>
           </Field>
           <Field label={t("expenses.beneficiary")}>
             <Input value={form.beneficiaryName} onChange={(e) => setField("beneficiaryName", e.target.value)} required />

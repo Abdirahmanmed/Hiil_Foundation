@@ -1,7 +1,11 @@
+import crypto from "node:crypto";
+
 import prisma from "../../config/prisma.js";
 import { hashInviteToken, hashPassword, verifyPassword } from "../../utils/hash.js";
 import { signAccessToken, signRefreshToken } from "../../utils/tokens.js";
 import { auditLog } from "../../utils/audit.js";
+import { invalidateUserCache } from "../../middlewares/auth.js";
+import { sendPasswordResetMail } from "../../services/mail.service.js";
 import { performance } from "node:perf_hooks";
 
 export async function createUser({ data, files, req }) {
@@ -434,4 +438,110 @@ export async function acceptInvitation({ token, password, req }) {
   });
 
   return { email: user.email, role: user.role };
+}
+
+const RESET_TTL_MINUTES = 60;
+
+/**
+ * Demande de reinitialisation.
+ *
+ * Repond TOUJOURS de la meme facon, que l'email existe ou non : sinon la route
+ * devient un enumerateur de comptes. Un compte encore en invitation est renvoye
+ * vers son lien d'activation, pas vers une reinitialisation.
+ */
+export async function requestPasswordReset({ email, req }) {
+  const normalizedEmail = normalizeEmail(email);
+  const user = await prisma.user.findUnique({
+    where: { email: normalizedEmail },
+    select: { id: true, email: true, fullName: true, status: true, inviteTokenHash: true },
+  });
+
+  if (!user || user.status === "BLOCKED" || user.inviteTokenHash) {
+    await auditLog({
+      userId: user?.id || null,
+      action: "PASSWORD_RESET_REQUESTED_IGNORED",
+      entity: "User",
+      entityId: user?.id || null,
+      req,
+      meta: { email: normalizedEmail },
+    });
+    return;
+  }
+
+  const token = crypto.randomBytes(32).toString("base64url");
+  const expiresAt = new Date(Date.now() + RESET_TTL_MINUTES * 60 * 1000);
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { resetTokenHash: hashInviteToken(token), resetTokenExpiresAt: expiresAt },
+  });
+
+  await sendPasswordResetMail({
+    email: user.email,
+    fullName: user.fullName,
+    token,
+    expiresAt,
+  });
+
+  await auditLog({
+    userId: user.id,
+    action: "PASSWORD_RESET_REQUESTED",
+    entity: "User",
+    entityId: user.id,
+    req,
+  });
+}
+
+/**
+ * Application de la reinitialisation.
+ *
+ * Le jeton est a usage unique et consomme dans la meme transaction que
+ * l'ecriture du mot de passe. tokenVersion est incremente : TOUTES les sessions
+ * ouvertes tombent, ce qui est le comportement attendu si le compte a ete
+ * compromis.
+ */
+export async function resetPassword({ token, password, req }) {
+  const invalide = () => {
+    const err = new Error("Lien de réinitialisation invalide ou expiré.");
+    err.status = 400;
+    return err;
+  };
+
+  const user = await prisma.user.findUnique({
+    where: { resetTokenHash: hashInviteToken(token) },
+    select: { id: true, email: true, resetTokenExpiresAt: true, status: true },
+  });
+
+  if (!user) throw invalide();
+  if (!user.resetTokenExpiresAt || user.resetTokenExpiresAt < new Date()) throw invalide();
+  if (user.status === "BLOCKED") throw invalide();
+
+  const passwordHash = await hashPassword(password);
+
+  const { count } = await prisma.user.updateMany({
+    where: { id: user.id, resetTokenHash: hashInviteToken(token) },
+    data: {
+      passwordHash,
+      resetTokenHash: null,
+      resetTokenExpiresAt: null,
+      tokenVersion: { increment: 1 },
+      // Un compte suspendu ne se reactive pas en changeant de mot de passe.
+      status: user.status === "PENDING_VERIFICATION" ? "ACTIVE" : user.status,
+    },
+  });
+
+  if (count === 0) throw invalide();
+
+  invalidateUserCache(user.id);
+
+  await auditLog({
+    userId: user.id,
+    action: "PASSWORD_RESET_COMPLETED",
+    entity: "User",
+    entityId: user.id,
+    req,
+    meta: { email: user.email },
+  });
+
+  return { email: user.email };
 }

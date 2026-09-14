@@ -14,6 +14,7 @@ function publicExpenseSelect() {
     quantity: true,
     unitPrice: true,
     amount: true,
+    currency: true,
     beneficiaryName: true,
     beneficiaryCountry: true,
     beneficiaryCity: true,
@@ -61,13 +62,23 @@ export async function getExpenseDashboard({ user }) {
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
   const monthWhere = { ...expenseWhere, createdAt: { gte: monthStart } };
 
-  const [total, monthTotal, byStatus, latestExpenses] = await Promise.all([
+  const [total, monthTotal, byStatus, byCurrency, latestExpenses] = await Promise.all([
     prisma.expense.aggregate({ where: expenseWhere, _sum: { amount: true }, _count: true }),
     prisma.expense.aggregate({ where: monthWhere, _sum: { amount: true }, _count: true }),
     prisma.expense.groupBy({
       by: ["status"],
       where: expenseWhere,
       _count: { status: true },
+      _sum: { amount: true },
+    }),
+    // Additionner francs djiboutiens, birrs et dollars donne un chiffre qui
+    // n'existe pas — et c'est celui que le Super Admin regarde pour décider
+    // d'un décaissement. Les totaux scalaires ci-dessus restent pour ne rien
+    // casser côté front, mais c'est CETTE ventilation qui dit la vérité.
+    prisma.expense.groupBy({
+      by: ["currency"],
+      where: expenseWhere,
+      _count: { currency: true },
       _sum: { amount: true },
     }),
     prisma.expense.findMany({
@@ -95,6 +106,11 @@ export async function getExpenseDashboard({ user }) {
     expensesByStatus: byStatus.map((row) => ({
       status: row.status,
       count: row._count.status,
+      amount: row._sum.amount || 0,
+    })),
+    expensesByCurrency: byCurrency.map((row) => ({
+      currency: row.currency,
+      count: row._count.currency,
       amount: row._sum.amount || 0,
     })),
     latestExpenses,
@@ -130,6 +146,7 @@ export async function createExpense({ user, data, req }) {
       quantity: data.quantity,
       unitPrice: data.unitPrice,
       amount,
+      currency: data.currency || "FRANC",
       beneficiaryName: data.beneficiaryName,
       beneficiaryCountry: data.beneficiaryCountry,
       beneficiaryCity: data.beneficiaryCity,

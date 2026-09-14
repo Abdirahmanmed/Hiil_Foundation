@@ -353,6 +353,44 @@ export async function sendPublicSubmissionNotification({ submission, data }) {
   });
 }
 
+/**
+ * Réinitialisation de mot de passe. Le lien contient le jeton en clair — il
+ * n'existe nulle part ailleurs, seul son hash est conservé en base.
+ */
+export async function sendPasswordResetMail({ email, fullName, token, expiresAt }) {
+  const link = `${env.APP_PUBLIC_URL}/reinitialisation?token=${encodeURIComponent(token)}`;
+  const limite = expiresAt.toLocaleString("fr-FR");
+
+  const lines = [
+    `Bonjour ${fullName || ""},`.trim(),
+    "",
+    "Vous avez demandé à réinitialiser votre mot de passe.",
+    link,
+    "",
+    `Ce lien est valable jusqu'au ${limite}.`,
+    "Toutes vos sessions ouvertes seront fermées après la réinitialisation.",
+    "",
+    "Si vous n'êtes pas à l'origine de cette demande, ignorez cet email : votre mot de passe reste inchangé.",
+  ];
+
+  const html = `
+    <p>Bonjour ${escapeHtml(fullName || "")},</p>
+    <p>Vous avez demandé à réinitialiser votre mot de passe.</p>
+    <p><a href="${escapeHtml(link)}">Choisir un nouveau mot de passe</a></p>
+    <p>Ce lien est valable jusqu'au <strong>${escapeHtml(limite)}</strong>.</p>
+    <p>Toutes vos sessions ouvertes seront fermées après la réinitialisation.</p>
+    <p style="color:#666">Si vous n'êtes pas à l'origine de cette demande, ignorez cet email : votre mot de passe reste inchangé.</p>
+  `;
+
+  return sendEmail({
+    to: email,
+    subject: "Réinitialisation de votre mot de passe",
+    html,
+    text: lines.join("\n"),
+    context: "PasswordReset",
+  });
+}
+
 const INTERNAL_ROLE_LABELS = {
   ADMIN: "Administrateur",
   GESTIONNAIRE_DEPENSE: "Gestionnaire de dépense",

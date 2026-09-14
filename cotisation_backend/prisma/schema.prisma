@@ -181,6 +181,12 @@ model User {
   inviteTokenHash      String?   @unique
   inviteTokenExpiresAt DateTime?
 
+  // Réinitialisation de mot de passe. Colonnes distinctes de l'invitation :
+  // les deux parcours ne doivent pas pouvoir se recouvrir, et un compte
+  // réinitialisé n'est pas un compte à activer.
+  resetTokenHash      String?   @unique
+  resetTokenExpiresAt DateTime?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -218,7 +224,11 @@ model Otp {
 model Subscription {
   id     String @id @default(cuid())
   userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // Restrict et non Cascade : supprimer un membre effaçait ses cotisations,
+  // leurs encaissements et leurs références bancaires. Une trace financière ne
+  // doit pas disparaître parce qu'un compte disparaît. Un droit à l'effacement
+  // se traite par anonymisation du membre, pas par suppression de la ligne.
+  user   User   @relation(fields: [userId], references: [id], onDelete: Restrict)
 
   bankCountry String
   bankName    String
@@ -312,6 +322,13 @@ model Expense {
   quantity           Int
   unitPrice          Int
   amount             Int
+
+  // Expense n'avait AUCUNE devise, alors que PaymentOrder en a une stricte.
+  // On ne savait donc pas dans quelle monnaie une dépense était engagée, et le
+  // contrôle « montant de l'ordre = montant de la dépense » comparait des
+  // unités potentiellement différentes. DJF par défaut : c'est la monnaie de
+  // toutes les lignes existantes.
+  currency           Currency @default(FRANC)
   beneficiaryName    String
   beneficiaryCountry Country
   beneficiaryCity    String

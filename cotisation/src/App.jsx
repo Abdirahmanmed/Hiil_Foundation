@@ -16,6 +16,7 @@ const SuperAdminDashboard = lazy(() => import("./pages/SuperAdminDashboard"));
 const TreasuryDashboard = lazy(() => import("./pages/TreasuryDashboard"));
 const InviteCommunity = lazy(() => import("./pages/InviteCommunity"));
 const SetPassword = lazy(() => import("./pages/SetPassword"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 
 function RTLHandler() {
   const { i18n } = useTranslation();
@@ -47,6 +48,9 @@ export default function App() {
                 renverrait vers un dashboard qui n'est pas le sien, en ecrasant
                 le jeton de l'URL sans aucun message. */}
             <Route path="/activation" element={<SetPassword />} />
+            {/* Hors PublicOnlyRoute pour la même raison : le lien arrive par
+                email et peut être ouvert dans un navigateur déjà connecté. */}
+            <Route path="/reinitialisation" element={<ResetPassword />} />
 
           <Route
             path="/client"

@@ -56,6 +56,16 @@ export async function createPaymentOrder({ user, data, req }) {
       throw err;
     }
 
+    // La devise de l'ordre DECOULE de la depense : comparer un montant sans
+    // comparer sa monnaie revient a comparer des unites differentes.
+    if (data.currency !== expense.currency) {
+      const err = new Error(
+        `La devise de l'ordre doit être celle de la dépense approuvée (${expense.currency}).`,
+      );
+      err.status = 400;
+      throw err;
+    }
+
     if (data.amount !== expense.amount) {
       const err = new Error("Le montant de l'ordre de paiement doit correspondre au montant de la depense approuvee");
       err.status = 400;
@@ -296,7 +306,14 @@ export async function markPaymentOrderExecuted({ user, id, executedAt, req }) {
 }
 
 export async function listPaymentOrders() {
-  return prisma.paymentOrder.findMany({ orderBy: { createdAt: "desc" }, include: includeOrder() });
+  // Borne explicite : la requete renvoyait la table entiere, sans take ni
+  // curseur, et la supervision ADMIN vient de s'ajouter comme lectrice. Mieux
+  // vaut une limite visible qu'une page qui ralentit sans qu'on sache pourquoi.
+  return prisma.paymentOrder.findMany({
+    orderBy: { createdAt: "desc" },
+    take: 200,
+    include: includeOrder(),
+  });
 }
 
 export async function getPaymentOrderPrint({ user, id, req }) {

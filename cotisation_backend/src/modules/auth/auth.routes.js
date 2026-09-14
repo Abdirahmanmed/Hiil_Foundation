@@ -12,6 +12,8 @@ import {
   me,
   changePassword,
   acceptInvite,
+  forgotPassword,
+  resetPassword,
 } from "./auth.controller.js";
 
 const router = Router();
@@ -33,6 +35,12 @@ router.post("/login", loginLimiter, login);
 
 // Publique : le titulaire d'un compte interne n'est pas encore connecte.
 router.post("/invite/accept", inviteAcceptLimiter, acceptInvite);
+
+// Mot de passe oublie. Publiques par nature — quelqu'un qui a perdu son mot de
+// passe ne peut evidemment pas s'authentifier. Meme limiteur que l'invitation :
+// ces routes prennent un email ou un jeton en entree sans rien en amont.
+router.post("/password/forgot", inviteAcceptLimiter, forgotPassword);
+router.post("/password/reset", inviteAcceptLimiter, resetPassword);
 router.get("/me", auth, me);
 router.patch("/change-password", auth, changePasswordLimiter, changePassword);
 

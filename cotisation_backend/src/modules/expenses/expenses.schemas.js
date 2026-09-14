@@ -10,6 +10,7 @@ export const createExpenseSchema = z.object({
   quantity: z.coerce.number().int().positive(),
   unitPrice: z.coerce.number().int().positive(),
   amount: z.coerce.number().int().positive().optional(),
+  currency: z.enum(["FRANC", "DOLLAR", "BIRR_ETHIOPIEN"]).default("FRANC"),
   beneficiaryName: z.string().trim().min(1),
   beneficiaryCountry: z.enum(countries),
   beneficiaryCity: z.string().trim().min(1),

@@ -108,7 +108,7 @@ export default function TreasuryDashboard() {
   function openOrder(expense) {
     const paymentCountry = expense.beneficiaryCountry || "DJIBOUTI";
     setSelectedExpense(expense);
-    setForm({ paymentMethod: "VIREMENT_BANCAIRE", currency: "FRANC", paymentCountry, amount: expense.amount || 1, bankName: bankOptionsByCountry[paymentCountry][0], bankReference: "", bankAccountHolder: expense.beneficiaryName || "" });
+    setForm({ paymentMethod: "VIREMENT_BANCAIRE", currency: expense.currency || "FRANC", paymentCountry, amount: expense.amount || 1, bankName: bankOptionsByCountry[paymentCountry][0], bankReference: "", bankAccountHolder: expense.beneficiaryName || "" });
   }
 
   function setPaymentMethod(paymentMethod) {
@@ -371,12 +371,16 @@ export default function TreasuryDashboard() {
               <option value="CHEQUE">{t("paymentMethods.CHEQUE")}</option>
             </Select>
           </Field>
+          {/* La devise découle de la dépense approuvée. Le serveur refuse toute
+              autre valeur : payer en dollars une dépense engagée en francs,
+              c'est changer le montant sans changer le chiffre. */}
           <Field label={t("treasury.order.currency")}>
-            <Select value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value })}>
-              <option value="FRANC">{t("currencies.FRANC")}</option>
-              <option value="DOLLAR">{t("currencies.DOLLAR")}</option>
-              <option value="BIRR_ETHIOPIEN">{t("currencies.BIRR_ETHIOPIEN")}</option>
-            </Select>
+            <Input
+              value={t(`currencies.${form.currency}`, form.currency)}
+              readOnly
+              tabIndex={-1}
+              className="cursor-not-allowed bg-slate-100 text-slate-600"
+            />
           </Field>
           <Field label={t("treasury.order.paymentCountry")}>
             <Select value={form.paymentCountry} onChange={(e) => setPaymentCountry(e.target.value)}>
