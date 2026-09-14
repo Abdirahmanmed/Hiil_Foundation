@@ -66,6 +66,7 @@ export async function setUserStatus(req, res, next) {
     const body = setUserStatusSchema.parse(req.body);
     const updated = await adminService.setUserStatus({
       adminId: req.user.id,
+      adminRole: req.user.role,
       userId: req.params.userId,
       status: body.status,
       req,
@@ -97,6 +98,7 @@ export async function resetUserOtp(req, res, next) {
     resetUserOtpSchema.parse(req.body || {});
     const updated = await adminService.resetUserOtpSecurity({
       adminId: req.user.id,
+      adminRole: req.user.role,
       userId: req.params.userId,
       req,
     });

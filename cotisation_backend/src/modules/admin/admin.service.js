@@ -328,7 +328,53 @@ export async function createInternalUser({ adminId, adminRole, data, req }) {
   return created;
 }
 
-export async function setUserStatus({ adminId, userId, status, req }) {
+/**
+ * Garde commune a toutes les actions d'un ADMIN sur le compte d'autrui.
+ *
+ * Elle porte sur la CIBLE, jamais sur la valeur demandee : une garde posee
+ * seulement sur la suspension laisserait un ADMIN REACTIVER un compte que le
+ * SUPER_ADMIN vient de bloquer, ce qui revient au meme.
+ */
+async function assertCanActOnTarget({ adminId, adminRole, userId, action, req }) {
+  const target = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true, role: true, status: true },
+  });
+
+  if (!target) throw createHttpError("Utilisateur introuvable", 404);
+
+  const isProtectedTarget =
+    target.role === "ADMIN" ||
+    target.role === "SUPER_ADMIN" ||
+    target.id === adminId;
+
+  if (adminRole === "ADMIN" && isProtectedTarget) {
+    await auditLog({
+      userId: adminId,
+      action: `${action}_DENIED`,
+      entity: "User",
+      entityId: userId,
+      req,
+      meta: { targetRole: target.role, reason: "PROTECTED_TARGET" },
+    });
+    throw createHttpError(
+      "Un ADMIN ne peut pas agir sur un ADMIN, un SUPER_ADMIN, ni sur son propre compte",
+      403,
+    );
+  }
+
+  return target;
+}
+
+export async function setUserStatus({ adminId, adminRole, userId, status, req }) {
+  const target = await assertCanActOnTarget({
+    adminId,
+    adminRole,
+    userId,
+    action: "ADMIN_SET_USER_STATUS",
+    req,
+  });
+
   const updated = await prisma.user.update({
     where: { id: userId },
     data: { status },
@@ -348,7 +394,7 @@ export async function setUserStatus({ adminId, userId, status, req }) {
     entity: "User",
     entityId: updated.id,
     req,
-    meta: { status },
+    meta: { from: target.status, to: status, targetRole: updated.role },
   });
 
   return updated;
@@ -426,7 +472,15 @@ export async function setUserRole({ adminId, adminRole, userId, role, req }) {
   return updated;
 }
 
-export async function resetUserOtpSecurity({ adminId, userId, req }) {
+export async function resetUserOtpSecurity({ adminId, adminRole, userId, req }) {
+  await assertCanActOnTarget({
+    adminId,
+    adminRole,
+    userId,
+    action: "ADMIN_RESET_OTP_SECURITY",
+    req,
+  });
+
   const updated = await prisma.user.update({
     where: { id: userId },
     data: {

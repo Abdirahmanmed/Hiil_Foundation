@@ -1,0 +1,7 @@
+# Les fichiers de migration Prisma sont hashes (checksum) et compares a ceux
+# enregistres en base. Un CRLF introduit par Windows fausse ce checksum et fait
+# echouer `prisma migrate deploy` avec un message qui ne designe pas la cause.
+*.sql text eol=lf
+
+# Meme raison pour les scripts executes sur le serveur.
+*.sh text eol=lf

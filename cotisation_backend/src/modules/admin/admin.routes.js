@@ -35,7 +35,15 @@ router.post("/users/:userId/otp/reset", resetUserOtp);
 
 // ACTIONS SUBSCRIPTIONS
 router.patch("/subscriptions/:subscriptionId/status", setSubStatus);
-router.post("/subscriptions/:subscriptionId/consent/force", forceConsent);
+
+// Forcer un consentement inscrit l'IP et le user-agent de CELUI QUI CLIQUE dans
+// les champs de preuve du membre : l'application fabrique une preuve juridique
+// d'adhesion au nom de quelqu'un d'autre. Ce n'est pas un acte de supervision.
+router.post(
+  "/subscriptions/:subscriptionId/consent/force",
+  requireRole("SUPER_ADMIN"),
+  forceConsent,
+);
 // AUDIT
 router.get("/audit", audit);
 

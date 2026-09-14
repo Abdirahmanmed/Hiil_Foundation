@@ -38,10 +38,50 @@ function parseOptionalPositiveInteger(name) {
   return value;
 }
 
-function parsePaymentMode(name, fallback = "mock") {
-  const value = process.env[name] || fallback;
-  if (["mock", "live"].includes(value)) return value;
-  throw new Error(`❌ Variable d’environnement invalide : ${name} doit être mock ou live`);
+const nodeEnv = process.env.NODE_ENV || "development";
+
+/**
+ * Le mode "mock" accepte un OTP constant : c'est un defaut OUVERT.
+ * Il ne doit jamais s'appliquer par omission sur un serveur de production —
+ * un oubli de variable transformerait silencieusement l'encaissement reel en
+ * simulation. En production, le choix doit donc etre explicite.
+ */
+function resolvePaymentMode() {
+  const raw = process.env.CAC_PAYMENT_MODE;
+
+  if (!raw) {
+    if (nodeEnv === "production") {
+      throw new Error(
+        "❌ CAC_PAYMENT_MODE doit être défini explicitement (mock ou live) en production",
+      );
+    }
+    return "mock";
+  }
+
+  if (!["mock", "live"].includes(raw)) {
+    throw new Error(
+      "❌ Variable d’environnement invalide : CAC_PAYMENT_MODE doit être mock ou live",
+    );
+  }
+
+  return raw;
+}
+
+const cacPaymentMode = resolvePaymentMode();
+
+// En live, on echoue au DEMARRAGE plutot qu'a la premiere requete de paiement :
+// un serveur qui demarre est un serveur qu'on croit fonctionnel.
+if (cacPaymentMode === "live") {
+  for (const name of [
+    "CAC_BASE_URL",
+    "CAC_USERNAME",
+    "CAC_PASSWORD",
+    "CAC_APP_KEY",
+    "CAC_API_KEY",
+    "CAC_COMPANY_SERVICE_ID",
+  ]) {
+    required(name);
+  }
 }
 
 const hasBrevoApiKey = Boolean(process.env.BREVO_API_KEY);
@@ -53,7 +93,7 @@ const emailPass = hasBrevoApiKey ? process.env.EMAIL_PASS : required("EMAIL_PASS
 
 export const env = {
   // Server
-  NODE_ENV: process.env.NODE_ENV || "development",
+  NODE_ENV: nodeEnv,
   PORT: Number(process.env.PORT || 4000),
 
   // Database (Neon)
@@ -100,5 +140,5 @@ export const env = {
   CAC_API_KEY: process.env.CAC_API_KEY,
   CAC_COMPANY_SERVICE_ID: parseOptionalPositiveInteger("CAC_COMPANY_SERVICE_ID"),
   CAC_CURRENCY: process.env.CAC_CURRENCY || "DJF",
-  CAC_PAYMENT_MODE: parsePaymentMode("CAC_PAYMENT_MODE", "mock"),
+  CAC_PAYMENT_MODE: cacPaymentMode,
 };
