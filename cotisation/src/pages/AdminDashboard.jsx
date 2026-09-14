@@ -21,8 +21,11 @@ import {
   resetUserOtp,
   resendUserInvite,
   getUserDetails,
+  getOversight,
   getAudit,
 } from "../api/admin.api";
+
+import { getExpenseTrail } from "../api/expenses.api";
 
 import { SimpleBarChart, SimplePieChart } from "../components/DashboardCharts";
 import DashboardTabs from "../components/DashboardTabs";
@@ -43,6 +46,13 @@ const SUB_STATUS_TONES = {
   CANCELLED: "red",
 };
 
+const EXPENSE_STATUS_TONES = {
+  EN_ATTENTE: "yellow",
+  APPROUVER: "blue",
+  EFFECTUER: "green",
+  REJETER: "red",
+};
+
 const ROLE_OPTIONS = ["ADMIN", "GESTIONNAIRE_DEPENSE", "EQUIPE_TRESORERIE"];
 const ADMIN_ROLE_OPTIONS = ["GESTIONNAIRE_DEPENSE", "EQUIPE_TRESORERIE"];
 
@@ -51,6 +61,15 @@ function fmtDate(d) {
     return new Date(d).toLocaleString();
   } catch {
     return "-";
+  }
+}
+
+function fmtAmount(n) {
+  if (n === null || n === undefined) return "—";
+  try {
+    return Number(n).toLocaleString("fr-FR");
+  } catch {
+    return String(n);
   }
 }
 
@@ -82,7 +101,8 @@ export default function AdminDashboard() {
   const { user, logout } = useAuth();
 
   // Tabs
-  const [tab, setTab] = useState("overview"); // overview | users | adherents | audit
+  const [tab, setTab] = useState("overview"); // overview | oversight | users | adherents | audit
+  const [trailExpenseId, setTrailExpenseId] = useState(null);
 
   // Users
   const [userSearch, setUserSearch] = useState("");
@@ -123,6 +143,18 @@ export default function AdminDashboard() {
     queryKey: ["admin-adherents-contributions"],
     queryFn: getAdherentsContributions,
     enabled: tab === "adherents",
+  });
+
+  const qOversight = useQuery({
+    queryKey: ["admin-oversight"],
+    queryFn: getOversight,
+    enabled: tab === "oversight",
+  });
+
+  const qTrail = useQuery({
+    queryKey: ["expense-trail", trailExpenseId],
+    queryFn: () => getExpenseTrail(trailExpenseId),
+    enabled: !!trailExpenseId,
   });
 
   const qUserDetails = useQuery({
@@ -352,6 +384,7 @@ export default function AdminDashboard() {
         <DashboardTabs
           tabs={[
             { id: "overview", label: t("admin_overview") },
+            { id: "oversight", label: t("admin.oversight.tab", "Supervision") },
             { id: "users", label: t("users") },
             { id: "adherents", label: t("adherents") },
             { id: "audit", label: t("admin_audit") },
@@ -421,6 +454,213 @@ export default function AdminDashboard() {
         ) : null}
 
         {/* USERS */}
+        {/* SUPERVISION — lecture seule. Aucun bouton d'action ici : ni
+            Approuver, ni Rejeter, ni Créer un ordre, ni Imprimer. Si un bouton
+            apparaît dans cet onglet, le contrôle interne est percé. */}
+        {tab === "oversight" ? (
+          <div className="space-y-6">
+            <Card className="p-7 border border-emerald-100 bg-white">
+              <SectionTitle
+                title={t("admin.oversight.title", "Supervision")}
+                subtitle={t(
+                  "admin.oversight.sub",
+                  "Le déroulement du travail des gestionnaires de dépense et de l'équipe trésorerie. Lecture seule.",
+                )}
+                right={
+                  <div className="text-xs text-slate-500">
+                    {qOversight.isLoading ? t("loading") : "OK"}
+                  </div>
+                }
+              />
+
+              <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <StatCard
+                  label={t("admin.oversight.pending", "Dépenses en attente")}
+                  value={qOversight.data?.indicators?.pending?.count}
+                  hint={fmtAmount(qOversight.data?.indicators?.pending?.amount)}
+                />
+                <StatCard
+                  label={t("admin.oversight.approved", "Approuvées, non décaissées")}
+                  value={qOversight.data?.indicators?.approvedNotDisbursed?.count}
+                  hint={fmtAmount(
+                    qOversight.data?.indicators?.approvedNotDisbursed?.amount,
+                  )}
+                />
+                <StatCard
+                  label={t("admin.oversight.ordersMonth", "Ordres émis ce mois")}
+                  value={qOversight.data?.indicators?.ordersThisMonth}
+                />
+                {/* Le chiffre qui compte pour un superviseur n'est pas le
+                    volume, c'est le dossier qui attend depuis le plus longtemps. */}
+                <StatCard
+                  label={t("admin.oversight.oldest", "Plus ancienne en attente")}
+                  value={
+                    qOversight.data?.indicators?.oldestPending
+                      ? `${qOversight.data.indicators.oldestPending.ageDays} j`
+                      : "—"
+                  }
+                  hint={qOversight.data?.indicators?.oldestPending?.label}
+                />
+              </div>
+            </Card>
+
+            <div className="grid gap-6 lg:grid-cols-2">
+              <Card className="p-6 border border-emerald-100 bg-white">
+                <SectionTitle
+                  title={t("admin.oversight.managers", "Gestionnaires de dépense")}
+                  subtitle={t("admin.oversight.last30", "Sur 30 jours")}
+                />
+                <div className="mt-4 space-y-3">
+                  {(qOversight.data?.managers || []).map((m) => (
+                    <div
+                      key={m.id}
+                      className="rounded-2xl border border-emerald-100 bg-emerald-50/30 p-4"
+                    >
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <div className="font-black text-slate-900">
+                          {m.fullName || m.email}
+                        </div>
+                        <Badge tone={USER_STATUS_TONES[m.status] || "neutral"}>
+                          {m.status}
+                        </Badge>
+                      </div>
+                      <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-slate-600 sm:grid-cols-4">
+                        <div>
+                          <span className="font-black text-slate-900">{m.created30d}</span>{" "}
+                          {t("admin.oversight.created", "créées")}
+                        </div>
+                        <div>
+                          <span className="font-black text-slate-900">{m.pending}</span>{" "}
+                          {t("admin.oversight.waiting", "en attente")}
+                        </div>
+                        <div className={m.rejected ? "text-red-700" : ""}>
+                          <span className="font-black">{m.rejected}</span>{" "}
+                          {t("admin.oversight.rejected", "rejetées")}
+                        </div>
+                        <div>{fmtAmount(m.engagedAmount30d)}</div>
+                      </div>
+                      <div className="mt-2 text-[11px] text-slate-500">
+                        {t("admin.oversight.lastActivity", "Dernière activité")} :{" "}
+                        {m.lastActivityAt ? fmtDate(m.lastActivityAt) : "—"}
+                      </div>
+                    </div>
+                  ))}
+                  {!qOversight.isLoading && !(qOversight.data?.managers || []).length ? (
+                    <div className="text-sm text-slate-500">
+                      {t("admin.oversight.noManager", "Aucun gestionnaire de dépense.")}
+                    </div>
+                  ) : null}
+                </div>
+              </Card>
+
+              <Card className="p-6 border border-emerald-100 bg-white">
+                <SectionTitle
+                  title={t("admin.oversight.treasurers", "Équipe trésorerie")}
+                  subtitle={t("admin.oversight.last30", "Sur 30 jours")}
+                />
+                <div className="mt-4 space-y-3">
+                  {(qOversight.data?.treasurers || []).map((tr) => (
+                    <div
+                      key={tr.id}
+                      className="rounded-2xl border border-emerald-100 bg-emerald-50/30 p-4"
+                    >
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <div className="font-black text-slate-900">
+                          {tr.fullName || tr.email}
+                        </div>
+                        <Badge tone={USER_STATUS_TONES[tr.status] || "neutral"}>
+                          {tr.status}
+                        </Badge>
+                      </div>
+                      <div className="mt-2 flex flex-wrap gap-3 text-xs text-slate-600">
+                        <div>
+                          <span className="font-black text-slate-900">{tr.orders30d}</span>{" "}
+                          {t("admin.oversight.orders", "ordres")}
+                        </div>
+                        <div className={tr.notPrinted ? "text-red-700 font-black" : ""}>
+                          {tr.notPrinted} {t("admin.oversight.notPrinted", "non imprimés")}
+                        </div>
+                      </div>
+                      {/* Par devise : additionner francs, birrs et dollars
+                          produirait un total qui n'existe pas. */}
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {Object.entries(tr.amountByCurrency30d || {}).map(([cur, amt]) => (
+                          <span
+                            key={cur}
+                            className="rounded-lg bg-white px-2 py-1 text-[11px] font-black text-slate-700 ring-1 ring-emerald-100"
+                          >
+                            {fmtAmount(amt)} {cur}
+                          </span>
+                        ))}
+                      </div>
+                      <div className="mt-2 text-[11px] text-slate-500">
+                        {t("admin.oversight.lastActivity", "Dernière activité")} :{" "}
+                        {tr.lastActivityAt ? fmtDate(tr.lastActivityAt) : "—"}
+                      </div>
+                    </div>
+                  ))}
+                  {!qOversight.isLoading && !(qOversight.data?.treasurers || []).length ? (
+                    <div className="text-sm text-slate-500">
+                      {t("admin.oversight.noTreasurer", "Aucun membre de l'équipe trésorerie.")}
+                    </div>
+                  ) : null}
+                </div>
+              </Card>
+            </div>
+
+            <Card className="p-6 border border-emerald-100 bg-white">
+              <SectionTitle
+                title={t("admin.oversight.files", "Dossiers de dépense")}
+                subtitle={t(
+                  "admin.oversight.filesSub",
+                  "Tous statuts confondus. Cliquez une ligne pour voir sa chronologie.",
+                )}
+              />
+              <div className="mt-4 overflow-x-auto">
+                <table className="w-full min-w-[760px] text-left text-sm">
+                  <thead className="text-xs uppercase tracking-wide text-slate-500">
+                    <tr>
+                      <th className="px-3 py-2">{t("admin.oversight.label", "Objet")}</th>
+                      <th className="px-3 py-2">{t("admin.oversight.engagedBy", "Engagée par")}</th>
+                      <th className="px-3 py-2">{t("admin.oversight.disbursedBy", "Décaissée par")}</th>
+                      <th className="px-3 py-2">{t("amount", "Montant")}</th>
+                      <th className="px-3 py-2">{t("status", "Statut")}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(qOversight.data?.recentExpenses || []).map((e) => (
+                      <tr
+                        key={e.id}
+                        onClick={() => setTrailExpenseId(e.id)}
+                        className="cursor-pointer border-t border-emerald-50 hover:bg-emerald-50/40"
+                      >
+                        <td className="px-3 py-2">
+                          <div className="font-bold text-slate-900">{e.label}</div>
+                          <div className="text-[11px] text-slate-500">
+                            {e.beneficiaryName} · {fmtDate(e.createdAt)}
+                          </div>
+                        </td>
+                        <td className="px-3 py-2 text-xs">
+                          {e.createdBy?.fullName || e.createdBy?.email || "—"}
+                        </td>
+                        <td className="px-3 py-2 text-xs">
+                          {e.paymentOrders?.[0]?.createdBy?.fullName || "—"}
+                        </td>
+                        <td className="px-3 py-2 font-black">{fmtAmount(e.amount)}</td>
+                        <td className="px-3 py-2">
+                          <Badge tone={EXPENSE_STATUS_TONES[e.status] || "neutral"}>
+                            {t(`enumStatus.${e.status}`, e.status)}
+                          </Badge>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
+          </div>
+        ) : null}
+
         {tab === "users" ? (
           <Card className="p-5 sm:p-7 border border-emerald-100 bg-white shadow-[0_20px_60px_-30px_rgba(16,185,129,0.2)]">
             <SectionTitle
@@ -794,6 +1034,98 @@ export default function AdminDashboard() {
       </div>
 
       {/* CREATE INTERNAL USER DRAWER */}
+      {/* Chronologie d'un dossier : l'information qui n'existait nulle part et
+          qui fait la différence entre surveiller et regarder. */}
+      <Drawer
+        open={!!trailExpenseId}
+        onClose={() => setTrailExpenseId(null)}
+        title={t("admin.oversight.trail", "Chronologie du dossier")}
+        subtitle={qTrail.data?.expense?.label || trailExpenseId}
+      >
+        {qTrail.isLoading ? (
+          <div className="text-sm text-slate-600">{t("loading")}</div>
+        ) : qTrail.isError ? (
+          <div className="text-sm text-red-600">{t("error_details")}</div>
+        ) : (
+          <div className="space-y-5">
+            <div className="grid grid-cols-2 gap-3">
+              <SoftKpi
+                label={t("amount", "Montant")}
+                value={fmtAmount(qTrail.data?.expense?.amount)}
+              />
+              <SoftKpi
+                label={t("status", "Statut")}
+                value={t(
+                  `enumStatus.${qTrail.data?.expense?.status}`,
+                  qTrail.data?.expense?.status,
+                )}
+              />
+              <SoftKpi
+                label={t("admin.oversight.beneficiary", "Bénéficiaire")}
+                value={qTrail.data?.expense?.beneficiaryName}
+              />
+              <SoftKpi
+                label={t("admin.oversight.engagedBy", "Engagée par")}
+                value={qTrail.data?.expense?.createdBy?.fullName}
+              />
+            </div>
+
+            {(qTrail.data?.orders || []).length ? (
+              <div>
+                <div className="mb-2 text-xs font-black uppercase tracking-wide text-slate-500">
+                  {t("admin.oversight.orders", "Ordres de paiement")}
+                </div>
+                <div className="space-y-2">
+                  {qTrail.data.orders.map((o) => (
+                    <div
+                      key={o.id}
+                      className="rounded-xl border border-emerald-100 bg-emerald-50/30 p-3 text-xs"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="font-black text-slate-900">
+                          {o.referenceNumber}
+                        </span>
+                        <Badge tone={o.status === "IMPRIME" ? "green" : "yellow"}>
+                          {o.status}
+                        </Badge>
+                      </div>
+                      <div className="mt-1 text-slate-600">
+                        {fmtAmount(o.amount)} {o.currency} ·{" "}
+                        {o.createdBy?.fullName || o.createdBy?.email} ·{" "}
+                        {fmtDate(o.createdAt)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
+            <div>
+              <div className="mb-2 text-xs font-black uppercase tracking-wide text-slate-500">
+                {t("admin.oversight.history", "Historique")}
+              </div>
+              <ol className="space-y-2 border-l-2 border-emerald-100 pl-4">
+                {(qTrail.data?.logs || []).map((l, i) => (
+                  <li key={i} className="relative text-xs">
+                    <span className="absolute -left-[21px] top-1 h-2 w-2 rounded-full bg-emerald-500" />
+                    <div className="font-black text-slate-900">{l.action}</div>
+                    <div className="text-slate-600">
+                      {l.user?.fullName || l.user?.email || "—"}
+                      {l.user?.role ? ` (${l.user.role})` : ""} · {fmtDate(l.createdAt)}
+                    </div>
+                  </li>
+                ))}
+                {!(qTrail.data?.logs || []).length ? (
+                  <li className="text-xs text-slate-500">
+                    {t("admin.oversight.noHistory", "Aucune trace d'audit sur ce dossier.")}
+                  </li>
+                ) : null}
+              </ol>
+            </div>
+          </div>
+        )}
+      </Drawer>
+
       <Drawer
         open={createUserOpen}
         onClose={() => setCreateUserOpen(false)}

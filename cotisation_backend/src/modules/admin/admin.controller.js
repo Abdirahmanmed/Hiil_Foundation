@@ -154,6 +154,15 @@ export async function forceConsent(req, res, next) {
   }
 }
 
+export async function oversight(req, res, next) {
+  try {
+    const data = await adminService.getOversight();
+    res.json(data);
+  } catch (err) {
+    next(err);
+  }
+}
+
 export async function audit(req, res, next) {
   try {
     const result = await adminService.listAuditLogs({

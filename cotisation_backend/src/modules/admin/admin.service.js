@@ -804,3 +804,157 @@ export async function getUserDetails({ userId }) {
 
   return user;
 }
+
+/* =========================
+   SUPERVISION (lecture seule)
+   ========================= */
+
+const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+
+/**
+ * Ce que l'ADMIN doit voir pour suivre le deroulement du travail de ses deux
+ * profils. Uniquement des agregations et des listes : aucune ecriture, aucune
+ * action possible depuis cet ecran.
+ */
+export async function getOversight() {
+  const now = new Date();
+  const since = new Date(now.getTime() - THIRTY_DAYS_MS);
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+  const [
+    managers,
+    treasurers,
+    expensesByStatus,
+    expensesByManager,
+    ordersByTreasurer,
+    ordersThisMonth,
+    oldestPending,
+    lastActivity,
+    recentExpenses,
+  ] = await Promise.all([
+    prisma.user.findMany({
+      where: { role: "GESTIONNAIRE_DEPENSE" },
+      select: { id: true, fullName: true, email: true, status: true },
+      orderBy: { fullName: "asc" },
+    }),
+    prisma.user.findMany({
+      where: { role: "EQUIPE_TRESORERIE" },
+      select: { id: true, fullName: true, email: true, status: true },
+      orderBy: { fullName: "asc" },
+    }),
+    prisma.expense.groupBy({
+      by: ["status"],
+      _count: { status: true },
+      _sum: { amount: true },
+    }),
+    prisma.expense.groupBy({
+      by: ["createdById", "status"],
+      where: { createdAt: { gte: since } },
+      _count: { status: true },
+      _sum: { amount: true },
+    }),
+    prisma.paymentOrder.groupBy({
+      by: ["createdById", "currency", "status"],
+      where: { createdAt: { gte: since } },
+      _count: { status: true },
+      _sum: { amount: true },
+    }),
+    prisma.paymentOrder.count({ where: { createdAt: { gte: monthStart } } }),
+    prisma.expense.findFirst({
+      where: { status: "EN_ATTENTE" },
+      orderBy: { createdAt: "asc" },
+      select: { id: true, createdAt: true, label: true, amount: true },
+    }),
+    prisma.auditLog.groupBy({
+      by: ["userId"],
+      _max: { createdAt: true },
+    }),
+    prisma.expense.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 50,
+      select: {
+        id: true,
+        createdAt: true,
+        label: true,
+        type: true,
+        amount: true,
+        status: true,
+        beneficiaryName: true,
+        createdBy: { select: { id: true, fullName: true, email: true } },
+        paymentOrders: {
+          select: {
+            id: true,
+            referenceNumber: true,
+            status: true,
+            createdBy: { select: { id: true, fullName: true } },
+          },
+        },
+      },
+    }),
+  ]);
+
+  const parStatut = expensesByStatus.reduce((acc, r) => {
+    acc[r.status] = { count: r._count.status, amount: r._sum.amount || 0 };
+    return acc;
+  }, {});
+
+  const derniereActivite = new Map(
+    lastActivity.filter((r) => r.userId).map((r) => [r.userId, r._max.createdAt]),
+  );
+
+  const profilDepensier = (u) => {
+    const lignes = expensesByManager.filter((r) => r.createdById === u.id);
+    const compte = (statut) =>
+      lignes.filter((r) => r.status === statut).reduce((n, r) => n + r._count.status, 0);
+    return {
+      ...u,
+      lastActivityAt: derniereActivite.get(u.id) || null,
+      created30d: lignes.reduce((n, r) => n + r._count.status, 0),
+      engagedAmount30d: lignes.reduce((n, r) => n + (r._sum.amount || 0), 0),
+      pending: compte("EN_ATTENTE"),
+      rejected: compte("REJETER"),
+    };
+  };
+
+  const profilTresorier = (u) => {
+    const lignes = ordersByTreasurer.filter((r) => r.createdById === u.id);
+    // Les montants sont regroupes PAR DEVISE : additionner des francs
+    // djiboutiens, des birrs et des dollars produirait un nombre qui n'existe
+    // pas — et c'est un nombre sur lequel on deciderait d'un decaissement.
+    const parDevise = {};
+    for (const r of lignes) {
+      parDevise[r.currency] = (parDevise[r.currency] || 0) + (r._sum.amount || 0);
+    }
+    return {
+      ...u,
+      lastActivityAt: derniereActivite.get(u.id) || null,
+      orders30d: lignes.reduce((n, r) => n + r._count.status, 0),
+      amountByCurrency30d: parDevise,
+      notPrinted: lignes
+        .filter((r) => r.status === "CREE")
+        .reduce((n, r) => n + r._count.status, 0),
+    };
+  };
+
+  return {
+    indicators: {
+      pending: parStatut.EN_ATTENTE || { count: 0, amount: 0 },
+      approvedNotDisbursed: parStatut.APPROUVER || { count: 0, amount: 0 },
+      disbursed: parStatut.EFFECTUER || { count: 0, amount: 0 },
+      ordersThisMonth,
+      // Le chiffre qui compte pour un superviseur n'est pas le volume, c'est le
+      // dossier qui attend depuis le plus longtemps.
+      oldestPending: oldestPending
+        ? {
+            ...oldestPending,
+            ageDays: Math.floor(
+              (now.getTime() - oldestPending.createdAt.getTime()) / 86_400_000,
+            ),
+          }
+        : null,
+    },
+    managers: managers.map(profilDepensier),
+    treasurers: treasurers.map(profilTresorier),
+    recentExpenses,
+  };
+}

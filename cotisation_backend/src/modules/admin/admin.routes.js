@@ -14,6 +14,7 @@ import {
   resendInvite,
   setSubStatus,
   forceConsent,
+  oversight,
   audit,
   userDetails,
 } from "./admin.controller.js";
@@ -57,6 +58,10 @@ router.post(
   requireRole("SUPER_ADMIN"),
   forceConsent,
 );
+// SUPERVISION — lecture seule, par construction : c'est un GET, et le service
+// ne contient que des agregations et des findMany.
+router.get("/oversight", oversight);
+
 // AUDIT
 router.get("/audit", audit);
 

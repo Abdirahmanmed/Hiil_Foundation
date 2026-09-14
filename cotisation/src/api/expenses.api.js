@@ -12,6 +12,13 @@ export async function getExpenses() {
   return res.data;
 }
 
+// Chronologie complete d'un dossier : qui a engage, qui a approuve, qui a
+// decaisse. Reservee aux roles de supervision.
+export async function getExpenseTrail(id) {
+  const res = await http.get(`${basePath}/${id}/trail`);
+  return res.data;
+}
+
 export async function createExpense(payload) {
   const res = await http.post(basePath, payload);
   return res.data;
