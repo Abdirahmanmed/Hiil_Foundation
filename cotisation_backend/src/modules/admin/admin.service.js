@@ -330,19 +330,33 @@ export async function createInternalUser({ adminId, adminRole, data, req }) {
   // Le createur du compte ne connait aucun secret permettant de s'y connecter.
   const passwordHash = await hashUnusablePassword();
 
-  const created = await prisma.user.create({
-    data: {
-      fullName: data.fullName,
-      email: data.email.toLowerCase(),
-      phone: data.phone,
-      role: data.role,
-      status: "PENDING_VERIFICATION",
-      passwordHash,
-      country: "N/A",
-      city: "N/A",
-    },
-    select: userPublicSelect(),
-  });
+  let created;
+  try {
+    created = await prisma.user.create({
+      data: {
+        fullName: data.fullName,
+        email: data.email.toLowerCase(),
+        phone: data.phone,
+        role: data.role,
+        status: "PENDING_VERIFICATION",
+        passwordHash,
+        country: "N/A",
+        city: "N/A",
+      },
+      select: userPublicSelect(),
+    });
+  } catch (err) {
+    // Email et telephone sont @unique. Sans ce traitement, une simple faute de
+    // frappe renvoie un 500 portant le texte brut de Prisma jusque dans
+    // l'interface, nom de contrainte compris.
+    if (err?.code === "P2002") {
+      const champs = Array.isArray(err.meta?.target)
+        ? err.meta.target.join(", ")
+        : "email ou téléphone";
+      throw createHttpError(`Un compte utilise déjà ce ${champs}.`, 409);
+    }
+    throw err;
+  }
 
   await auditLog({
     userId: adminId,
@@ -465,6 +479,27 @@ export async function setUserStatus({ adminId, adminRole, userId, status, req })
     action: "ADMIN_SET_USER_STATUS",
     req,
   });
+
+  // Un compte encore en invitation n'a pas de mot de passe que son titulaire
+  // connaisse. Le passer ACTIVE ou SUSPENDED casse l'unique chemin d'activation :
+  // acceptInvitation exige PENDING_VERIFICATION, et le renvoi d'invitation aussi.
+  // BLOCKED reste permis, c'est la facon d'annuler une invitation.
+  // Le retour VERS PENDING_VERIFICATION reste permis : c'est le filet qui repare
+  // un compte deja casse.
+  if (target.status === "PENDING_VERIFICATION" && status !== "BLOCKED") {
+    await auditLog({
+      userId: adminId,
+      action: "ADMIN_SET_USER_STATUS_DENIED",
+      entity: "User",
+      entityId: userId,
+      req,
+      meta: { from: target.status, to: status, reason: "INVITE_PENDING" },
+    });
+    throw createHttpError(
+      "Ce compte n'a pas encore activé son invitation : renvoyez l'invitation, ou bloquez le compte.",
+      409,
+    );
+  }
 
   const updated = await prisma.user.update({
     where: { id: userId },

@@ -40,6 +40,13 @@ export async function patchUserRole(userId, role) {
   return res.data; // { user }
 }
 
+// Renvoie le lien d'activation d'un compte interne encore en attente.
+// Chaque renvoi invalide le lien precedent.
+export async function resendUserInvite(userId) {
+  const res = await http.post(`${basePath}/users/${userId}/invite/resend`, {});
+  return res.data;
+}
+
 export async function resetUserOtp(userId) {
   const res = await http.post(`${basePath}/users/${userId}/otp/reset`, {});
   return res.data; // { otpSecurity }

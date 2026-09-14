@@ -21,6 +21,16 @@ import publicFormRoutes from "./modules/public-forms/publicForms.routes.js";
 
 export const app = express();
 
+// Render, Vercel et tout reverse proxy presentent leur propre IP a Express.
+// Sans cette ligne, req.ip vaut la meme valeur pour TOUS les visiteurs : chaque
+// limiteur de debit devient un compteur unique et mondial — 5 candidatures par
+// heure pour la planete entiere sur le formulaire public, et un seul visiteur
+// suffit a fermer l'inscription pour tout le monde. La colonne `ip` de
+// PublicSubmission et les lignes d'audit enregistrent aussi l'IP du proxy.
+// Surtout PAS `true` : express-rate-limit leve ERR_ERL_PERMISSIVE_TRUST_PROXY,
+// et X-Forwarded-For devient forgeable par le client.
+app.set("trust proxy", 1);
+
 app.use(helmet());
 app.use(cors({ origin: env.CORS_ORIGIN, credentials: true }));
 app.use(express.json({ limit: "1mb" }));

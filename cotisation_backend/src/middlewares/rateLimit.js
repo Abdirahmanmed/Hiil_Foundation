@@ -49,6 +49,18 @@ export const publicFormLimiter = rateLimit({
  * Stricte, parce qu'il n'y a aucune authentification en amont pour freiner un
  * essai de jetons a la chaine.
  */
+/**
+ * Renvoi d'une invitation : chaque appel invalide le jeton precedent.
+ * Sans plafond, une boucle d'appels prive le titulaire de tout lien valable.
+ */
+export const inviteResendLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 min
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: "Trop de renvois d'invitation. Réessaie plus tard." },
+});
+
 export const inviteAcceptLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 min
   max: 10,

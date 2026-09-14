@@ -227,6 +227,9 @@ function NosActions({ G, t }) {
     email: "",
     theme: "",
     desc: "",
+    // Champ piege : cache aux humains, rempli par la plupart des robots.
+    // Le serveur repond 201 sans rien ecrire quand il est renseigne.
+    website: "",
   });
   const [submitted, setSubmitted] = useState(false);
   const [sending, setSending] = useState(false);
@@ -973,6 +976,25 @@ function NosActions({ G, t }) {
                           }}
                         />
                       </div>
+                      {/* piege a robots : jamais visible, jamais focusable */}
+                      <input
+                        type="text"
+                        name="website"
+                        tabIndex={-1}
+                        autoComplete="off"
+                        aria-hidden="true"
+                        value={formData.website}
+                        onChange={(e) =>
+                          setFormData({ ...formData, website: e.target.value })
+                        }
+                        style={{
+                          position: "absolute",
+                          left: "-9999px",
+                          width: 1,
+                          height: 1,
+                          opacity: 0,
+                        }}
+                      />
                       <button
                         disabled={sending}
                         onClick={async () => {
@@ -981,6 +1003,27 @@ function NosActions({ G, t }) {
                               t(
                                 "home.actions.form.required",
                                 "Nom, email et description sont requis.",
+                              ),
+                            );
+                            return;
+                          }
+                          if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+                            toast.error(
+                              t(
+                                "home.actions.form.emailInvalid",
+                                "Cette adresse email n'est pas valide.",
+                              ),
+                            );
+                            return;
+                          }
+                          // Aligne sur le schema zod du backend : min 10 caracteres.
+                          // Sans ce controle, le candidat recoit un 400 generique
+                          // sans savoir quel champ est en cause.
+                          if (formData.desc.trim().length < 10) {
+                            toast.error(
+                              t(
+                                "home.actions.form.descTooShort",
+                                "Décrivez votre projet en quelques mots (10 caractères minimum).",
                               ),
                             );
                             return;
@@ -994,6 +1037,7 @@ function NosActions({ G, t }) {
                               organization: formData.org,
                               theme: formData.theme,
                               message: formData.desc,
+                              website: formData.website,
                             });
                             // L'ecran de remerciement ne s'affiche QUE si le
                             // serveur a confirme l'enregistrement.
@@ -3378,7 +3422,7 @@ function Soutenir({ G }) {
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
   const [generatedOtp, setGeneratedOtp] = useState("");
-  const [benevoleForm, setBenevoleForm] = useState({ nom: "", email: "", competence: "", dispo: "" });
+  const [benevoleForm, setBenevoleForm] = useState({ nom: "", email: "", competence: "", dispo: "", website: "" });
   const [benevoleSubmitted, setBenevoleSubmitted] = useState(false);
   const [benevoleSending, setBenevoleSending] = useState(false);
 
@@ -3825,7 +3869,7 @@ function Soutenir({ G }) {
               <p style={{ color: G.slateMid, fontSize: "0.85rem" }}>
                 {t("home.support.volunteer.submittedDesc")}
               </p>
-              <button onClick={() => { setBenevoleSubmitted(false); setBenevoleForm({ nom: "", email: "", competence: "", dispo: "" }); }}
+              <button onClick={() => { setBenevoleSubmitted(false); setBenevoleForm({ nom: "", email: "", competence: "", dispo: "", website: "" }); }}
                 style={{ marginTop: "1rem", padding: "0.55rem 1.2rem", borderRadius: "0.75rem", background: G.white, border: `1px solid ${G.greenBorder}`, color: G.green, fontWeight: 700, cursor: "pointer", fontSize: "0.82rem" }}
               >
                 {t("home.support.volunteer.closeBtn")}
@@ -3871,6 +3915,18 @@ function Soutenir({ G }) {
                     {dispoOptions.map((o) => <option key={o}>{o}</option>)}
                   </select>
                 </div>
+                <input
+                  type="text"
+                  name="website"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  aria-hidden="true"
+                  value={benevoleForm.website}
+                  onChange={(e) =>
+                    setBenevoleForm({ ...benevoleForm, website: e.target.value })
+                  }
+                  style={{ position: "absolute", left: "-9999px", width: 1, height: 1, opacity: 0 }}
+                />
                 <button
                   disabled={benevoleSending}
                   onClick={async () => {
@@ -3883,6 +3939,15 @@ function Soutenir({ G }) {
                       );
                       return;
                     }
+                    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(benevoleForm.email)) {
+                      toast.error(
+                        t(
+                          "home.benevole.emailInvalid",
+                          "Cette adresse email n'est pas valide.",
+                        ),
+                      );
+                      return;
+                    }
                     setBenevoleSending(true);
                     try {
                       await submitPublicFormApi({
@@ -3891,6 +3956,7 @@ function Soutenir({ G }) {
                         email: benevoleForm.email,
                         skills: benevoleForm.competence,
                         availability: benevoleForm.dispo,
+                        website: benevoleForm.website,
                       });
                       setBenevoleSubmitted(true);
                     } catch (err) {

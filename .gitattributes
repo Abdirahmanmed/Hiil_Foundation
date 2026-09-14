@@ -1,6 +1,11 @@
-# Les fichiers de migration Prisma sont hashes (checksum) et compares a ceux
-# enregistres en base. Un CRLF introduit par Windows fausse ce checksum et fait
-# echouer `prisma migrate deploy` avec un message qui ne designe pas la cause.
+# Les fichiers de migration Prisma sont hashes (sha256 des octets bruts) et le
+# hash est enregistre dans _prisma_migrations. Un CRLF Windows change ce hash.
+#
+# Verifie sur Prisma 7.3 : `prisma migrate deploy` IGNORE un ecart de checksum
+# et se deploie sans broncher. C'est `prisma migrate dev` qui refuse de
+# continuer — "was modified after it was applied" — et reclame un reset de la
+# base. D'ou LF impose, pour que le meme fichier produise le meme hash sur
+# Windows, sur Render et en CI.
 *.sql text eol=lf
 
 # Meme raison pour les scripts executes sur le serveur.

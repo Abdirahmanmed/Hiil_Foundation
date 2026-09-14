@@ -40,8 +40,13 @@ export default function App() {
             <Route path="/register" element={<PublicOnlyRoute><Register /></PublicOnlyRoute>} />
             <Route path="/otp" element={<PublicOnlyRoute><OtpVerify /></PublicOnlyRoute>} />
             <Route path="/login" element={<PublicOnlyRoute><Login /></PublicOnlyRoute>} />
-            {/* Activation d'un compte interne : le titulaire n'est pas encore connecte */}
-            <Route path="/activation" element={<PublicOnlyRoute><SetPassword /></PublicOnlyRoute>} />
+            {/* Activation d'un compte interne. Volontairement HORS PublicOnlyRoute :
+                le titulaire clique souvent son lien depuis un navigateur ou une
+                autre session est deja ouverte (le poste du bureau, celui de
+                l'admin qui vient de creer le compte). PublicOnlyRoute le
+                renverrait vers un dashboard qui n'est pas le sien, en ecrasant
+                le jeton de l'URL sans aucun message. */}
+            <Route path="/activation" element={<SetPassword />} />
 
           <Route
             path="/client"

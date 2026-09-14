@@ -11,21 +11,58 @@ import { auditLog } from "../../utils/audit.js";
 // le saisir pour annuler une suspension prononcee par un ADMIN.
 const OTP_BLOCKED_STATUSES = new Set(["SUSPENDED", "BLOCKED"]);
 
-function assertOtpAllowed(user, { req, action }) {
-  if (!OTP_BLOCKED_STATUSES.has(user.status)) return;
-
+function refuse(user, { req, action, reason, message, status }) {
   auditLog({
     userId: user.id,
     action,
     entity: "User",
     entityId: user.id,
     req,
-    meta: { status: user.status },
+    meta: { reason, status: user.status },
   });
 
-  const err = new Error("Ce compte est suspendu. Contactez l'administration.");
-  err.status = 403;
+  const err = new Error(message);
+  err.status = status;
   throw err;
+}
+
+function assertOtpAllowed(user, { req, action }) {
+  if (OTP_BLOCKED_STATUSES.has(user.status)) {
+    refuse(user, {
+      req,
+      action,
+      reason: "ACCOUNT_" + user.status,
+      message: "Ce compte est suspendu. Contactez l'administration.",
+      status: 403,
+    });
+  }
+
+  // Le parcours OTP appartient a l'inscription d'un MEMBRE. Un compte interne
+  // s'active par son lien d'invitation, jamais par ici : le laisser passer le
+  // ferait basculer en ACTIVE alors que son mot de passe est un hash aleatoire
+  // que personne ne connait, et acceptInvitation refuserait ensuite le jeton
+  // parce que le statut n'est plus PENDING_VERIFICATION. Le compte serait mort.
+  if (user.role && user.role !== "CLIENT") {
+    refuse(user, {
+      req,
+      action,
+      reason: "INTERNAL_ACCOUNT",
+      message:
+        "Ce compte s'active depuis le lien d'invitation reçu par email.",
+      status: 403,
+    });
+  }
+
+  if (user.inviteTokenHash) {
+    refuse(user, {
+      req,
+      action,
+      reason: "INVITE_PENDING",
+      message:
+        "Ce compte s'active depuis le lien d'invitation reçu par email.",
+      status: 403,
+    });
+  }
 }
 
 export const sendEmailOtp = async ({ email }, { req } = {}) => {

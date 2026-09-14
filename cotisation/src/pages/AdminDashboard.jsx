@@ -19,6 +19,7 @@ import {
   patchUserStatus,
   patchUserRole,
   resetUserOtp,
+  resendUserInvite,
   getUserDetails,
   getAudit,
 } from "../api/admin.api";
@@ -251,6 +252,18 @@ export default function AdminDashboard() {
       toast.success(t("admin_role_updated"));
       qUsers.refetch();
       if (selectedUserId) qUserDetails.refetch();
+    },
+    onError: (err) =>
+      toast.error(err?.response?.data?.message || t("error_generic")),
+  });
+
+  const mResendInvite = useMutation({
+    mutationFn: (userId) => resendUserInvite(userId),
+    onSuccess: () => {
+      toast.success(
+        t("admin.inviteSent", "Invitation renvoyée à l'adresse du titulaire."),
+      );
+      qUsers.refetch();
     },
     onError: (err) =>
       toast.error(err?.response?.data?.message || t("error_generic")),
@@ -508,22 +521,36 @@ export default function AdminDashboard() {
                       </div>
 
                       <div className="col-span-2 flex justify-end gap-2">
-                        <Select
-                          value={u.status}
-                          onChange={(e) =>
-                            mUserStatus.mutate({
-                              userId: u.id,
-                              status: e.target.value,
-                            })
-                          }
-                          className="max-w-[160px]"
-                        >
-                          {["ACTIVE", "SUSPENDED"].map((s) => (
-                            <option key={s} value={s}>
-                              {s}
-                            </option>
-                          ))}
-                        </Select>
+                        {/* Un compte en attente d'activation n'a pas de statut a
+                            changer : le selecteur afficherait ACTIVE alors que le
+                            badge dit PENDING_VERIFICATION, et le moindre
+                            changement casserait son lien d'invitation. */}
+                        {u.status === "PENDING_VERIFICATION" ? (
+                          <button
+                            onClick={() => mResendInvite.mutate(u.id)}
+                            disabled={mResendInvite.isPending}
+                            className="rounded-xl border border-emerald-200 bg-white px-3 py-2 text-xs font-black text-slate-700 hover:bg-emerald-50 disabled:opacity-60"
+                          >
+                            {t("admin.resendInvite", "Renvoyer l'invitation")}
+                          </button>
+                        ) : (
+                          <Select
+                            value={u.status}
+                            onChange={(e) =>
+                              mUserStatus.mutate({
+                                userId: u.id,
+                                status: e.target.value,
+                              })
+                            }
+                            className="max-w-[160px]"
+                          >
+                            {["ACTIVE", "SUSPENDED"].map((s) => (
+                              <option key={s} value={s}>
+                                {s}
+                              </option>
+                            ))}
+                          </Select>
+                        )}
 
                         {u.otpLockedUntil || u.otpSendCountHour ? (
                           <button
