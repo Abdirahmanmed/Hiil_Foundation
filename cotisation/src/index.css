@@ -4,3 +4,30 @@
 body {
   @apply bg-white text-black antialiased;
 }
+/* Impression du bon de paiement.
+   Sans cette feuille, window.print() imprimait le tableau de bord entier,
+   overlay du tiroir compris, et le conteneur scrollable tronquait le contenu.
+   On utilise visibility et non display:none : le tiroir est en position fixed,
+   le masquer par display casserait le positionnement de son contenu. */
+@media print {
+  @page { size: A4 portrait; margin: 14mm; }
+
+  body * { visibility: hidden !important; }
+
+  #payment-order-print,
+  #payment-order-print * {
+    visibility: visible !important;
+    overflow: visible !important;
+  }
+
+  #payment-order-print {
+    position: fixed !important;
+    inset: 0 auto auto 0 !important;
+    width: 100% !important;
+    border: 0 !important;
+    color: #000 !important;
+    background: #fff !important;
+  }
+
+  .no-print { display: none !important; }
+}

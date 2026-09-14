@@ -281,6 +281,17 @@ model Expense {
   beneficiaryName    String
   beneficiaryCountry Country
   beneficiaryCity    String
+
+  // Coordonnées de paiement du bénéficiaire, saisies par le dépensier et lues
+  // par le Super Admin AU MOMENT D'APPROUVER.
+  //
+  // Sans elles, rien ne reliait le bénéficiaire approuvé au compte réellement
+  // payé : le Super Admin approuvait « 300 000 DJF à la clinique de Balbala »,
+  // et le trésorier saisissait ensuite, seul et sans revalidation, le nom de la
+  // banque et le numéro de compte. Le contrôle interne ne voyait rien.
+  beneficiaryBankName       String?
+  beneficiaryAccountRef     String?
+  beneficiaryAccountHolder  String?
   status             ExpenseStatus @default(EN_ATTENTE)
 
   // Qui a engagé la dépense.

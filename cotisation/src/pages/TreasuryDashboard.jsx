@@ -68,7 +68,7 @@ export default function TreasuryDashboard() {
 
   const createMut = useMutation({ mutationFn: createPaymentOrder, onSuccess: () => { toast.success(t("create_payment_order") + " ✅"); setSelectedExpense(null); qc.invalidateQueries({ queryKey: ["expenses"] }); qc.invalidateQueries({ queryKey: ["payment-orders"] }); qc.invalidateQueries({ queryKey: ["treasury-dashboard"] }); }, onError: (e) => toast.error(e?.response?.data?.message || t("sub_create_error")) });
   const printMut = useMutation({ mutationFn: getPaymentOrderPrint, onSuccess: (data) => setPrintOrder(data.paymentOrder), onError: (e) => toast.error(e?.response?.data?.message || t("error_generic")) });
-  const markPrintedMut = useMutation({ mutationFn: markPaymentOrderPrinted, onSuccess: (data) => { setPrintOrder(data.paymentOrder); qc.invalidateQueries({ queryKey: ["payment-orders"] }); qc.invalidateQueries({ queryKey: ["treasury-dashboard"] }); window.print(); }, onError: (e) => toast.error(e?.response?.data?.message || t("error_generic")) });
+  const markPrintedMut = useMutation({ mutationFn: markPaymentOrderPrinted, onSuccess: (data) => { setPrintOrder(data.paymentOrder); qc.invalidateQueries({ queryKey: ["payment-orders"] }); qc.invalidateQueries({ queryKey: ["treasury-dashboard"] }); }, onError: (e) => toast.error(e?.response?.data?.message || t("error_generic")) });
 
   const executeMut = useMutation({
     mutationFn: ({ id, executedAt }) => markPaymentOrderExecuted(id, executedAt),
@@ -137,7 +137,12 @@ export default function TreasuryDashboard() {
   }
 
   function printCurrentOrder() {
-    if (!printOrder?.id || markPrintedMut.isPending) return;
+    if (!printOrder?.id) return;
+    // Impression D'ABORD, traçabilité ensuite en best-effort. L'ordre inverse
+    // avait deux défauts : React 19 regroupe les mises à jour, donc window.print()
+    // partait avant que le DOM ne reflète le nouvel objet ; et un backend
+    // indisponible empêchait d'imprimer un bon pourtant déjà valide.
+    window.print();
     markPrintedMut.mutate(printOrder.id);
   }
 
@@ -384,19 +389,41 @@ export default function TreasuryDashboard() {
           </Field>
           {form.paymentMethod !== "CASH" && (
             <>
-              <Field label={t("treasury.order.bankName")}>
-                <Select value={form.bankName} onChange={(e) => setForm({ ...form, bankName: e.target.value })}>
-                  {bankOptionsByCountry[form.paymentCountry || "DJIBOUTI"].map((bank) => (
-                    <option key={bank} value={bank}>{bank}</option>
-                  ))}
-                </Select>
-              </Field>
-              <Field label={t("treasury.order.bankReference")}>
-                <Input value={form.bankReference} onChange={(e) => setForm({ ...form, bankReference: e.target.value })} required />
-              </Field>
-              <Field label={t("treasury.order.bankAccountHolder")}>
-                <Input value={form.bankAccountHolder} onChange={(e) => setForm({ ...form, bankAccountHolder: e.target.value })} />
-              </Field>
+              {/* Si la dépense porte le compte à payer, il a été approuvé avec
+                  elle : on l'affiche, on ne le ressaisit pas. Le serveur ignore
+                  de toute façon ce qui serait envoyé ici. */}
+              {selectedExpense?.beneficiaryBankName ? (
+                <div className="rounded-xl border border-emerald-200 bg-emerald-50/60 p-3 text-sm">
+                  <div className="text-xs font-black uppercase tracking-wide text-emerald-800">
+                    {t("treasury.order.approvedAccount", "Compte approuvé avec la dépense")}
+                  </div>
+                  <p className="mt-2"><b>{t("treasury.order.bankName")} :</b> {selectedExpense.beneficiaryBankName}</p>
+                  <p><b>{t("treasury.order.bankReference")} :</b> {selectedExpense.beneficiaryAccountRef || "—"}</p>
+                  <p><b>{t("treasury.order.bankAccountHolder")} :</b> {selectedExpense.beneficiaryAccountHolder || selectedExpense.beneficiaryName}</p>
+                </div>
+              ) : (
+                <>
+                  <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
+                    {t(
+                      "treasury.order.noApprovedAccount",
+                      "Cette dépense ne porte pas de compte approuvé. Votre saisie sera enregistrée comme telle dans le journal d'audit.",
+                    )}
+                  </div>
+                  <Field label={t("treasury.order.bankName")}>
+                    <Select value={form.bankName} onChange={(e) => setForm({ ...form, bankName: e.target.value })}>
+                      {bankOptionsByCountry[form.paymentCountry || "DJIBOUTI"].map((bank) => (
+                        <option key={bank} value={bank}>{bank}</option>
+                      ))}
+                    </Select>
+                  </Field>
+                  <Field label={t("treasury.order.bankReference")}>
+                    <Input value={form.bankReference} onChange={(e) => setForm({ ...form, bankReference: e.target.value })} required />
+                  </Field>
+                  <Field label={t("treasury.order.bankAccountHolder")}>
+                    <Input value={form.bankAccountHolder} onChange={(e) => setForm({ ...form, bankAccountHolder: e.target.value })} />
+                  </Field>
+                </>
+              )}
             </>
           )}
           <button disabled={createMut.isPending} className="w-full rounded-xl bg-emerald-600 px-4 py-3 text-sm font-black text-white disabled:opacity-50">
@@ -416,7 +443,10 @@ export default function TreasuryDashboard() {
           </button>
         }
       >
-        <div className="print:bg-white rounded-2xl border border-emerald-100 p-6 text-slate-900">
+        {/* id ciblé par la feuille de style @media print : sans elle,
+            window.print() imprimait le tableau de bord entier, overlay du
+            tiroir compris, et le conteneur scrollable tronquait le contenu. */}
+        <div id="payment-order-print" className="print:bg-white rounded-2xl border border-emerald-100 p-6 text-slate-900">
           <div className="text-center">
             <img src="/logoherciise.jpeg" alt="Hiil Foundation" className="mx-auto h-20 w-20 rounded-full object-cover" />
             <h2 className="mt-3 text-2xl font-black">Hiil Foundation</h2>
@@ -428,6 +458,17 @@ export default function TreasuryDashboard() {
             <p><b>{t("treasury.order.expense")} :</b> {printOrder?.expense?.label}</p>
             <p><b>{t("treasury.order.beneficiary")} :</b> {printOrder?.expense?.beneficiaryName}</p>
             <p><b>{t("treasury.order.method")} :</b> {t(`paymentMethods.${printOrder?.paymentMethod}`, printOrder?.paymentMethod)}</p>
+            {/* Sans ces trois lignes, une banque ne peut pas exécuter le
+                document : elles étaient saisies et stockées, mais jamais
+                imprimées. */}
+            {printOrder?.bankName ? (
+              <>
+                <p><b>{t("treasury.order.bankName")} :</b> {printOrder.bankName}</p>
+                <p><b>{t("treasury.order.bankReference")} :</b> {printOrder.bankReference || "—"}</p>
+                <p><b>{t("treasury.order.bankAccountHolder")} :</b> {printOrder.bankAccountHolder || printOrder?.expense?.beneficiaryName}</p>
+                <p><b>{t("treasury.order.bankCountry", "Pays de la banque")} :</b> {t(`countries.${printOrder.bankCountry}`, printOrder.bankCountry || "—")}</p>
+              </>
+            ) : null}
             <p><b>{t("treasury.order.currency2")} :</b> {t(`currencies.${printOrder?.currency}`, printOrder?.currency)}</p>
             <p><b>{t("treasury.order.country")} :</b> {t(`countries.${printOrder?.paymentCountry}`, printOrder?.paymentCountry)}</p>
             <p><b>{t("treasury.order.amount")} :</b> {fmtMoney(printOrder?.amount)}</p>

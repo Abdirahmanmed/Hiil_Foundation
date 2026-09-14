@@ -13,6 +13,12 @@ export const createExpenseSchema = z.object({
   beneficiaryName: z.string().trim().min(1),
   beneficiaryCountry: z.enum(countries),
   beneficiaryCity: z.string().trim().min(1),
+  // Coordonnees de paiement, saisies par le depensier pour que le Super Admin
+  // approuve un beneficiaire ET un compte. Optionnelles : un decaissement en
+  // especes n'a pas de compte bancaire.
+  beneficiaryBankName: z.string().trim().max(160).optional().or(z.literal("")),
+  beneficiaryAccountRef: z.string().trim().max(80).optional().or(z.literal("")),
+  beneficiaryAccountHolder: z.string().trim().max(160).optional().or(z.literal("")),
 });
 
 export const expenseIdParamsSchema = z.object({

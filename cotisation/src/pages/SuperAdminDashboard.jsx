@@ -100,11 +100,17 @@ export default function SuperAdminDashboard() {
   // le second facteur que l'ancien jeton n'apportait pas — il était généré par
   // le serveur à l'instant même de l'approbation.
   const askApprove = (expense) => {
+    // Le compte à payer est affiché ICI, au moment de la décision : approuver
+    // un bénéficiaire sans voir où l'argent part, c'est approuver à l'aveugle.
+    const compte = expense.beneficiaryBankName
+      ? `${expense.beneficiaryBankName} — ${expense.beneficiaryAccountRef || "?"} (${expense.beneficiaryAccountHolder || expense.beneficiaryName})`
+      : t("validation.noAccount", "espèces / aucun compte déclaré");
+
     const password = window.prompt(
-      t(
-        "validation.approvePrompt",
-        `Confirmez votre mot de passe pour approuver « ${expense.label} » (${expense.amount}).`,
-      ),
+      `${expense.label} — ${expense.amount}\n` +
+        `${t("expenses.beneficiary", "Bénéficiaire")} : ${expense.beneficiaryName}\n` +
+        `${t("expenses.payTo", "Compte à payer")} : ${compte}\n\n` +
+        t("validation.approvePrompt", "Confirmez votre mot de passe pour approuver :"),
     );
     if (!password) return;
     approveMut.mutate({ id: expense.id, password });

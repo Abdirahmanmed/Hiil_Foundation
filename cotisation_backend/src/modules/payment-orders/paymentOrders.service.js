@@ -64,6 +64,33 @@ export async function createPaymentOrder({ user, data, req }) {
 
     const amount = expense.amount;
     const referenceNumber = await generateReference(tx);
+
+    // Les coordonnees bancaires viennent de la DEPENSE, c'est-a-dire de ce que
+    // le Super Admin a reellement approuve. Le tresorier recopie, il ne decide
+    // pas vers quel compte l'argent part.
+    //
+    // Repli transitoire : les depenses creees avant ce changement n'ont pas ces
+    // champs. On accepte alors la saisie du tresorier, mais on l'ecrit dans
+    // l'audit — pour qu'un decaissement dont le compte n'a jamais ete approuve
+    // reste identifiable.
+    const especes = data.paymentMethod === "CASH";
+    const depenseSpecifieCompte = Boolean(
+      expense.beneficiaryBankName || expense.beneficiaryAccountRef,
+    );
+    const compte = especes
+      ? { bankName: null, bankReference: null, bankAccountHolder: null }
+      : depenseSpecifieCompte
+        ? {
+            bankName: expense.beneficiaryBankName,
+            bankReference: expense.beneficiaryAccountRef,
+            bankAccountHolder:
+              expense.beneficiaryAccountHolder || expense.beneficiaryName,
+          }
+        : {
+            bankName: data.bankName,
+            bankReference: data.bankReference,
+            bankAccountHolder: data.bankAccountHolder,
+          };
     const created = await tx.paymentOrder.create({
       data: {
         expenseId: expense.id,
@@ -79,9 +106,9 @@ export async function createPaymentOrder({ user, data, req }) {
           data.paymentMethod === "CASH"
             ? null
             : (data.bankCountry ?? data.paymentCountry),
-        bankName: data.paymentMethod === "CASH" ? null : data.bankName,
-        bankReference: data.paymentMethod === "CASH" ? null : data.bankReference,
-        bankAccountHolder: data.paymentMethod === "CASH" ? null : data.bankAccountHolder,
+        bankName: compte.bankName,
+        bankReference: compte.bankReference,
+        bankAccountHolder: compte.bankAccountHolder,
         referenceNumber,
         status: "CREE",
         // Porte la contrainte d'unicite : un seul ordre ACTIF par depense.
@@ -108,6 +135,13 @@ export async function createPaymentOrder({ user, data, req }) {
           expenseId: data.expenseId,
           referenceNumber: created.referenceNumber,
           amount: created.amount,
+          // Trace explicite quand le compte payé n'a PAS été approuvé avec la
+          // dépense : c'est ce qui rend le cas repérable dans le journal.
+          bankDetailsFrom: especes
+            ? "n/a"
+            : depenseSpecifieCompte
+              ? "expense"
+              : "treasury",
         },
         ip: req?.ip || null,
         userAgent: req?.get?.("user-agent")?.slice(0, 500) || null,

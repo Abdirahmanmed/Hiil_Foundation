@@ -25,6 +25,11 @@ const initialForm = {
   beneficiaryName: "",
   beneficiaryCountry: "DJIBOUTI",
   beneficiaryCity: "",
+  // Le compte à payer est déclaré ICI, pour que le Super Admin approuve un
+  // bénéficiaire ET un compte. La trésorerie recopiera, elle ne décidera pas.
+  beneficiaryBankName: "",
+  beneficiaryAccountRef: "",
+  beneficiaryAccountHolder: "",
 };
 
 const statusTones = { EN_ATTENTE: "yellow", APPROUVER: "blue", EFFECTUER: "green", REJETER: "red" };
@@ -302,6 +307,30 @@ export default function ExpenseManagerDashboard() {
           <Field label={t("common.city")}>
             <Input value={form.beneficiaryCity} onChange={(e) => setField("beneficiaryCity", e.target.value)} required />
           </Field>
+
+          <div className="rounded-xl border border-emerald-100 bg-emerald-50/40 p-3">
+            <div className="text-xs font-black text-slate-700">
+              {t("expenses.payTo", "Compte à payer")}
+            </div>
+            <p className="mt-1 text-xs text-slate-600">
+              {t(
+                "expenses.payToHint",
+                "Laissez vide pour un décaissement en espèces. Ce compte est approuvé en même temps que la dépense : la trésorerie le recopie, elle ne le choisit pas.",
+              )}
+            </p>
+            <div className="mt-3 space-y-3">
+              <Field label={t("expenses.bankName", "Banque")}>
+                <Input value={form.beneficiaryBankName} onChange={(e) => setField("beneficiaryBankName", e.target.value)} />
+              </Field>
+              <Field label={t("expenses.accountRef", "Numéro de compte / RIB")}>
+                <Input value={form.beneficiaryAccountRef} onChange={(e) => setField("beneficiaryAccountRef", e.target.value)} />
+              </Field>
+              <Field label={t("expenses.accountHolder", "Titulaire du compte")}>
+                <Input value={form.beneficiaryAccountHolder} onChange={(e) => setField("beneficiaryAccountHolder", e.target.value)} />
+              </Field>
+            </div>
+          </div>
+
           <button disabled={createMut.isPending} className="w-full rounded-xl bg-emerald-600 px-4 py-3 text-sm font-black text-white disabled:opacity-50">
             {t("common.save")}
           </button>
