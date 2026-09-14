@@ -46,9 +46,29 @@ export const createSubscription = async (userId, data, req) => {
     consentUserAgent: null,
   };
 
-  // (Option) empêcher plusieurs subscriptions actives si tu veux
-  // const existing = await prisma.subscription.findFirst({ where: { userId, status: { in: ["ACTIVE", "ACTIVE_MANUAL"] } } });
-  // if (existing) throw Object.assign(new Error("Vous avez déjà une cotisation active."), { status: 409 });
+  // Un seul mandat ouvert par membre.
+  //
+  // Ce garde-fou était écrit puis commenté : un membre pouvait créer un nombre
+  // illimité de cotisations ACTIVE, toutes additionnées dans les statistiques
+  // présentées au conseil. Les versements supplémentaires — don ponctuel,
+  // rattrapage — sont des Contribution rattachées au mandat existant, pas de
+  // nouveaux mandats. C'est ce qui rend le compteur « nombre de cotisants »
+  // égal au nombre de personnes.
+  const existante = await prisma.subscription.findFirst({
+    where: {
+      userId,
+      status: { in: ["PENDING_CONSENT", "ACTIVE", "ACTIVE_MANUAL"] },
+    },
+    select: { id: true, status: true },
+  });
+
+  if (existante) {
+    const err = new Error(
+      "Vous avez déjà une cotisation en cours. Modifiez-la plutôt que d'en créer une seconde.",
+    );
+    err.status = 409;
+    throw err;
+  }
 
   const created = await prisma.subscription.create({ data: payload });
 

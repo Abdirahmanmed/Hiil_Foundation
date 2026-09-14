@@ -109,6 +109,26 @@ enum PublicSubmissionKind {
   VOLUNTEER
 }
 
+/// Etat d'un ENCAISSEMENT, a ne pas confondre avec l'etat de l'engagement.
+enum ContributionStatus {
+  PENDING
+  CONFIRMED
+  FAILED
+  /// La banque n'a pas repondu dans le delai. Surtout pas FAILED : le paiement
+  /// a pu aboutir de son cote. C'est la reconciliation qui tranche.
+  TIMEOUT
+}
+
+enum ContributionChannel {
+  CAC
+  WALLET
+  BANK_TRANSFER
+  CASH
+  CHEQUE
+  /// Saisi a la main par le back-office (versement constate sur un releve).
+  MANUAL
+}
+
 model User {
   id   String @id @default(cuid())
   role Role   @default(CLIENT)
@@ -224,12 +244,26 @@ model Subscription {
 
   status SubscriptionStatus @default(PENDING_CONSENT)
 
+  // ⚠️ Ces six champs sont HISTORIQUES et figés.
+  //
+  // Ils ne peuvent porter qu'UN SEUL encaissement : structurellement, une
+  // cotisation mensuelle de 6 000 DJF ne pouvait jamais représenter les douze
+  // versements de l'année. Les encaissements vivent désormais dans
+  // Contribution, un par versement. Ces colonnes restent le temps que la
+  // reprise soit vérifiée, puis elles seront supprimées.
   cacPaymentRequestId String?
   cacConfirmReference String?
   cacReference        String?
   cacStatus           String?
   cacRawResponse      Json?
   paidAt              DateTime?
+
+  /// Prochaine échéance attendue. Mise à jour à chaque encaissement confirmé.
+  /// Le retard se calcule à la lecture : pas d'échéancier généré à l'avance,
+  /// pas de tâche planifiée, pas de service supplémentaire à héberger.
+  nextDueDate DateTime?
+
+  contributions Contribution[]
 
   consentAccepted  Boolean   @default(false)
   consentVersion   String?
@@ -397,4 +431,43 @@ model PublicSubmission {
 
   @@index([kind, createdAt])
   @@index([handledAt])
+}
+
+/// Un ENCAISSEMENT : un versement réellement reçu, ou en cours de l'être.
+///
+/// Subscription porte l'ENGAGEMENT (le mandat : montant, périodicité,
+/// consentement). Contribution porte l'argent. Les confondre était la cause
+/// racine du chiffre ambigu du tableau de bord : le simple clic de
+/// consentement faisait passer une cotisation en ACTIVE, et ce statut était
+/// additionné comme s'il s'agissait d'une recette.
+model Contribution {
+  id             String       @id @default(cuid())
+  subscriptionId String
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Restrict)
+
+  amount   Int
+  currency String
+
+  /// Échéance couverte par ce versement. Permet de dire « la mensualité de
+  /// mars est impayée » sans générer d'échéancier à l'avance.
+  periodStart DateTime
+
+  status  ContributionStatus  @default(PENDING)
+  channel ContributionChannel
+
+  /// Clé d'idempotence STABLE, de la forme SUB-<id>-AAAA-MM-JJ.
+  /// L'ancien venderRef contenait Date.now() et changeait à chaque clic : deux
+  /// clics produisaient deux OTP valides, donc un double débit possible sans
+  /// trace du premier.
+  idempotencyKey String @unique
+
+  reference   String?
+  rawResponse Json?
+  paidAt      DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([subscriptionId, periodStart])
+  @@index([status, createdAt])
 }
