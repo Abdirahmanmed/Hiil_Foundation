@@ -275,8 +275,20 @@ export default function ExpenseManagerDashboard() {
           <Field label={t("expenses.unitPrice")}>
             <Input type="number" min="1" value={form.unitPrice} onChange={(e) => setField("unitPrice", e.target.value)} required />
           </Field>
+          {/* Montant dérivé, jamais saisi : le serveur le recalcule et refuse
+              tout écart. Un champ éditable ici permettait de déclarer 10 sacs
+              à 1 000 et de faire approuver 500 000. */}
           <Field label={t("common.amount")}>
-            <Input type="number" min="1" value={form.amount} onChange={(e) => setField("amount", e.target.value)} required />
+            <Input
+              type="number"
+              value={form.amount}
+              readOnly
+              tabIndex={-1}
+              className="cursor-not-allowed bg-slate-100 text-slate-600"
+            />
+            <span className="text-xs font-normal text-slate-500">
+              {t("expenses.amountDerived", "Calculé : quantité × prix unitaire")}
+            </span>
           </Field>
           <Field label={t("expenses.beneficiary")}>
             <Input value={form.beneficiaryName} onChange={(e) => setField("beneficiaryName", e.target.value)} required />

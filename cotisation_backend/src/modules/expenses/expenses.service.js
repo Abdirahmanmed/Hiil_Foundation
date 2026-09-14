@@ -99,7 +99,26 @@ export async function getExpenseDashboard({ user }) {
 }
 
 export async function createExpense({ user, data, req }) {
-  const amount = data.amount || data.quantity * data.unitPrice;
+  // Le montant est DERIVE, jamais saisi.
+  //
+  // Avant : `data.amount || data.quantity * data.unitPrice`. Le client fixait
+  // donc librement le montant, et le champ etait editable dans le formulaire.
+  // Un depensier pouvait declarer 10 sacs de riz a 1 000 DJF et faire approuver
+  // 500 000 : le Super Admin validait un chiffre incoherent avec le detail
+  // qu'il lisait juste au-dessus, et la contrainte d'unicite garantissait que
+  // ce chiffre-la sortirait de la caisse. C'etait en amont de tous les
+  // controles construits ici.
+  const amount = data.quantity * data.unitPrice;
+
+  // `amount` reste accepte par le schema, mais uniquement comme controle de
+  // coherence : un ecart revele un bug du formulaire au lieu de le masquer.
+  if (data.amount !== undefined && data.amount !== amount) {
+    const err = new Error(
+      `Le montant doit valoir quantité × prix unitaire (${data.quantity} × ${data.unitPrice} = ${amount}).`,
+    );
+    err.status = 400;
+    throw err;
+  }
   const expense = await prisma.expense.create({
     data: {
       date: data.date || new Date(),

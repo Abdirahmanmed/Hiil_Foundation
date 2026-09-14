@@ -1,4 +1,4 @@
-import rateLimit from "express-rate-limit";
+import rateLimit, { ipKeyGenerator } from "express-rate-limit";
 
 export const globalLimiter = rateLimit({
   windowMs: 60 * 1000, // 1 min
@@ -29,6 +29,26 @@ export const changePasswordLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: { message: "Trop de tentatives. Réessaie plus tard." },
+});
+
+/**
+ * Connexion. La route n'avait aucun limiteur specifique, seulement le limiteur
+ * global : une attaque par force brute sur le compte SUPER_ADMIN passait sous
+ * le radar.
+ *
+ * La cle est composite IP + email, volontairement : une cle par email seul
+ * permettrait a un attaquant de verrouiller tous les comptes qu'il connait
+ * depuis une seule machine.
+ */
+export const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  skipSuccessfulRequests: true,
+  keyGenerator: (req) =>
+    `${ipKeyGenerator(req)}:${String(req.body?.email || "").toLowerCase()}`,
+  message: { message: "Trop de tentatives de connexion. Réessaie dans 15 minutes." },
 });
 
 /**

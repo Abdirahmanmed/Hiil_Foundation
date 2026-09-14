@@ -150,6 +150,11 @@ model User {
   otpSendCountHour   Int       @default(0)
   otpSendWindowStart DateTime?
 
+  // Incrémenté pour invalider d'un coup toutes les sessions d'un compte
+  // (réinitialisation de mot de passe, compromission). Les jetons émis avant
+  // portent l'ancienne valeur et sont refusés.
+  tokenVersion Int @default(0)
+
   // ✅ Invitation d'un compte interne (ADMIN / GESTIONNAIRE_DEPENSE / EQUIPE_TRESORERIE).
   // Le createur du compte ne choisit PAS le mot de passe : le titulaire le fixe
   // lui-meme via ce jeton, envoye a sa propre adresse email.

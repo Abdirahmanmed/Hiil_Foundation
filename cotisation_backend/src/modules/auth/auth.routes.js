@@ -4,6 +4,7 @@ import { auth } from "../../middlewares/auth.js";
 import {
   changePasswordLimiter,
   inviteAcceptLimiter,
+  loginLimiter,
 } from "../../middlewares/rateLimit.js";
 import {
   register,
@@ -28,7 +29,7 @@ router.post(
   register,
 );
 
-router.post("/login", login);
+router.post("/login", loginLimiter, login);
 
 // Publique : le titulaire d'un compte interne n'est pas encore connecte.
 router.post("/invite/accept", inviteAcceptLimiter, acceptInvite);

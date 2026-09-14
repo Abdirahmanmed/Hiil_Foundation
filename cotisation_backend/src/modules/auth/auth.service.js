@@ -167,6 +167,7 @@ export async function loginUser({ email, password, req }) {
         role: true,
         status: true,
         accountType: true,
+        tokenVersion: true,
       },
     });
     dbMs = roundMs(dbStart);
@@ -193,8 +194,8 @@ export async function loginUser({ email, password, req }) {
     }
 
     const tokenSignStart = performance.now();
-    const accessToken = signAccessToken({ sub: user.id, role: user.role });
-    const refreshToken = signRefreshToken({ sub: user.id, role: user.role });
+    const accessToken = signAccessToken({ sub: user.id, role: user.role, tv: user.tokenVersion });
+    const refreshToken = signRefreshToken({ sub: user.id, role: user.role, tv: user.tokenVersion });
     tokenSignMs = roundMs(tokenSignStart);
 
     const auditStart = performance.now();
@@ -245,6 +246,19 @@ export async function loginUser({ email, password, req }) {
       },
     };
   } catch (err) {
+    // Seuls les succes etaient journalises : une attaque par force brute sur le
+    // compte SUPER_ADMIN ne laissait AUCUNE trace. userId est nullable dans le
+    // schema, c'est prevu pour le cas de l'email inconnu.
+    // Jamais le mot de passe dans meta — seulement la raison.
+    await auditLog({
+      userId: user?.id || null,
+      action: "LOGIN_FAILED",
+      entity: "User",
+      entityId: user?.id || null,
+      req,
+      meta: { email: normalizedEmail, reason: err?.message || "unknown" },
+    });
+
     logLoginPerf({
       totalStart,
       dbMs,

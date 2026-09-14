@@ -2,6 +2,7 @@ import crypto from "node:crypto";
 
 import prisma from "../../config/prisma.js";
 import { CAN_SUPERVISE } from "../../config/roles.js";
+import { invalidateUserCache } from "../../middlewares/auth.js";
 import { auditLog } from "../../utils/audit.js";
 import { hashInviteToken, hashUnusablePassword } from "../../utils/hash.js";
 import { sendInternalInviteMail } from "../../services/mail.service.js";
@@ -527,6 +528,10 @@ export async function setUserStatus({ adminId, adminRole, userId, status, req })
     },
   });
 
+  // Sans cette invalidation, la revocation attendrait jusqu'a 30 secondes le
+  // temps que le cache du middleware expire. La rendre immediate ne coute rien.
+  invalidateUserCache(updated.id);
+
   await auditLog({
     userId: adminId,
     action: "ADMIN_SET_USER_STATUS",
@@ -598,6 +603,10 @@ export async function setUserRole({ adminId, adminRole, userId, role, req }) {
       phone: true,
     },
   });
+
+  // Le role vient desormais de la base a chaque requete : une retrogradation
+  // prend effet immediatement plutot qu'a l'expiration du jeton.
+  invalidateUserCache(updated.id);
 
   await auditLog({
     userId: adminId,
