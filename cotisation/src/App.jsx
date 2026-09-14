@@ -96,7 +96,7 @@ export default function App() {
           <Route
             path="/treasury"
             element={
-              <ProtectedRoute role="EQUIPE_TRESORERIE">
+              <ProtectedRoute roles={["EQUIPE_TRESORERIE", "SUPER_ADMIN"]}>
                 <TreasuryDashboard />
               </ProtectedRoute>
             }

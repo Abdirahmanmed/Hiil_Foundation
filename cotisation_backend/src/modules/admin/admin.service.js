@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
 
 import prisma from "../../config/prisma.js";
+import { CAN_SUPERVISE } from "../../config/roles.js";
 import { auditLog } from "../../utils/audit.js";
 import { hashInviteToken, hashUnusablePassword } from "../../utils/hash.js";
 import { sendInternalInviteMail } from "../../services/mail.service.js";
@@ -95,7 +96,11 @@ function mapStatusRows(rows) {
 export async function getDashboardStats({ role } = {}) {
   const { monthStart, yearStart } = getPeriodStarts();
   const subscriptionActiveWhere = { status: { in: ["ACTIVE", "ACTIVE_MANUAL"] } };
-  const includeFinancials = role === "SUPER_ADMIN";
+  // L'ADMIN supervise le deroulement du travail du tresorier et du depensier :
+  // il lui faut les chiffres consolides. Superviser sans voir les montants n'est
+  // pas superviser. Il reste en lecture seule : aucune route d'ecriture des
+  // modules expenses / payment-orders ne le mentionne.
+  const includeFinancials = CAN_SUPERVISE.includes(role);
 
   const [
     totalUsers,
@@ -252,6 +257,7 @@ export async function listAdherentsContributions() {
       currency: true,
       status: true,
       createdAt: true,
+      paidAt: true,
       user: {
         select: {
           id: true,
@@ -279,7 +285,14 @@ export async function listAdherentsContributions() {
     amount: subscription.amount,
     currency: subscription.currency,
     status: subscription.status,
-    paidAt: subscription.createdAt,
+    // La date de creation de l'engagement n'est PAS une date d'encaissement.
+    // Renvoyer l'une a la place de l'autre faisait passer chaque cotisation
+    // declaree pour une cotisation payee dans l'ecran des contributions.
+    // `paidAt` n'est alimente que par un paiement CAC confirme ; ailleurs il est
+    // null, et c'est la verite tant que la vague 2 n'a pas separe l'engagement
+    // de l'encaissement.
+    declaredAt: subscription.createdAt,
+    paidAt: subscription.paidAt ?? null,
   }));
 }
 

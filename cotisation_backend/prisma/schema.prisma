@@ -245,6 +245,10 @@ model AuditLog {
 
   @@index([action, createdAt])
   @@index([userId, createdAt])
+  // La chronologie d'un dossier (GET /api/expenses/:id/trail) interroge
+  // AuditLog par entity + entityId. Sans cet index, chaque ouverture de fiche
+  // fait un seq scan sur une table qui ne fait que grossir.
+  @@index([entity, entityId, createdAt])
 }
 
 model Expense {

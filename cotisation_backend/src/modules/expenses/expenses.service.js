@@ -32,9 +32,29 @@ function publicExpenseSelect() {
   };
 }
 
+/**
+ * Le perimetre de lecture d'un role sur les depenses.
+ *
+ * Une seule fonction, utilisee par la liste ET par le tableau de bord : les deux
+ * derivaient leur filtre separement, chacune avec un `else {}` muet qui rendait
+ * TOUT visible a n'importe quel role non prevu. Le tresorier obtenait ainsi, via
+ * le tableau de bord, les agregats de depenses qu'il n'est pas cense voir.
+ * Chaque branche est desormais une decision explicite, et un role inconnu est
+ * refuse au lieu de tout voir.
+ */
+export function expenseScopeFor(user) {
+  if (user.role === "GESTIONNAIRE_DEPENSE") return { createdById: user.id };
+  if (user.role === "EQUIPE_TRESORERIE") return { status: "APPROUVER" };
+  // Supervision : tout, par decision. ADMIN en lecture seule, jamais en ecriture.
+  if (user.role === "ADMIN" || user.role === "SUPER_ADMIN") return {};
+
+  const err = new Error("Accès refusé");
+  err.status = 403;
+  throw err;
+}
+
 export async function getExpenseDashboard({ user }) {
-  const isManager = user.role === "GESTIONNAIRE_DEPENSE";
-  const expenseWhere = isManager ? { createdById: user.id } : {};
+  const expenseWhere = expenseScopeFor(user);
 
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -104,18 +124,64 @@ export async function createExpense({ user, data, req }) {
 }
 
 export async function listExpenses({ user }) {
-  const where =
-    user.role === "GESTIONNAIRE_DEPENSE"
-      ? { createdById: user.id }
-      : user.role === "EQUIPE_TRESORERIE"
-        ? { status: "APPROUVER" }
-        : {};
-
   return prisma.expense.findMany({
-    where,
+    where: expenseScopeFor(user),
     orderBy: { createdAt: "desc" },
+    take: 200,
     select: publicExpenseSelect(),
   });
+}
+
+/**
+ * La chronologie complete d'un dossier de depense : qui l'a engagee, qui l'a
+ * approuvee, qui l'a decaissee, et quand. C'est l'information qui manquait pour
+ * qu'un ADMIN puisse reellement suivre le deroulement du travail de ses deux
+ * profils, plutot que de regarder une liste de montants.
+ */
+export async function getExpenseTrail({ id }) {
+  const expense = await prisma.expense.findUnique({
+    where: { id },
+    select: publicExpenseSelect(),
+  });
+
+  if (!expense) {
+    const err = new Error("Dépense introuvable");
+    err.status = 404;
+    throw err;
+  }
+
+  const orders = await prisma.paymentOrder.findMany({
+    where: { expenseId: id },
+    orderBy: { createdAt: "asc" },
+    select: {
+      id: true,
+      referenceNumber: true,
+      status: true,
+      amount: true,
+      currency: true,
+      createdAt: true,
+      createdBy: { select: { id: true, fullName: true, email: true, role: true } },
+    },
+  });
+
+  const logs = await prisma.auditLog.findMany({
+    where: {
+      OR: [
+        { entity: "Expense", entityId: id },
+        { entity: "PaymentOrder", entityId: { in: orders.map((o) => o.id) } },
+      ],
+    },
+    orderBy: { createdAt: "asc" },
+    select: {
+      action: true,
+      createdAt: true,
+      meta: true,
+      ip: true,
+      user: { select: { id: true, fullName: true, email: true, role: true } },
+    },
+  });
+
+  return { expense, orders, logs };
 }
 
 function assertSuperAdminRole(role) {

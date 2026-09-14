@@ -93,5 +93,11 @@ export const createSubscriptionSchema = z
   });
 
 export const consentSchema = z.object({
-  accepted: z.coerce.boolean(),
+  // PAS de z.coerce.boolean() : il applique Boolean(input), donc la chaine
+  // "false" — comme "non", ou n'importe quelle chaine non vide — devient true.
+  // Ce champ est la preuve juridique de l'adhesion d'un membre : il n'accepte
+  // que le booleen true, et rien d'autre.
+  accepted: z.literal(true, {
+    message: "Le consentement doit être explicitement accepté",
+  }),
 });

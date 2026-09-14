@@ -240,9 +240,19 @@ export default function TreasuryDashboard() {
                       <td className="px-4 py-3 font-black">{fmtMoney(e.amount)}</td>
                       <td className="px-4 py-3"><Badge tone={statusTones[e.status]}>{t(`enumStatus.${e.status}`, e.status)}</Badge></td>
                       <td className="px-4 py-3">
-                        <button onClick={() => openOrder(e)} className="rounded-xl bg-emerald-600 px-3 py-2 text-xs font-black text-white">
-                          {t("treasury.createOrder")}
-                        </button>
+                        {/* Le SUPER_ADMIN consulte la position de caisse pour
+                            arbitrer, il ne decaisse pas. Le backend le refuse
+                            de toute facon ; lui montrer le bouton reviendrait a
+                            l'inviter a contourner sa propre procedure. */}
+                        {user?.role === "EQUIPE_TRESORERIE" ? (
+                          <button onClick={() => openOrder(e)} className="rounded-xl bg-emerald-600 px-3 py-2 text-xs font-black text-white">
+                            {t("treasury.createOrder")}
+                          </button>
+                        ) : (
+                          <span className="text-xs text-slate-400">
+                            {t("treasury.readOnly", "Lecture seule")}
+                          </span>
+                        )}
                       </td>
                     </tr>
                   ))}

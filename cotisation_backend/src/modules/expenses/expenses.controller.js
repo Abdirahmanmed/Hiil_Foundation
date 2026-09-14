@@ -29,6 +29,16 @@ export async function list(req, res, next) {
   }
 }
 
+export async function trail(req, res, next) {
+  try {
+    const params = expenseIdParamsSchema.parse(req.params);
+    const result = await service.getExpenseTrail({ id: params.id });
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
+}
+
 export async function approve(req, res, next) {
   try {
     const params = expenseIdParamsSchema.parse(req.params);
