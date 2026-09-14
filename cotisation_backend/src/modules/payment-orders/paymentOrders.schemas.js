@@ -4,7 +4,9 @@ const bankPaymentMethods = ["VIREMENT_BANCAIRE", "CHEQUE"];
 
 export const createPaymentOrderSchema = z.object({
   expenseId: z.string().min(1),
-  token: z.string().trim().min(1),
+  // Plus de `token` : le jeton d'approbation n'existe plus. Le tresorier ne
+  // saisit plus rien pour emettre un ordre — il voit la depense approuvee dans
+  // sa liste et clique. Le statut APPROUVER est l'autorisation.
   paymentMethod: z.enum(["VIREMENT_BANCAIRE", "CASH", "CHEQUE"]),
   currency: z.enum(["FRANC", "DOLLAR", "BIRR_ETHIOPIEN"]),
   paymentCountry: z.enum(["DJIBOUTI", "ETHIOPIE"]),

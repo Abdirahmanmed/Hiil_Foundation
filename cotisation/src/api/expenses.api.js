@@ -24,12 +24,15 @@ export async function createExpense(payload) {
   return res.data;
 }
 
-export async function approveExpense(id) {
-  const res = await http.patch(`${basePath}/${id}/approve`, {});
+// Approuver engage une sortie d'argent : le mot de passe du Super Admin est
+// redemandé. Un JWT volé ou un poste laissé ouvert ne suffit plus.
+export async function approveExpense(id, password) {
+  const res = await http.patch(`${basePath}/${id}/approve`, { password });
   return res.data;
 }
 
-export async function rejectExpense(id) {
-  const res = await http.patch(`${basePath}/${id}/reject`, {});
+// Rejeter sans motif rend l'audit muet.
+export async function rejectExpense(id, reason) {
+  const res = await http.patch(`${basePath}/${id}/reject`, { reason });
   return res.data;
 }

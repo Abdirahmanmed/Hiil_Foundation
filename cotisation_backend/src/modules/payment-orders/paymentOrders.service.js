@@ -2,10 +2,6 @@ import crypto from "crypto";
 import prisma from "../../config/prisma.js";
 import { auditLog } from "../../utils/audit.js";
 
-function hashToken(token) {
-  return crypto.createHash("sha256").update(token).digest("hex");
-}
-
 function includeOrder() {
   return {
     expense: {
@@ -41,28 +37,22 @@ async function generateReference(tx) {
 }
 
 export async function createPaymentOrder({ user, data, req }) {
-  const tokenHash = hashToken(data.token);
-
   const order = await prisma.$transaction(async (tx) => {
-    const expense = await tx.expense.findUnique({ where: { id: data.expenseId } });
-    if (!expense) {
+    // Verrou de ligne : deux requetes simultanees — double-clic, retry axios,
+    // deux tresoriers — lisaient toutes deux APPROUVER et produisaient deux
+    // ordres, chacun imprimable et remis a la banque. Postgres les serialise.
+    const verrou = await tx.$queryRaw`
+      SELECT "id" FROM "Expense" WHERE "id" = ${data.expenseId} FOR UPDATE`;
+    if (!verrou.length) {
       const err = new Error("Dépense introuvable");
       err.status = 404;
       throw err;
     }
+
+    const expense = await tx.expense.findUnique({ where: { id: data.expenseId } });
     if (expense.status !== "APPROUVER") {
       const err = new Error("La dépense doit être approuvée avant paiement");
       err.status = 409;
-      throw err;
-    }
-    if (!expense.approvalTokenHash || expense.approvalTokenHash !== tokenHash) {
-      const err = new Error("Token invalide");
-      err.status = 403;
-      throw err;
-    }
-    if (!expense.approvalTokenExpiresAt || expense.approvalTokenExpiresAt < new Date()) {
-      const err = new Error("Token expiré");
-      err.status = 403;
       throw err;
     }
 
@@ -78,12 +68,17 @@ export async function createPaymentOrder({ user, data, req }) {
       data: {
         expenseId: expense.id,
         createdById: user.id,
-        tokenUsedHash: tokenHash,
         paymentMethod: data.paymentMethod,
         currency: data.currency,
         paymentCountry: data.paymentCountry,
         amount,
-        bankCountry: data.paymentMethod === "CASH" ? null : data.paymentCountry,
+        // Le pays de banque saisi n'est plus ecrase par le pays de paiement :
+        // un virement depuis Djibouti vers un compte en Ethiopie etait
+        // enregistre bankCountry = DJIBOUTI.
+        bankCountry:
+          data.paymentMethod === "CASH"
+            ? null
+            : (data.bankCountry ?? data.paymentCountry),
         bankName: data.paymentMethod === "CASH" ? null : data.bankName,
         bankReference: data.paymentMethod === "CASH" ? null : data.bankReference,
         bankAccountHolder: data.paymentMethod === "CASH" ? null : data.bankAccountHolder,
@@ -98,10 +93,28 @@ export async function createPaymentOrder({ user, data, req }) {
       data: { status: "EFFECTUER" },
     });
 
+    // L'audit DANS la transaction : un decaissement ne doit jamais pouvoir
+    // exister sans sa trace. Il etait ecrit apres, donc perdu si le process
+    // tombait entre les deux.
+    await tx.auditLog.create({
+      data: {
+        userId: user.id,
+        action: "PAYMENT_ORDER_CREATE",
+        entity: "PaymentOrder",
+        entityId: created.id,
+        meta: {
+          expenseId: data.expenseId,
+          referenceNumber: created.referenceNumber,
+          amount: created.amount,
+        },
+        ip: req?.ip || null,
+        userAgent: req?.get?.("user-agent")?.slice(0, 500) || null,
+      },
+    });
+
     return created;
   });
 
-  await auditLog({ userId: user.id, action: "PAYMENT_ORDER_CREATE", entity: "PaymentOrder", entityId: order.id, req, meta: { expenseId: data.expenseId, referenceNumber: order.referenceNumber, amount: order.amount } });
   return order;
 }
 

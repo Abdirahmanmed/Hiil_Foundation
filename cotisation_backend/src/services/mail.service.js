@@ -418,52 +418,45 @@ export async function verifyMailer() {
   }
 }
 
-export async function sendExpenseApprovalTokenEmail({ to, expense, token }) {
-  const expiresAt = expense.approvalTokenExpiresAt
-    ? new Date(expense.approvalTokenExpiresAt).toLocaleString("fr-FR")
-    : "Non renseignée";
+/**
+ * Prévient l'équipe trésorerie qu'une dépense vient d'être approuvée.
+ *
+ * Remplace l'email qui transportait un jeton d'approbation jusqu'au Super Admin,
+ * à charge pour lui de le retransmettre à la main — hors application, sans trace
+ * de qui avait mandaté qui. Celui-ci ne contient aucun secret : il annonce, il
+ * n'autorise pas. La dépense est de toute façon déjà visible dans la liste de la
+ * trésorerie, donc l'échec de cet envoi ne bloque plus aucun décaissement.
+ */
+export async function sendExpenseApprovedEmail({ to, expense }) {
   const lines = [
     "Bonjour,",
     "",
-    "Une dépense Hiil Foundation a été approuvée par le Super Admin.",
-    `Référence dépense : ${expense.id}`,
+    "Une dépense vient d'être approuvée et attend son ordre de paiement.",
     `Libellé : ${expense.label}`,
     `Montant : ${expense.amount}`,
     `Bénéficiaire : ${expense.beneficiaryName}`,
-    `Token : ${token}`,
-    `Expiration : ${expiresAt}`,
+    `Référence : ${expense.id}`,
     "",
-    "Le SUPER_ADMIN doit transmettre ce token manuellement à l’équipe trésorerie.",
-    "Le token n’est pas stocké en clair en base de données.",
+    "Elle apparaît dans votre liste des dépenses approuvées.",
   ];
 
   const html = `
     <p>Bonjour,</p>
-    <p>Une dépense Hiil Foundation a été approuvée par le Super Admin.</p>
+    <p>Une dépense vient d'être approuvée et attend son ordre de paiement.</p>
     <ul>
-      <li><strong>Référence dépense :</strong> ${escapeHtml(expense.id)}</li>
       <li><strong>Libellé :</strong> ${escapeHtml(expense.label)}</li>
       <li><strong>Montant :</strong> ${escapeHtml(expense.amount)}</li>
       <li><strong>Bénéficiaire :</strong> ${escapeHtml(expense.beneficiaryName)}</li>
-      <li><strong>Token :</strong> ${escapeHtml(token)}</li>
-      <li><strong>Expiration :</strong> ${escapeHtml(expiresAt)}</li>
+      <li><strong>Référence :</strong> ${escapeHtml(expense.id)}</li>
     </ul>
-    <p>Le SUPER_ADMIN doit transmettre ce token manuellement à l’équipe trésorerie.</p>
-    <p>Le token n’est pas stocké en clair en base de données.</p>
+    <p>Elle apparaît dans votre liste des dépenses approuvées.</p>
   `;
 
-  try {
-    return await sendEmail({
-      to,
-      subject: "Token d’approbation de dépense - Hiil Foundation",
-      html,
-      text: lines.join("\n"),
-      context: "Expense approval token",
-    });
-  } catch (err) {
-    if (err?.status === 502) {
-      throw err;
-    }
-    throw createEmailDeliveryError("Impossible d’envoyer l’email du token d’approbation pour le moment. Réessayez plus tard.");
-  }
+  return sendEmail({
+    to,
+    subject: "Dépense approuvée — Hiil Foundation",
+    html,
+    text: lines.join("\n"),
+    context: "ExpenseApproved",
+  });
 }

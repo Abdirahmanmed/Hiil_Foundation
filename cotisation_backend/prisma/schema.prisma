@@ -157,8 +157,13 @@ model User {
   otps          Otp[]
   subscriptions Subscription[]
   auditLogs     AuditLog[]
-  expenses      Expense[]
   paymentOrders PaymentOrder[]
+
+  // Trois liens distincts vers Expense : engager, approuver et rejeter sont
+  // trois actes differents, portes par trois roles differents.
+  expenses         Expense[] @relation("ExpenseCreatedBy")
+  approvedExpenses Expense[] @relation("ExpenseApprovedBy")
+  rejectedExpenses Expense[] @relation("ExpenseRejectedBy")
 
   @@index([status])
 }
@@ -267,12 +272,25 @@ model Expense {
   beneficiaryCity    String
   status             ExpenseStatus @default(EN_ATTENTE)
 
-  createdById           String
-  createdBy             User      @relation(fields: [createdById], references: [id], onDelete: Restrict)
-  approvedByManagerAt   DateTime?
-  approvalTokenHash     String?
-  approvalTokenExpiresAt DateTime?
-  superAdminNotifiedAt  DateTime?
+  // Qui a engagé la dépense.
+  createdById String
+  createdBy   User   @relation("ExpenseCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+
+  // Qui l'a approuvée. Jusqu'ici seul l'horodatage existait : l'identité de
+  // l'approbateur n'était nulle part, sauf dans le journal d'audit — donc
+  // impossible à afficher dans l'écran de supervision.
+  approvedById        String?
+  approvedBy          User?     @relation("ExpenseApprovedBy", fields: [approvedById], references: [id], onDelete: SetNull)
+  approvedByManagerAt DateTime?
+
+  // Qui l'a rejetée, et pourquoi. Rejeter sans motif rend l'audit muet.
+  rejectedById    String?
+  rejectedBy      User?     @relation("ExpenseRejectedBy", fields: [rejectedById], references: [id], onDelete: SetNull)
+  rejectedAt      DateTime?
+  rejectionReason String?
+
+  // Horodatage de la notification envoyée à la trésorerie.
+  superAdminNotifiedAt DateTime?
 
   paymentOrders PaymentOrder[]
 
@@ -291,7 +309,9 @@ model PaymentOrder {
   createdById String
   createdBy   User   @relation(fields: [createdById], references: [id], onDelete: Restrict)
 
-  tokenUsedHash   String
+  // Conservé nullable pour l'audit des ordres émis avant la suppression du
+  // jeton d'approbation. Plus jamais alimenté.
+  tokenUsedHash     String?
   paymentMethod     PaymentMethod
   currency          Currency
   paymentCountry    Country

@@ -86,15 +86,41 @@ export default function SuperAdminDashboard() {
     qc.invalidateQueries({ queryKey: ["admin-dashboard"] });
   };
   const approveMut = useMutation({
-    mutationFn: approveExpense,
+    mutationFn: ({ id, password }) => approveExpense(id, password),
     onSuccess: (data) => { toast.success(data?.message || t("validation.expenseApproved")); refresh(); },
     onError:   (e)    => toast.error(e?.response?.data?.message || t("validation.approveError")),
   });
   const rejectMut = useMutation({
-    mutationFn: rejectExpense,
+    mutationFn: ({ id, reason }) => rejectExpense(id, reason),
     onSuccess: (data) => { toast.success(data?.message || t("validation.expenseRejected")); refresh(); },
     onError:   (e)    => toast.error(e?.response?.data?.message || t("validation.rejectError")),
   });
+
+  // Approuver engage une sortie d'argent : on redemande le mot de passe. C'est
+  // le second facteur que l'ancien jeton n'apportait pas — il était généré par
+  // le serveur à l'instant même de l'approbation.
+  const askApprove = (expense) => {
+    const password = window.prompt(
+      t(
+        "validation.approvePrompt",
+        `Confirmez votre mot de passe pour approuver « ${expense.label} » (${expense.amount}).`,
+      ),
+    );
+    if (!password) return;
+    approveMut.mutate({ id: expense.id, password });
+  };
+
+  const askReject = (expense) => {
+    const reason = window.prompt(
+      t("validation.rejectPrompt", "Motif du rejet (3 caractères minimum) :"),
+    );
+    if (reason === null) return;
+    if (reason.trim().length < 3) {
+      toast.error(t("validation.reasonTooShort", "Motif trop court."));
+      return;
+    }
+    rejectMut.mutate({ id: expense.id, reason: reason.trim() });
+  };
   const actionPending = approveMut.isPending || rejectMut.isPending;
 
   const expenseTableHeaders = [
@@ -273,14 +299,14 @@ export default function SuperAdminDashboard() {
                         <div className="flex flex-wrap gap-2">
                           <button
                             disabled={actionPending || e.status === "EFFECTUER" || e.status === "REJETER"}
-                            onClick={() => approveMut.mutate(e.id)}
+                            onClick={() => askApprove(e)}
                             className="rounded-xl bg-emerald-600 px-3 py-2 text-xs font-black text-white disabled:opacity-50"
                           >
                             {t("validation.approve")}
                           </button>
                           <button
                             disabled={actionPending || e.status === "EFFECTUER" || e.status === "REJETER"}
-                            onClick={() => rejectMut.mutate(e.id)}
+                            onClick={() => askReject(e)}
                             className="rounded-xl bg-red-600 px-3 py-2 text-xs font-black text-white disabled:opacity-50"
                           >
                             {t("validation.reject")}

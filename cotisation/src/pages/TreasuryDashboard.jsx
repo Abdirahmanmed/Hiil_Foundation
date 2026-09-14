@@ -44,7 +44,7 @@ export default function TreasuryDashboard() {
   const [tab, setTab] = useState("dashboard");
   const [selectedExpense, setSelectedExpense] = useState(null);
   const [printOrder, setPrintOrder] = useState(null);
-  const [form, setForm] = useState({ token: "", paymentMethod: "VIREMENT_BANCAIRE", currency: "FRANC", paymentCountry: "DJIBOUTI", amount: 1, bankName: "CAC Bank", bankReference: "", bankAccountHolder: "" });
+  const [form, setForm] = useState({ paymentMethod: "VIREMENT_BANCAIRE", currency: "FRANC", paymentCountry: "DJIBOUTI", amount: 1, bankName: "CAC Bank", bankReference: "", bankAccountHolder: "" });
 
   const qStats = useQuery({ queryKey: ["treasury-dashboard"], queryFn: getTreasuryDashboard });
   const qExpenses = useQuery({ queryKey: ["expenses", "treasury"], queryFn: getExpenses, enabled: tab === "expenses" });
@@ -73,7 +73,7 @@ export default function TreasuryDashboard() {
   function openOrder(expense) {
     const paymentCountry = expense.beneficiaryCountry || "DJIBOUTI";
     setSelectedExpense(expense);
-    setForm({ token: "", paymentMethod: "VIREMENT_BANCAIRE", currency: "FRANC", paymentCountry, amount: expense.amount || 1, bankName: bankOptionsByCountry[paymentCountry][0], bankReference: "", bankAccountHolder: expense.beneficiaryName || "" });
+    setForm({ paymentMethod: "VIREMENT_BANCAIRE", currency: "FRANC", paymentCountry, amount: expense.amount || 1, bankName: bankOptionsByCountry[paymentCountry][0], bankReference: "", bankAccountHolder: expense.beneficiaryName || "" });
   }
 
   function setPaymentMethod(paymentMethod) {
@@ -306,9 +306,10 @@ export default function TreasuryDashboard() {
       {/* Drawer: Create payment order */}
       <Drawer open={!!selectedExpense} onClose={() => setSelectedExpense(null)} title={t("treasury.order.createTitle")}>
         <form onSubmit={submit} className="space-y-4">
-          <Field label={t("treasury.order.token")}>
-            <Input value={form.token} onChange={(e) => setForm({ ...form, token: e.target.value })} required />
-          </Field>
+          {/* Plus de champ « token » : le jeton d'approbation n'existe plus.
+              La dépense apparaît dans cette liste parce qu'elle est approuvée,
+              et ce statut EST l'autorisation. Le Super Admin n'a plus rien à
+              transmettre à la main. */}
           <Field label={t("treasury.order.paymentMethod")}>
             <Select value={form.paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
               <option value="VIREMENT_BANCAIRE">{t("paymentMethods.VIREMENT_BANCAIRE")}</option>
