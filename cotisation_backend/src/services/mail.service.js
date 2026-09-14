@@ -308,6 +308,51 @@ export async function sendOtpMail({ email, code }) {
 
 export const sendOtpEmail = sendOtpMail;
 
+const SUBMISSION_LABELS = {
+  PROJECT_PROPOSAL: "Appel à projets",
+  VOLUNTEER: "Candidature bénévole",
+};
+
+/**
+ * Previent la fondation qu'une candidature vient d'arriver.
+ * La candidature est DEJA enregistree en base quand cet email part : si l'envoi
+ * echoue, rien n'est perdu.
+ */
+export async function sendPublicSubmissionNotification({ submission, data }) {
+  const label = SUBMISSION_LABELS[submission.kind] || submission.kind;
+
+  const lines = [
+    `${label}`,
+    ``,
+    `Nom     : ${data.fullName}`,
+    `Email   : ${data.email}`,
+  ];
+
+  if (submission.kind === "PROJECT_PROPOSAL") {
+    if (data.organization) lines.push(`Structure : ${data.organization}`);
+    if (data.theme) lines.push(`Thématique : ${data.theme}`);
+    lines.push(``, `Projet :`, data.message);
+  } else {
+    if (data.skills) lines.push(`Compétences : ${data.skills}`);
+    if (data.availability) lines.push(`Disponibilités : ${data.availability}`);
+  }
+
+  lines.push(``, `Référence : ${submission.id}`);
+
+  const text = lines.join("\n");
+  const html = lines
+    .map((line) => (line ? `<p>${escapeHtml(line)}</p>` : "<br/>"))
+    .join("");
+
+  return sendEmail({
+    to: env.CONTACT_EMAIL,
+    subject: `${label} — ${data.fullName}`,
+    html,
+    text,
+    context: "PublicSubmission",
+  });
+}
+
 const INTERNAL_ROLE_LABELS = {
   ADMIN: "Administrateur",
   GESTIONNAIRE_DEPENSE: "Gestionnaire de dépense",

@@ -32,6 +32,19 @@ export const changePasswordLimiter = rateLimit({
 });
 
 /**
+ * Formulaires de la vitrine publique (appel a projets, benevolat).
+ * Assez large pour ne jamais gener un candidat legitime, assez strict pour
+ * qu'un robot ne remplisse pas la table.
+ */
+export const publicFormLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 h
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: "Trop de candidatures envoyées. Réessaie plus tard." },
+});
+
+/**
  * Acceptation d'une invitation : route publique qui prend un jeton en entree.
  * Stricte, parce qu'il n'y a aucune authentification en amont pour freiner un
  * essai de jetons a la chaine.

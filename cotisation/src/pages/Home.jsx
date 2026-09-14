@@ -3,6 +3,8 @@ import { AnimatePresence, motion } from "framer-motion"; // eslint-disable-line 
 
 import { useTranslation } from "react-i18next";
 import { useMemo, useState } from "react";
+import toast from "react-hot-toast";
+import { submitPublicFormApi } from "../api/publicForms.api";
 import Brand from "../components/Brand";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 import { useAuth } from "../context/AuthContext";
@@ -222,10 +224,12 @@ function NosActions({ G, t }) {
   const [formData, setFormData] = useState({
     nom: "",
     org: "",
+    email: "",
     theme: "",
     desc: "",
   });
   const [submitted, setSubmitted] = useState(false);
+  const [sending, setSending] = useState(false);
 
   const filtered = activeTheme
     ? programmes.filter((p) => p.thematique === activeTheme)
@@ -850,6 +854,14 @@ function NosActions({ G, t }) {
                               "home.actions.form.organizationPlaceholder"
                             ),
                           },
+                          {
+                            key: "email",
+                            label: t("home.actions.form.emailLabel", "Email"),
+                            placeholder: t(
+                              "home.actions.form.emailPlaceholder",
+                              "pour vous répondre",
+                            ),
+                          },
                         ].map(({ key, label, placeholder }) => (
                           <div key={key}>
                             <label
@@ -962,8 +974,41 @@ function NosActions({ G, t }) {
                         />
                       </div>
                       <button
-                        onClick={() => {
-                          if (formData.nom && formData.desc) setSubmitted(true);
+                        disabled={sending}
+                        onClick={async () => {
+                          if (!formData.nom || !formData.email || !formData.desc) {
+                            toast.error(
+                              t(
+                                "home.actions.form.required",
+                                "Nom, email et description sont requis.",
+                              ),
+                            );
+                            return;
+                          }
+                          setSending(true);
+                          try {
+                            await submitPublicFormApi({
+                              kind: "PROJECT_PROPOSAL",
+                              fullName: formData.nom,
+                              email: formData.email,
+                              organization: formData.org,
+                              theme: formData.theme,
+                              message: formData.desc,
+                            });
+                            // L'ecran de remerciement ne s'affiche QUE si le
+                            // serveur a confirme l'enregistrement.
+                            setSubmitted(true);
+                          } catch (err) {
+                            toast.error(
+                              err?.response?.data?.message ||
+                                t(
+                                  "home.actions.form.error",
+                                  "Envoi impossible pour le moment. Réessayez dans un instant.",
+                                ),
+                            );
+                          } finally {
+                            setSending(false);
+                          }
                         }}
                         style={{
                           padding: "0.85rem 2rem",
@@ -3335,6 +3380,7 @@ function Soutenir({ G }) {
   const [generatedOtp, setGeneratedOtp] = useState("");
   const [benevoleForm, setBenevoleForm] = useState({ nom: "", email: "", competence: "", dispo: "" });
   const [benevoleSubmitted, setBenevoleSubmitted] = useState(false);
+  const [benevoleSending, setBenevoleSending] = useState(false);
 
   const donTabs = useMemo(
     () => [
@@ -3825,7 +3871,40 @@ function Soutenir({ G }) {
                     {dispoOptions.map((o) => <option key={o}>{o}</option>)}
                   </select>
                 </div>
-                <button onClick={() => { if (benevoleForm.nom && benevoleForm.email) setBenevoleSubmitted(true); }}
+                <button
+                  disabled={benevoleSending}
+                  onClick={async () => {
+                    if (!benevoleForm.nom || !benevoleForm.email) {
+                      toast.error(
+                        t(
+                          "home.benevole.required",
+                          "Nom et email sont requis.",
+                        ),
+                      );
+                      return;
+                    }
+                    setBenevoleSending(true);
+                    try {
+                      await submitPublicFormApi({
+                        kind: "VOLUNTEER",
+                        fullName: benevoleForm.nom,
+                        email: benevoleForm.email,
+                        skills: benevoleForm.competence,
+                        availability: benevoleForm.dispo,
+                      });
+                      setBenevoleSubmitted(true);
+                    } catch (err) {
+                      toast.error(
+                        err?.response?.data?.message ||
+                          t(
+                            "home.benevole.error",
+                            "Envoi impossible pour le moment. Réessayez dans un instant.",
+                          ),
+                      );
+                    } finally {
+                      setBenevoleSending(false);
+                    }
+                  }}
                   style={{ padding: "0.85rem", borderRadius: "0.875rem", background: `linear-gradient(135deg,${G.greenMid},${G.green})`, color: "white", fontWeight: 800, fontSize: "0.9rem", border: "none", cursor: "pointer" }}
                 >
                   {t("home.support.volunteer.submitBtn")}

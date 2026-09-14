@@ -127,6 +127,10 @@ export const env = {
   EMAIL_FROM: emailFrom,
   EMAIL_FROM_NAME: process.env.EMAIL_FROM_NAME || "Hiil Foundation",
 
+  // Destinataire interne des candidatures deposees sur la vitrine.
+  // Par defaut l'adresse d'envoi, qui est deja validee cote Brevo.
+  CONTACT_EMAIL: process.env.CONTACT_EMAIL || emailFrom,
+
   // EMAIL SMTP fallback (used only when BREVO_API_KEY is absent)
   EMAIL_HOST: emailHost,
   EMAIL_PORT: emailPort,

@@ -99,6 +99,11 @@ enum PaymentOrderStatus {
   IMPRIME
 }
 
+enum PublicSubmissionKind {
+  PROJECT_PROPOSAL
+  VOLUNTEER
+}
+
 model User {
   id   String @id @default(cuid())
   role Role   @default(CLIENT)
@@ -297,4 +302,34 @@ model PaymentOrder {
   @@index([expenseId])
   @@index([createdById, createdAt])
   @@index([status])
+}
+
+/// Candidatures deposees depuis la vitrine publique : appel a projets et
+/// benevolat. Avant, les deux formulaires se contentaient d'un setSubmitted(true)
+/// cote navigateur : le candidat voyait un ecran de remerciement et sa
+/// candidature n'existait nulle part.
+model PublicSubmission {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  kind     PublicSubmissionKind
+  fullName String
+  email    String
+
+  // Appel a projets
+  organization String?
+  theme        String?
+  message      String?
+
+  // Benevolat
+  skills       String?
+  availability String?
+
+  ip        String?
+  userAgent String?
+
+  handledAt DateTime?
+
+  @@index([kind, createdAt])
+  @@index([handledAt])
 }
