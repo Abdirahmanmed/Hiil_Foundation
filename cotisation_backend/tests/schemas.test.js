@@ -73,9 +73,13 @@ describe("ordre de paiement", () => {
     expect(r.data.token).toBeUndefined();
   });
 
-  it("exige les champs bancaires pour un virement", () => {
+  // Le schema n'exige PLUS les champs bancaires : la regle depend de la
+  // depense (porte-t-elle un compte approuve ?) et zod n'a pas acces a la base.
+  // Elle vit dans createPaymentOrder. L'exiger ici rendait indecaissable toute
+  // depense au nouveau format, puisque le front n'envoie alors plus rien.
+  it("n'exige plus les champs bancaires : la règle est dans le service", () => {
     const { bankName, bankReference, ...sansBanque } = base;
-    expect(createPaymentOrderSchema.safeParse(sansBanque).success).toBe(false);
+    expect(createPaymentOrderSchema.safeParse(sansBanque).success).toBe(true);
   });
 
   it("exige un motif d'annulation", () => {

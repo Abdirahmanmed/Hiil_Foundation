@@ -135,17 +135,36 @@ export async function confirmSubscriptionPayment(userId, subscriptionId, otp, re
   const subscription = await getOwnedSubscription(userId, subscriptionId);
   assertPayable(subscription);
 
-  if (!subscription.cacPaymentRequestId) {
-    const err = new Error("Paiement CAC non initie.");
-    err.status = 400;
+  if (!subscription.cacPaymentRequestId || subscription.cacStatus !== "OTP_SENT") {
+    const err = new Error("Aucun paiement CAC en attente de confirmation.");
+    err.status = 409;
     throw err;
   }
 
-  // L'encaissement ouvert a l'initiation. C'est lui qui porte l'argent.
-  const contribution = await contributions.openContribution({
-    subscription,
-    channel: "CAC",
+  // L'encaissement ouvert a l'initiation, retrouve par la reference du
+  // paymentRequestId.
+  //
+  // Surtout PAS re-derive de nextDueDate via openContribution : la confirmation
+  // precedente vient justement de l'avancer, donc la cle porterait sur
+  // l'echeance SUIVANTE. Rejouer la confirmation cinq fois — le plafond du
+  // limiteur — fabriquait cinq encaissements CONFIRMED et poussait l'echeance
+  // de cinq mois, sans qu'un franc soit verse.
+  const contribution = await prisma.contribution.findFirst({
+    where: {
+      subscriptionId: subscription.id,
+      reference: String(subscription.cacPaymentRequestId),
+      status: { in: ["PENDING", "TIMEOUT"] },
+    },
+    orderBy: { createdAt: "desc" },
   });
+
+  if (!contribution) {
+    const err = new Error(
+      "Aucun encaissement en attente pour ce paiement. Relancez l'opération.",
+    );
+    err.status = 409;
+    throw err;
+  }
 
   const response = await cacBank.confirmPayment({
     paymentRequestId: subscription.cacPaymentRequestId,
@@ -173,6 +192,9 @@ export async function confirmSubscriptionPayment(userId, subscriptionId, otp, re
       cacReference: response?.reference || null,
       cacStatus: "CONFIRMED",
       cacRawResponse: response,
+      // Consomme le jeton d'initiation : une seconde confirmation ne trouvera
+      // plus ni OTP_SENT, ni encaissement en attente portant cette référence.
+      cacPaymentRequestId: null,
       paidAt,
       consentAccepted: true,
       consentVersion: subscription.consentVersion || "cac-payment-v1",

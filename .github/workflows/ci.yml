@@ -58,12 +58,16 @@ jobs:
       - run: npx prisma migrate deploy
       - run: npx prisma migrate status
       # Détecte la dérive : un champ ajouté au schéma sans migration.
-      - name: Aucune dérive entre les migrations et le schéma
+      #
+      # On compare la base QUI VIENT D'ÊTRE MIGRÉE au schéma. Comparer
+      # --from-migrations à --to-schema demanderait une base miroir distincte,
+      # et lui passer la base déjà migrée ne comparerait rien d'utile.
+      # `--exit-code` sort en 2 quand un écart existe : c'est l'échec voulu.
+      - name: Aucune dérive entre la base migrée et le schéma
         run: |
           npx prisma migrate diff \
-            --from-migrations prisma/migrations \
+            --from-config-datasource \
             --to-schema prisma/schema.prisma \
-            --shadow-database-url "$DATABASE_URL" \
             --exit-code
 
   frontend:

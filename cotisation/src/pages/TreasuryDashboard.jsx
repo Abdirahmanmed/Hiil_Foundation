@@ -396,7 +396,9 @@ export default function TreasuryDashboard() {
               {/* Si la dépense porte le compte à payer, il a été approuvé avec
                   elle : on l'affiche, on ne le ressaisit pas. Le serveur ignore
                   de toute façon ce qui serait envoyé ici. */}
-              {selectedExpense?.beneficiaryBankName ? (
+              {/* Même condition que le serveur — banque ET numéro — sinon les
+                  deux divergent et le trésorier saisit un compte qui sera jeté. */}
+              {selectedExpense?.beneficiaryBankName && selectedExpense?.beneficiaryAccountRef ? (
                 <div className="rounded-xl border border-emerald-200 bg-emerald-50/60 p-3 text-sm">
                   <div className="text-xs font-black uppercase tracking-wide text-emerald-800">
                     {t("treasury.order.approvedAccount", "Compte approuvé avec la dépense")}

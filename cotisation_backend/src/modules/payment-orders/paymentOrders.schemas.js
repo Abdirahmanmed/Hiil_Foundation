@@ -1,7 +1,5 @@
 import { z } from "zod";
 
-const bankPaymentMethods = ["VIREMENT_BANCAIRE", "CHEQUE"];
-
 export const createPaymentOrderSchema = z.object({
   expenseId: z.string().min(1),
   // Plus de `token` : le jeton d'approbation n'existe plus. Le tresorier ne
@@ -15,19 +13,20 @@ export const createPaymentOrderSchema = z.object({
   bankName: z.string().trim().optional(),
   bankReference: z.string().trim().optional(),
   bankAccountHolder: z.string().trim().optional(),
-}).superRefine((data, ctx) => {
-  if (!bankPaymentMethods.includes(data.paymentMethod)) return;
-
-  for (const field of ["bankName", "bankReference"]) {
-    if (!data[field]) {
-      ctx.addIssue({
-        code: "custom",
-        path: [field],
-        message: "Champ bancaire obligatoire pour cette méthode de paiement",
-      });
-    }
-  }
 });
+
+// Le superRefine qui exigeait bankName et bankReference a ete retire, et ce
+// n'est pas un relachement : la regle est CONDITIONNELLE a la depense, et zod
+// n'a pas acces a la base.
+//
+// Depuis que les coordonnees du beneficiaire vivent sur la depense, le tresorier
+// ne saisit plus rien — le formulaire affiche le compte approuve en lecture
+// seule. Le schema exigeait donc des champs que le front n'envoyait plus :
+// TOUTE depense au nouveau format etait indecaissable, sans qu'aucun champ ne
+// puisse etre corrige depuis l'ecran.
+//
+// La regle vit desormais dans createPaymentOrder, qui sait si la depense porte
+// deja un compte.
 
 export const paymentOrderIdParamsSchema = z.object({
   id: z.string().min(1),

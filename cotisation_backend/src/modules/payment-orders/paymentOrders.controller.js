@@ -18,7 +18,7 @@ export async function create(req, res, next) {
 
 export async function list(req, res, next) {
   try {
-    const paymentOrders = await service.listPaymentOrders();
+    const paymentOrders = await service.listPaymentOrders({ user: req.user });
     res.json({ paymentOrders });
   } catch (err) {
     next(err);

@@ -84,9 +84,25 @@ export async function createPaymentOrder({ user, data, req }) {
     // l'audit — pour qu'un decaissement dont le compte n'a jamais ete approuve
     // reste identifiable.
     const especes = data.paymentMethod === "CASH";
+
+    // ET, pas OU : un compte n'est « specifie » que s'il est COMPLET. Avec un
+    // OU, une depense portant un numero sans nom de banque faisait diverger la
+    // condition du serveur de celle de l'ecran — le tresorier saisissait une
+    // banque que le serveur jetait ensuite, et le bon sortait sans coordonnees.
     const depenseSpecifieCompte = Boolean(
-      expense.beneficiaryBankName || expense.beneficiaryAccountRef,
+      expense.beneficiaryBankName && expense.beneficiaryAccountRef,
     );
+
+    // Basculer en especes effacerait le compte que le Super Admin a approuve,
+    // et le tresorier deciderait seul a qui remettre l'argent en main propre.
+    // C'est exactement le contournement que le compte approuve vient fermer.
+    if (especes && depenseSpecifieCompte) {
+      const err = new Error(
+        "Cette dépense a été approuvée avec un compte bancaire : elle ne peut pas être décaissée en espèces.",
+      );
+      err.status = 409;
+      throw err;
+    }
     const compte = especes
       ? { bankName: null, bankReference: null, bankAccountHolder: null }
       : depenseSpecifieCompte
@@ -101,6 +117,21 @@ export async function createPaymentOrder({ user, data, req }) {
             bankReference: data.bankReference,
             bankAccountHolder: data.bankAccountHolder,
           };
+
+    // La regle « il faut des coordonnees bancaires » vit ici et non dans zod,
+    // parce qu'elle depend de la depense : selon que celle-ci porte deja un
+    // compte approuve ou non, ce sont deux sources differentes qu'il faut
+    // verifier. Le message distingue les deux cas, sinon le tresorier cherche
+    // dans un formulaire ou il n'y a rien a corriger.
+    if (!especes && (!compte.bankName || !compte.bankReference)) {
+      const err = new Error(
+        depenseSpecifieCompte
+          ? "Le compte approuvé avec cette dépense est incomplet (banque et numéro de compte requis). Corrigez la dépense avant d'émettre l'ordre."
+          : "Banque et numéro de compte sont requis pour ce mode de paiement.",
+      );
+      err.status = 400;
+      throw err;
+    }
     const created = await tx.paymentOrder.create({
       data: {
         expenseId: expense.id,
@@ -215,8 +246,12 @@ export async function cancelPaymentOrder({ user, id, reason, req }) {
       throw err;
     }
 
-    await tx.paymentOrder.update({
-      where: { id },
+    // updateMany conditionne sur les statuts annulables : entre la lecture
+    // ci-dessus et cette ecriture, un POST /:id/execute concurrent pouvait
+    // basculer l'ordre en EXECUTE. L'annulation l'ecrasait alors, et la depense
+    // redevenait decaissable alors que l'argent etait sorti.
+    const { count } = await tx.paymentOrder.updateMany({
+      where: { id, status: { in: ["CREE", "IMPRIME"] } },
       data: {
         status: "ANNULE",
         // Libere la contrainte : une reemission redevient possible.
@@ -226,6 +261,14 @@ export async function cancelPaymentOrder({ user, id, reason, req }) {
         cancellationReason: reason,
       },
     });
+
+    if (count === 0) {
+      const err = new Error(
+        "Cet ordre vient de changer d'état : il ne peut plus être annulé.",
+      );
+      err.status = 409;
+      throw err;
+    }
 
     // La depense redevient decaissable, elle ne repart pas a l'approbation :
     // la decision du Super Admin tient toujours, c'est l'execution qui a rate.
@@ -305,11 +348,20 @@ export async function markPaymentOrderExecuted({ user, id, executedAt, req }) {
   });
 }
 
-export async function listPaymentOrders() {
+export async function listPaymentOrders({ user } = {}) {
+  // Le perimetre manquait : la route est ouverte a CAN_READ_MONEY, donc au
+  // GESTIONNAIRE_DEPENSE, qui lisait TOUS les ordres et toutes les coordonnees
+  // bancaires de tous les beneficiaires. Il ne voit desormais que les ordres
+  // adosses a ses propres depenses.
+  const where =
+    user?.role === "GESTIONNAIRE_DEPENSE"
+      ? { expense: { createdById: user.id } }
+      : {};
+
   // Borne explicite : la requete renvoyait la table entiere, sans take ni
-  // curseur, et la supervision ADMIN vient de s'ajouter comme lectrice. Mieux
-  // vaut une limite visible qu'une page qui ralentit sans qu'on sache pourquoi.
+  // curseur, et la supervision ADMIN vient de s'ajouter comme lectrice.
   return prisma.paymentOrder.findMany({
+    where,
     orderBy: { createdAt: "desc" },
     take: 200,
     include: includeOrder(),

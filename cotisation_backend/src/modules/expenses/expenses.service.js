@@ -367,7 +367,13 @@ export async function rejectExpense({ user, id, reason, req }) {
   await prisma.$transaction(async (tx) => {
     // Une depense APPROUVER reste revocable tant qu'aucun ordre n'a ete emis :
     // passe ce point, c'est une annulation d'ordre qu'il faut, pas un rejet.
-    const ordres = await tx.paymentOrder.count({ where: { expenseId: id } });
+    // Seuls les ordres ACTIFS bloquent. En comptant aussi les annulés, une
+    // dépense dont l'ordre avait été annulé ne pouvait plus JAMAIS être
+    // rejetée : l'approbateur perdait son veto pour toujours, alors que la
+    // trésorerie, elle, gardait la main pour réémettre.
+    const ordres = await tx.paymentOrder.count({
+      where: { expenseId: id, status: { not: "ANNULE" } },
+    });
     if (ordres > 0) {
       const err = new Error(
         "Un ordre de paiement a déjà été émis : annulez-le avant de rejeter la dépense.",
