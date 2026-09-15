@@ -1,0 +1,89 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  backend:
+    name: Backend — tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cotisation_backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: cotisation_backend/package-lock.json
+      # Jamais --omit=dev : la CLI prisma et jiti sont en devOptional.
+      - run: npm ci
+      - run: npx prisma generate
+      - run: npm test
+
+  migrations:
+    name: Migrations sur base vierge
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cotisation_backend
+    # C'est CE job qui aurait attrapé le bug des deux migrations du 3 juin :
+    # un DROP INDEX exécuté avant le CREATE correspondant, invisible sur une
+    # base existante, fatal sur toute base neuve.
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: cotisation_ci
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/cotisation_ci?sslmode=disable
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: cotisation_backend/package-lock.json
+      - run: npm ci
+      - run: npx prisma migrate deploy
+      - run: npx prisma migrate status
+      # Détecte la dérive : un champ ajouté au schéma sans migration.
+      - name: Aucune dérive entre les migrations et le schéma
+        run: |
+          npx prisma migrate diff \
+            --from-migrations prisma/migrations \
+            --to-schema prisma/schema.prisma \
+            --shadow-database-url "$DATABASE_URL" \
+            --exit-code
+
+  frontend:
+    name: Frontend — lint, i18n, build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cotisation
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: cotisation/package-lock.json
+      - run: npm ci
+      - run: npx eslint src
+      # prebuild lance la vérification des clés i18n : un déploiement avec une
+      # clé manquante échoue ici au lieu d'afficher des identifiants techniques
+      # aux utilisateurs.
+      - run: npm run build
+        env:
+          VITE_API_URL: https://ci.example.test
