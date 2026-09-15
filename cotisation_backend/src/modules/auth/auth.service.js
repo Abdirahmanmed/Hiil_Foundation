@@ -6,6 +6,7 @@ import { signAccessToken, signRefreshToken } from "../../utils/tokens.js";
 import { auditLog } from "../../utils/audit.js";
 import { invalidateUserCache } from "../../middlewares/auth.js";
 import { sendPasswordResetMail } from "../../services/mail.service.js";
+import { toStorageKey } from "../../utils/upload.js";
 import { performance } from "node:perf_hooks";
 
 export async function createUser({ data, files, req }) {
@@ -62,22 +63,22 @@ export async function createUser({ data, files, req }) {
       commune: isAssociation ? data.commune : null,
 
       associationStatusDocPath: isAssociation
-        ? associationStatusDoc.path
+        ? toStorageKey(associationStatusDoc)
         : null,
       representativeType: isAssociation ? data.representativeType : null,
       representativeName: isAssociation ? data.representativeName : null,
       representativePhone: isAssociation ? data.representativePhone : null,
       representativeAddress: isAssociation ? data.representativeAddress : null,
       representativeEmail: isAssociation ? data.representativeEmail : null,
-      presidentIdDocPath: isAssociation ? presidentIdDoc.path : null,
+      presidentIdDocPath: isAssociation ? toStorageKey(presidentIdDoc) : null,
 
       passwordHash,
       status: "PENDING_VERIFICATION",
       role: "CLIENT",
 
       // fichiers seulement si ADHERENT
-      idDocPath: isAdherent ? idDoc.path : null,
-      selfiePath: isAdherent ? selfie.path : null,
+      idDocPath: isAdherent ? toStorageKey(idDoc) : null,
+      selfiePath: isAdherent ? toStorageKey(selfie) : null,
     },
     select: {
       id: true,

@@ -26,6 +26,7 @@ import {
 } from "../api/admin.api";
 
 import { getExpenseTrail } from "../api/expenses.api";
+import { http } from "../api/http";
 
 import { SimpleBarChart, SimplePieChart } from "../components/DashboardCharts";
 import DashboardTabs from "../components/DashboardTabs";
@@ -347,6 +348,31 @@ export default function AdminDashboard() {
 
   const canCreateAdminUser = user?.role === "SUPER_ADMIN";
   const createUserRoleOptions = canCreateAdminUser ? ROLE_OPTIONS : ADMIN_ROLE_OPTIONS;
+
+  /**
+   * Ouvre un document dans un onglet. La route est authentifiée : on ne peut
+   * pas se contenter d'un href, il faut porter le jeton. Le blob est révoqué
+   * pour ne pas laisser la pièce d'identité en mémoire du navigateur.
+   */
+  async function openKycDocument(userId, docType) {
+    try {
+      const res = await http.get(`/api/kyc/${userId}/${docType}`, {
+        responseType: "blob",
+      });
+      const url = URL.createObjectURL(res.data);
+      window.open(url, "_blank", "noopener");
+      setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    } catch (err) {
+      const message =
+        err?.response?.status === 410
+          ? t(
+              "admin.kyc.gone",
+              "Le fichier n'est plus sur le serveur. Demandez à l'adhérent de le redéposer.",
+            )
+          : t("error_generic");
+      toast.error(message);
+    }
+  }
 
   function updateCreateUserForm(field, value) {
     setCreateUserForm((current) => ({ ...current, [field]: value }));
@@ -1279,6 +1305,38 @@ export default function AdminDashboard() {
                       </div>
                     </div>
                   ) : null}
+
+                  {/* Les documents étaient collectés puis jamais relus : pour un
+                      adhérent, l'administration ne voyait même pas un nom de
+                      fichier. Chaque consultation est journalisée côté serveur. */}
+                  <div className="rounded-2xl border border-emerald-100 bg-white p-4">
+                    <div className="text-xs font-black text-slate-600">
+                      {t("admin.kyc.title", "Pièces justificatives")}
+                    </div>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {[
+                        ["ID_DOC", u.idDocPath, t("admin.kyc.idDoc", "Pièce d'identité")],
+                        ["SELFIE", u.selfiePath, t("admin.kyc.selfie", "Selfie")],
+                        ["PRESIDENT_ID_DOC", u.presidentIdDocPath, t("admin.kyc.president", "Pièce du président")],
+                        ["ASSOCIATION_STATUS_DOC", u.associationStatusDocPath, t("admin.kyc.statuts", "Statuts")],
+                      ]
+                        .filter(([, chemin]) => Boolean(chemin))
+                        .map(([docType, , libelle]) => (
+                          <button
+                            key={docType}
+                            onClick={() => openKycDocument(u.id, docType)}
+                            className="rounded-xl border border-emerald-200 bg-white px-3 py-2 text-xs font-black text-slate-700 hover:bg-emerald-50"
+                          >
+                            {libelle}
+                          </button>
+                        ))}
+                      {![u.idDocPath, u.selfiePath, u.presidentIdDocPath, u.associationStatusDocPath].some(Boolean) ? (
+                        <span className="text-xs text-slate-500">
+                          {t("admin.kyc.none", "Aucun document déposé.")}
+                        </span>
+                      ) : null}
+                    </div>
+                  </div>
 
                   <div className="rounded-2xl border border-emerald-100 bg-emerald-50/40 p-4">
                     <div className="flex items-center justify-between">

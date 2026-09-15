@@ -2,7 +2,54 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import crypto from "crypto";
+import { fileURLToPath } from "node:url";
 import { env } from "../config/env.js";
+
+const BACKEND_ROOT = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "..",
+  "..",
+);
+
+/**
+ * Racine du stockage des documents.
+ *
+ * Les chemins etaient relatifs, donc resolus contre process.cwd() : cela ne
+ * marchait que parce qu'on lance le serveur depuis cotisation_backend/. Un
+ * superviseur qui redemarre le process avec un autre repertoire courant
+ * envoyait les pieces d'identite ailleurs, sans erreur visible.
+ *
+ * UPLOAD_ROOT permet en prime de sortir le stockage du checkout git, donc de
+ * le faire pointer vers un disque persistant.
+ */
+export const UPLOAD_ROOT = path.resolve(process.env.UPLOAD_ROOT || BACKEND_ROOT);
+
+/**
+ * Cle relative normalisee, stockee en base a la place du chemin absolu. Sans
+ * elle, changer UPLOAD_ROOT rendrait faux tous les chemins deja enregistres,
+ * et les antislashs Windows se retrouvaient en base.
+ */
+export const toStorageKey = (file) =>
+  path.relative(UPLOAD_ROOT, file.path).split(path.sep).join("/");
+
+/**
+ * Resout une cle de stockage en chemin absolu, en refusant toute sortie de la
+ * racine : sans ce controle, une cle contenant « ../ » lirait n'importe quel
+ * fichier du serveur.
+ */
+export function resolveStorageKey(key) {
+  const normalisee = String(key || "").split("\\").join("/");
+  const absolu = path.resolve(UPLOAD_ROOT, normalisee);
+  const racine = path.resolve(UPLOAD_ROOT) + path.sep;
+
+  if (!absolu.startsWith(racine)) {
+    const err = new Error("Chemin de document invalide");
+    err.status = 400;
+    throw err;
+  }
+
+  return absolu;
+}
 
 const ALLOWED = new Set(["image/jpeg", "image/png", "application/pdf"]);
 const ALLOWED_EXTENSIONS = new Set([".jpg", ".jpeg", ".png", ".pdf"]);
@@ -17,17 +64,25 @@ function ensureDir(dir) {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 }
 
+// Les QUATRE documents vont dans private_uploads.
+//
+// Avant, `selfie` et `idDoc` tombaient dans `uploads/` par la branche par
+// defaut : la piece d'identite d'un adherent etait donc MOINS protegee que
+// celle d'un president d'association, sans aucune raison. Et « uploads »
+// porte un nom qui invite a le servir en statique un jour de fatigue.
+const SUBDIR_BY_FIELD = {
+  selfie: "private_uploads/selfies",
+  idDoc: "private_uploads/id_docs",
+  presidentIdDoc: "private_uploads/president_id_docs",
+  associationStatusDoc: "private_uploads/association_status_docs",
+};
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    // fieldname : "idDoc" | "selfie" | "presidentIdDoc" | "associationStatusDoc"
-    const dir =
-      file.fieldname === "selfie"
-        ? "uploads/selfies"
-        : file.fieldname === "presidentIdDoc"
-          ? "private_uploads/president_id_docs"
-          : file.fieldname === "associationStatusDoc"
-            ? "private_uploads/association_status_docs"
-            : "uploads/id_docs";
+    const dir = path.join(
+      UPLOAD_ROOT,
+      SUBDIR_BY_FIELD[file.fieldname] || "private_uploads/divers",
+    );
     ensureDir(dir);
     cb(null, dir);
   },

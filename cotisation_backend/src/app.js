@@ -18,6 +18,7 @@ import paymentOrderRoutes from "./modules/payment-orders/paymentOrders.routes.js
 import treasuryRoutes from "./modules/treasury/treasury.routes.js";
 import cacPaymentRoutes from "./modules/cac-payments/cacPayments.routes.js";
 import publicFormRoutes from "./modules/public-forms/publicForms.routes.js";
+import kycRoutes from "./modules/kyc/kyc.routes.js";
 
 export const app = express();
 
@@ -57,6 +58,7 @@ app.use("/api/payment-orders", paymentOrderRoutes);
 app.use("/api/treasury", treasuryRoutes);
 app.use("/api/cac-payments", cacPaymentRoutes);
 app.use("/api/public", publicFormRoutes);
+app.use("/api/kyc", kycRoutes);
 
 // error handler (TOUJOURS EN DERNIER)
 app.use(errorHandler);
