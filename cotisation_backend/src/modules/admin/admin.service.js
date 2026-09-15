@@ -166,6 +166,31 @@ export async function getDashboardStats({ role } = {}) {
     }),
   ]);
 
+  // « Engagé » et « encaissé » sont deux chiffres différents, et les confondre
+  // était la cause racine du tableau de bord ambigu : un simple clic de
+  // consentement faisait passer une cotisation en ACTIVE, et ce statut était
+  // additionné comme s'il s'agissait d'une recette.
+  const [encaisseTotal, encaisseMois, encaisseParDevise, enAttenteEncaissement] =
+    await Promise.all([
+      prisma.contribution.aggregate({
+        where: { status: "CONFIRMED" },
+        _sum: { amount: true },
+        _count: true,
+      }),
+      prisma.contribution.aggregate({
+        where: { status: "CONFIRMED", paidAt: { gte: monthStart } },
+        _sum: { amount: true },
+        _count: true,
+      }),
+      prisma.contribution.groupBy({
+        by: ["currency"],
+        where: { status: "CONFIRMED" },
+        _sum: { amount: true },
+        _count: { currency: true },
+      }),
+      prisma.contribution.count({ where: { status: { in: ["PENDING", "TIMEOUT"] } } }),
+    ]);
+
   const stats = {
     totalUsers,
     activeUsers,
@@ -178,9 +203,26 @@ export async function getDashboardStats({ role } = {}) {
     activeSubscriptions,
     monthlySubscriptionsCount,
     annualSubscriptionsCount,
+    // Ces trois-là sont des ENGAGEMENTS : ce que les membres se sont engagés à
+    // verser. Le nom est conservé pour ne rien casser côté front, mais ce ne
+    // sont pas des recettes.
     monthlyCotisation: monthlyCotisation._sum.amount || 0,
     annualCotisation: annualCotisation._sum.amount || 0,
     totalCotisation: totalCotisation._sum.amount || 0,
+
+    // Ceux-là sont de l'argent réellement reçu.
+    encaisseTotal: encaisseTotal._sum.amount || 0,
+    encaisseCount: encaisseTotal._count,
+    encaisseMois: encaisseMois._sum.amount || 0,
+    encaisseMoisCount: encaisseMois._count,
+    encaisseParDevise: encaisseParDevise.map((r) => ({
+      currency: r.currency,
+      count: r._count.currency,
+      amount: r._sum.amount || 0,
+    })),
+    // Encaissements ouverts mais non confirmés : un TIMEOUT peut cacher un
+    // paiement abouti côté banque, il attend une réconciliation.
+    encaissementsEnAttente: enAttenteEncaissement,
     latestUsers,
     latestSubscriptions,
   };

@@ -441,7 +441,29 @@ export default function AdminDashboard() {
                 <StatCard label={t("admin_treasury_users_count")} value={stats?.treasuryUsersCount} />
                 <StatCard label={t("admin_monthly_contributions")} value={stats?.monthlySubscriptionsCount} hint={stats?.monthlyCotisation} />
                 <StatCard label={t("admin_annual_contributions")} value={stats?.annualSubscriptionsCount} hint={stats?.annualCotisation} />
-                <StatCard label={t("admin_total_contributions_amount")} value={stats?.totalCotisation} />
+                {/* « Engagé » et « encaissé » côte à côte, et nommés. Un seul
+                    chiffre laissait croire que les engagements étaient des
+                    recettes : un clic de consentement suffisait à le gonfler. */}
+                <StatCard
+                  label={t("admin.pledged", "Engagé (mandats signés)")}
+                  value={fmtAmount(stats?.totalCotisation)}
+                />
+                <StatCard
+                  label={t("admin.collected", "Encaissé (argent reçu)")}
+                  value={fmtAmount(stats?.encaisseTotal)}
+                  hint={
+                    stats?.encaisseCount !== undefined
+                      ? `${stats.encaisseCount} ${t("admin.payments", "versements")}`
+                      : undefined
+                  }
+                />
+                {stats?.encaissementsEnAttente ? (
+                  <StatCard
+                    label={t("admin.pendingPayments", "Encaissements en attente")}
+                    value={stats.encaissementsEnAttente}
+                    hint={t("admin.pendingPaymentsHint", "à réconcilier avec la banque")}
+                  />
+                ) : null}
               </div>
 
               <div className="mt-6 grid gap-4 md:grid-cols-2">
