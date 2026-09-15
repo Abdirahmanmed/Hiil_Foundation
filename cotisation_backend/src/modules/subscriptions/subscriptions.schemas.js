@@ -101,3 +101,14 @@ export const consentSchema = z.object({
     message: "Le consentement doit être explicitement accepté",
   }),
 });
+
+// Seuls le montant et la periodicite sont modifiables : changer de canal de
+// paiement revient a signer un autre mandat, avec un autre consentement.
+export const updateSubscriptionSchema = z
+  .object({
+    amount: z.coerce.number().int().positive().optional(),
+    frequency: z.enum(["MONTHLY", "QUARTERLY", "SEMIANNUAL", "ANNUAL"]).optional(),
+  })
+  .refine((d) => d.amount !== undefined || d.frequency !== undefined, {
+    message: "Indiquez au moins un montant ou une périodicité",
+  });

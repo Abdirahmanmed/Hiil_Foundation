@@ -25,10 +25,15 @@ déploies sans la poser, le service redémarre en boucle.
 | Variable | Obligatoire | Valeur |
 |---|---|---|
 | `CAC_PAYMENT_MODE` | **oui, en production** | `mock` tant que le rail CAC n'est pas en service |
-| `APP_PUBLIC_URL` | non | URL publique du front, pour les liens d'invitation. Défaut : `CORS_ORIGIN` |
+| `APP_PUBLIC_URL` | non | URL publique du front, pour les liens d'invitation et de réinitialisation. Défaut : `CORS_ORIGIN` |
 | `CONTACT_EMAIL` | non | destinataire interne des candidatures. Défaut : `EMAIL_FROM` |
+| `UPLOAD_ROOT` | non, **mais** | racine du stockage des pièces d'identité. Sur un système de fichiers éphémère, elles disparaissent à chaque redéploiement — faire pointer vers un disque persistant |
+| `PRISMA_LOG_QUERIES` | non | `true` pour journaliser le SQL. Écrit les paramètres en clair : jamais en production |
 
 En mode `live`, les six variables `CAC_*` sont exigées au démarrage.
+
+Le fichier [`cotisation_backend/.env.example`](cotisation_backend/.env.example) liste toutes les
+variables, avec pour chacune si elle est requise et ce qui se passe sans elle.
 
 ---
 
@@ -100,6 +105,30 @@ npx prisma migrate status
 ```
 
 Attendu : `Database schema is up to date!`, sans mention de migration absente localement.
+
+---
+
+## 3 bis. Ce que la reprise de données va changer sous tes yeux
+
+Le backfill des encaissements (`20260914110000_contribution_backfill`) reprend **une seule ligne** :
+la cotisation de 6 000 DJF marquée payée. Sa référence est `MOCK-CAC-1789389163` — c'est un test en
+mode mock, pas de l'argent reçu. Elle est reprise pour ne pas perdre la trace ; supprime-la si elle
+fausse tes chiffres :
+
+```sql
+DELETE FROM "Contribution" WHERE reference LIKE 'MOCK-%';
+```
+
+Le tableau de bord affiche maintenant **« Engagé »** et **« Encaissé »** séparément. Le second sera
+beaucoup plus bas que le chiffre unique d'avant, et c'est normal : l'ancien additionnait des mandats
+signés comme s'il s'agissait de recettes. **Préviens le président avant qu'il ne le découvre.**
+
+La contrainte de cohérence des montants est posée en `NOT VALID`, donc sans blocage au déploiement.
+Vérifié : les 3 dépenses existantes la respectent déjà, tu peux la valider quand tu veux :
+
+```sql
+ALTER TABLE "Expense" VALIDATE CONSTRAINT "Expense_amount_consistent";
+```
 
 ---
 

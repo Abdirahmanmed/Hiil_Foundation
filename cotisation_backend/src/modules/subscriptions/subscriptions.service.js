@@ -162,3 +162,89 @@ export const acceptConsent = async (userId, id, accepted, req) => {
 
   return updated;
 };
+
+/**
+ * Modifier son mandat.
+ *
+ * Seuls le montant et la periodicite sont modifiables : changer de canal de
+ * paiement revient a signer un autre mandat, avec un autre consentement. Les
+ * encaissements deja confirmes ne sont pas touches — on ne recrit pas le passe.
+ */
+export const updateMySubscription = async (userId, id, data, req) => {
+  const sub = await prisma.subscription.findFirst({ where: { id, userId } });
+  if (!sub) {
+    const err = new Error("Cotisation introuvable");
+    err.status = 404;
+    throw err;
+  }
+
+  if (sub.status === "CANCELLED") {
+    const err = new Error("Cette cotisation est annulée.");
+    err.status = 409;
+    throw err;
+  }
+
+  const updated = await prisma.subscription.update({
+    where: { id },
+    data: {
+      amount: data.amount ?? sub.amount,
+      frequency: data.frequency ?? sub.frequency,
+    },
+  });
+
+  await prisma.auditLog.create({
+    data: {
+      userId,
+      action: "SUBSCRIPTION_UPDATED",
+      entity: "Subscription",
+      entityId: id,
+      // Avant / après : sans cela, personne ne peut dire six mois plus tard
+      // que le montant a changé, ni dans quel sens.
+      meta: {
+        from: { amount: sub.amount, frequency: sub.frequency },
+        to: { amount: updated.amount, frequency: updated.frequency },
+      },
+      ip: getIp(req),
+      userAgent: req.headers["user-agent"] || null,
+    },
+  });
+
+  return updated;
+};
+
+/**
+ * Annuler son mandat.
+ *
+ * Le mandat s'arrete, les encaissements passes restent : ils sont de l'argent
+ * reellement recu, pas une intention. C'est aussi ce qui libere le membre pour
+ * en signer un nouveau, le garde-fou anti-doublon n'admettant qu'un mandat
+ * ouvert a la fois.
+ */
+export const cancelMySubscription = async (userId, id, req) => {
+  const { count } = await prisma.subscription.updateMany({
+    where: { id, userId, status: { in: ["DRAFT", "PENDING_CONSENT", "ACTIVE", "ACTIVE_MANUAL"] } },
+    data: { status: "CANCELLED", nextDueDate: null },
+  });
+
+  if (count === 0) {
+    const existe = await prisma.subscription.findFirst({ where: { id, userId } });
+    const err = new Error(
+      existe ? "Cette cotisation est déjà annulée." : "Cotisation introuvable",
+    );
+    err.status = existe ? 409 : 404;
+    throw err;
+  }
+
+  await prisma.auditLog.create({
+    data: {
+      userId,
+      action: "SUBSCRIPTION_CANCELLED",
+      entity: "Subscription",
+      entityId: id,
+      ip: getIp(req),
+      userAgent: req.headers["user-agent"] || null,
+    },
+  });
+
+  return { message: "Cotisation annulée." };
+};

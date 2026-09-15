@@ -4,6 +4,8 @@ import {
   listMySubscriptions,
   getMySubscriptionById,
   acceptConsent,
+  updateSubscription,
+  cancelSubscription,
 } from "./subscriptions.controller.js";
 
 import { auth } from "../../middlewares/auth.js";
@@ -21,5 +23,10 @@ router.post("/", createSubscription);
 router.get("/", listMySubscriptions);
 router.get("/:id", getMySubscriptionById);
 router.post("/:id/consent", acceptConsent);
+
+// Un membre doit pouvoir corriger son engagement sans passer par le support,
+// et l'arreter sans que ses versements passes disparaissent.
+router.patch("/:id", updateSubscription);
+router.post("/:id/cancel", cancelSubscription);
 
 export default router;
