@@ -78,20 +78,54 @@ const cacPaymentMode = resolvePaymentMode();
  * production, d'ou le refus de demarrer plutot que la perte differee.
  */
 function resolveDocumentStorage() {
-  const parTrois = Boolean(
-    process.env.CLOUDINARY_CLOUD_NAME &&
+  const mode = process.env.STORAGE_MODE;
+
+  // Le tableau de bord Cloudinary donne CLOUDINARY_URL en une seule chaine ;
+  // les trois variables separees font la meme chose. On accepte les deux.
+  const identifiants = Boolean(
+    (process.env.CLOUDINARY_CLOUD_NAME &&
       process.env.CLOUDINARY_API_KEY &&
-      process.env.CLOUDINARY_API_SECRET,
+      process.env.CLOUDINARY_API_SECRET) ||
+      process.env.CLOUDINARY_URL,
   );
 
-  // Le tableau de bord Cloudinary donne CLOUDINARY_URL en une seule chaine :
-  // c'est la forme la plus simple a coller dans Render, on l'accepte telle quelle.
-  if (parTrois || process.env.CLOUDINARY_URL) return "cloudinary";
+  if (mode && !["cloudinary", "local"].includes(mode)) {
+    throw new Error(
+      "❌ Variable d’environnement invalide : STORAGE_MODE doit être cloudinary ou local",
+    );
+  }
+
+  // STORAGE_MODE=cloudinary sans identifiants doit ECHOUER, jamais retomber sur
+  // le disque. Une retombee silencieuse est precisement le scenario a eviter :
+  // le service demarre, les inscriptions passent, et les pieces d'identite sont
+  // perdues au redeploiement suivant sans qu'aucune erreur n'ait ete levee.
+  if (mode === "cloudinary") {
+    if (!identifiants) {
+      throw new Error(
+        "❌ STORAGE_MODE=cloudinary mais aucun identifiant : renseigne CLOUDINARY_URL, " +
+          "ou CLOUDINARY_CLOUD_NAME + CLOUDINARY_API_KEY + CLOUDINARY_API_SECRET.",
+      );
+    }
+    return "cloudinary";
+  }
+
+  if (mode === "local") {
+    if (nodeEnv === "production") {
+      throw new Error(
+        "❌ STORAGE_MODE=local est interdit en production : le disque est éphémère, " +
+          "les pièces d'identité disparaîtraient au prochain déploiement.",
+      );
+    }
+    return "local";
+  }
+
+  // Sans STORAGE_MODE, on deduit — et on refuse de deduire « local » en production.
+  if (identifiants) return "cloudinary";
 
   if (nodeEnv === "production") {
     throw new Error(
-      "❌ Stockage des documents non configuré : renseigne CLOUDINARY_URL, " +
-        "ou CLOUDINARY_CLOUD_NAME + CLOUDINARY_API_KEY + CLOUDINARY_API_SECRET. " +
+      "❌ Stockage des documents non configuré : pose STORAGE_MODE=cloudinary et " +
+        "CLOUDINARY_URL, ou CLOUDINARY_CLOUD_NAME + CLOUDINARY_API_KEY + CLOUDINARY_API_SECRET. " +
         "Sans Cloudinary, les pièces d'identité disparaissent au prochain déploiement.",
     );
   }

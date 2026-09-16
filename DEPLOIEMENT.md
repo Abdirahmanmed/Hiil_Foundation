@@ -27,7 +27,9 @@ déploies sans la poser, le service redémarre en boucle.
 | `CAC_PAYMENT_MODE` | **oui, en production** | `mock` tant que le rail CAC n'est pas en service |
 | `APP_PUBLIC_URL` | non | URL publique du front, pour les liens d'invitation et de réinitialisation. Défaut : `CORS_ORIGIN` |
 | `CONTACT_EMAIL` | non | destinataire interne des candidatures. Défaut : `EMAIL_FROM` |
-| `CLOUDINARY_URL` | **oui, en production** | chaîne unique du tableau de bord Cloudinary (*Account Details → API environment variable*). Sans elle, l'API refuse de démarrer |
+| `STORAGE_MODE` | **oui, en production** | `cloudinary`. La valeur `local` est refusée en production, et `cloudinary` sans identifiants fait échouer le démarrage au lieu de retomber sur le disque |
+| `CLOUDINARY_CLOUD_NAME` + `CLOUDINARY_API_KEY` + `CLOUDINARY_API_SECRET` | **oui, en production** | les trois, ou `CLOUDINARY_URL` à la place |
+| `CLOUDINARY_URL` | au choix | la même chose en une chaîne, telle que donnée par *Dashboard → Account Details → API environment variable* |
 | `UPLOAD_ROOT` | non | aire de transit locale avant l'envoi chez Cloudinary. Ne sert plus de stockage durable |
 | `PRISMA_LOG_QUERIES` | non | `true` pour journaliser le SQL. Écrit les paramètres en clair : jamais en production |
 
@@ -35,6 +37,38 @@ En mode `live`, les six variables `CAC_*` sont exigées au démarrage.
 
 Le fichier [`cotisation_backend/.env.example`](cotisation_backend/.env.example) liste toutes les
 variables, avec pour chacune si elle est requise et ce qui se passe sans elle.
+
+---
+
+## 1 bis. Créer les services depuis le blueprint
+
+[`render.yaml`](render.yaml) décrit les deux services — l'API en conteneur Docker, le front en site
+statique. Sur Render : *New → Blueprint*, choisir le dépôt, Render lit le fichier et demande les
+variables marquées `sync: false`. **Aucun secret n'est écrit dans ce fichier**, c'est ce qui permet
+de le versionner.
+
+Deux points qui ne sont pas des détails :
+
+- **`autoDeploy` est à `false` sur les deux services.** Le backend n'applique pas les migrations
+  tout seul ; déployer du code en avance sur sa base fait échouer la création d'un compte interne.
+  L'ordre migrations → API → front doit rester une décision, pas la conséquence d'un `git push`.
+- **`OTP_PEPPER` ne se régénère pas** sur une base existante : il hache les secrets OTP, les jetons
+  d'invitation et ceux de réinitialisation. Le changer les invalide tous d'un coup. Reprends la
+  valeur du service actuel.
+
+L'image se construit avec [`cotisation_backend/Dockerfile`](cotisation_backend/Dockerfile) — Debian
+slim et non alpine, parce qu'`argon2` est un module natif dont le binaire préconstruit n'existe pas
+toujours pour musl. Le job CI `Image Docker` construit cette image et vérifie que le conteneur
+répond sur `/api/health` : un Dockerfile cassé échoue là, pas au déploiement.
+
+Pour rejouer les migrations sur une base vierge avant de toucher à la production :
+
+```bash
+docker compose up -d db
+cd cotisation_backend
+DATABASE_URL='postgresql://hiil:hiil@localhost:5433/hiil_dev?sslmode=disable' \
+  npx prisma migrate deploy
+```
 
 ---
 
@@ -178,9 +212,20 @@ il s'arrête avec un message plutôt que de retirer à l'Ougas Admin son pouvoir
 
 ## 4 ter. Cloudinary pour les pièces d'identité
 
-`CLOUDINARY_URL` est désormais **obligatoire en production** : sans elle l'API refuse de démarrer,
-volontairement. Le disque de Render est éphémère — les documents déposés y disparaissaient au
-redéploiement suivant, en laissant en base des lignes pointant vers rien.
+`STORAGE_MODE=cloudinary` et ses identifiants sont **obligatoires en production** : sans eux l'API
+refuse de démarrer, volontairement. Le disque de Render est éphémère — les documents déposés y
+disparaissaient au redéploiement suivant, en laissant en base des lignes pointant vers rien.
+
+```bash
+STORAGE_MODE=cloudinary
+CLOUDINARY_CLOUD_NAME=…
+CLOUDINARY_API_KEY=…
+CLOUDINARY_API_SECRET=…
+```
+
+`STORAGE_MODE=cloudinary` avec un identifiant mal collé **fait échouer le démarrage** au lieu de
+repasser en local. C'est le scénario qu'il faut rendre impossible : une retombée silencieuse laisse
+le service tourner, les inscriptions passer, et les documents se perdre des mois plus tard.
 
 Ce qui change concrètement :
 

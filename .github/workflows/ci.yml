@@ -70,6 +70,54 @@ jobs:
             --to-schema prisma/schema.prisma \
             --exit-code
 
+  image:
+    name: Image Docker — construction et démarrage
+    runs-on: ubuntu-latest
+    # Construit exactement ce que Render construira. Un Dockerfile ne se vérifie
+    # pas en le lisant : argon2 est un module natif, Prisma génère son client à
+    # la construction, et les deux échouent silencieusement jusqu'au déploiement.
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Construire l'image du backend
+        run: >-
+          docker build
+          -f cotisation_backend/Dockerfile
+          -t hiil-api:ci
+          cotisation_backend
+
+      # Une image qui se construit n'est pas une image qui démarre : env.js
+      # refuse le démarrage sur une variable manquante, et c'est précisément ce
+      # comportement qu'on veut voir passer avec une configuration complète.
+      # DATABASE_URL pointe dans le vide à dessein — rien ne se connecte au boot.
+      - name: L'API démarre et répond
+        run: |
+          docker run -d --name hiil-api-ci -p 4000:4000 \
+            -e DATABASE_URL='postgresql://u:p@localhost:5432/db' \
+            -e JWT_ACCESS_SECRET="$(openssl rand -base64 36 | tr -d '\n')" \
+            -e JWT_REFRESH_SECRET="$(openssl rand -base64 36 | tr -d '\n')" \
+            -e OTP_PEPPER="$(openssl rand -base64 24 | tr -d '\n')" \
+            -e CAC_PAYMENT_MODE=mock \
+            -e STORAGE_MODE=cloudinary \
+            -e CLOUDINARY_URL='cloudinary://123456789012345:abcdefghijklmnopqrstuvwxyz0@ci-demo' \
+            -e BREVO_API_KEY=ci \
+            -e EMAIL_FROM='no-reply@ci.test' \
+            hiil-api:ci
+          for _ in $(seq 1 30); do
+            if curl -sf http://localhost:4000/api/health > /dev/null; then
+              echo "✅ /api/health répond"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "❌ l'API n'a pas répondu en 60 s"
+          docker logs hiil-api-ci
+          exit 1
+
+      - name: Arrêter le conteneur
+        if: always()
+        run: docker rm -f hiil-api-ci || true
+
   frontend:
     name: Frontend — lint, i18n, build
     runs-on: ubuntu-latest

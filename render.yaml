@@ -1,0 +1,127 @@
+# Blueprint Render — https://render.com/docs/blueprint-spec
+#
+# Render lit ce fichier à la racine du dépôt et crée les deux services d'un
+# coup. Les valeurs marquées `sync: false` ne sont JAMAIS écrites ici : Render
+# les demande à la création et les garde de son côté. C'est la règle qui permet
+# de versionner ce fichier sans versionner un seul secret.
+#
+# Ordre de première mise en service :
+#   1. créer les services depuis ce blueprint, renseigner les variables ;
+#   2. appliquer les migrations à la main (voir DEPLOIEMENT.md) ;
+#   3. lancer le seed pour créer le compte d'amorçage ;
+#   4. seulement ensuite, déployer.
+
+services:
+  # ---------------------------------------------------------------- API ----
+  - type: web
+    name: hiil-foundation-api
+    runtime: docker
+    plan: free
+    region: frankfurt
+
+    # Les deux chemins sont relatifs à la racine du dépôt. Le Dockerfile pose
+    # lui-même son WORKDIR, il n'y a donc pas de rootDir à déclarer.
+    dockerfilePath: cotisation_backend/Dockerfile
+    dockerContext: cotisation_backend
+
+    healthCheckPath: /api/health
+
+    # Déploiement manuel, volontairement.
+    #
+    # Le backend n'applique pas les migrations tout seul : déployer du code en
+    # avance sur sa base fait échouer la création d'un compte interne sur
+    # « The column inviteTokenHash does not exist ». L'ordre migrations → API →
+    # front doit rester une décision, pas une conséquence d'un git push.
+    autoDeploy: false
+
+    envVars:
+      # PORT n'est pas déclaré : Render l'injecte, et src/config/env.js le lit.
+      - key: NODE_ENV
+        value: production
+
+      # Sans ça, le mode « mock » s'appliquerait par omission — il accepte l'OTP
+      # constant 123456. L'API refuse de démarrer si la variable est absente.
+      # Passer à « live » exige les six variables CAC_*, elles aussi au démarrage.
+      - key: CAC_PAYMENT_MODE
+        value: mock
+
+      # « local » est refusé en production, et « cloudinary » sans identifiants
+      # fait échouer le démarrage plutôt que de retomber sur le disque.
+      - key: STORAGE_MODE
+        value: cloudinary
+
+      - key: EMAIL_FROM_NAME
+        value: Hiil Foundation
+
+      # --- à renseigner dans l'interface Render ---
+      - key: DATABASE_URL
+        sync: false
+
+      # Générer chacun avec :
+      #   node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"
+      - key: JWT_ACCESS_SECRET
+        sync: false
+      - key: JWT_REFRESH_SECRET
+        sync: false
+
+      # Ne le change JAMAIS sur une base existante : il hache les secrets OTP,
+      # les jetons d'invitation et ceux de réinitialisation. Le modifier les
+      # invalide tous d'un coup, sans message d'erreur exploitable.
+      - key: OTP_PEPPER
+        sync: false
+
+      # Origine exacte du front, avec https:// et sans slash final.
+      - key: CORS_ORIGIN
+        sync: false
+      # Base des liens d'invitation et de réinitialisation. Défaut : CORS_ORIGIN.
+      - key: APP_PUBLIC_URL
+        sync: false
+
+      - key: BREVO_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+
+  # --------------------------------------------------------------- FRONT ----
+  - type: web
+    name: hiil-foundation-web
+    runtime: static
+    rootDir: cotisation
+
+    # `npm run build` déclenche le prebuild check-i18n : un déploiement avec une
+    # clé de traduction manquante échoue ici, au lieu d'afficher un identifiant
+    # technique à l'utilisateur.
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+
+    autoDeploy: false
+
+    envVars:
+      # URL publique de l'API ci-dessus, avec https:// et sans slash final.
+      - key: VITE_API_URL
+        sync: false
+
+    # Application à une seule page : toute URL inconnue doit rendre index.html,
+    # sinon un rechargement sur /ougas-admin renvoie un 404 du serveur statique.
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
+    headers:
+      - path: /*
+        name: X-Frame-Options
+        value: DENY
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: Referrer-Policy
+        value: strict-origin-when-cross-origin

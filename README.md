@@ -66,11 +66,20 @@ npm ci
 npm run dev
 ```
 
+Avec Docker, pour obtenir un Postgres jetable — le seul moyen de rejouer les migrations sur une base
+vierge avant de toucher à la production :
+
+```bash
+docker compose up -d db       # Postgres 16 sur le port 5433
+docker compose up api         # l'API dans le conteneur que Render construira
+```
+
 Tests : `npm test` dans `cotisation_backend`. Les tests sans base tournent toujours ; ceux qui
 touchent la base attendent `TEST_DATABASE_URL`, dont la valeur **doit contenir « test »** — le
 garde-fou refuse de démarrer autrement.
 
-Le déploiement a sa propre procédure : [DEPLOIEMENT.md](DEPLOIEMENT.md).
+Le déploiement a sa propre procédure : [DEPLOIEMENT.md](DEPLOIEMENT.md). Les deux services sont
+décrits dans [render.yaml](render.yaml), qui ne contient aucun secret.
 
 ---
 

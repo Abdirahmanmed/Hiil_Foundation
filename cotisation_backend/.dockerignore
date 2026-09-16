@@ -1,0 +1,28 @@
+# Ce fichier protège deux choses : la taille de l'image, et les secrets.
+#
+# Sans la ligne .env, le fichier d'environnement local part dans l'image et s'y
+# retrouve lisible par quiconque peut la télécharger — clés JWT, poivre OTP,
+# identifiants Cloudinary et chaîne de connexion Neon comprises.
+
+node_modules
+npm-debug.log*
+
+.env
+.env.*
+!.env.example
+
+# Documents d'identité déposés en local. Ils n'ont rien à faire dans une image.
+uploads/
+private_uploads/
+
+# Généré dans l'image par `prisma generate`, jamais copié depuis l'hôte : le
+# client Prisma est compilé pour la plateforme, celui de Windows ne tourne pas
+# sur Debian.
+generated/
+
+tests/
+vitest.config.js
+.git
+.gitignore
+Dockerfile
+.dockerignore
