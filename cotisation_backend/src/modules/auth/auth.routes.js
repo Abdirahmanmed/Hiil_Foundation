@@ -1,5 +1,9 @@
 import { Router } from "express";
-import { upload, validateUploadedFiles } from "../../utils/upload.js";
+import {
+  upload,
+  validateUploadedFiles,
+  storeUploadsRemotely,
+} from "../../utils/upload.js";
 import { auth } from "../../middlewares/auth.js";
 import {
   changePasswordLimiter,
@@ -27,7 +31,10 @@ router.post(
     { name: "presidentIdDoc", maxCount: 1 },
     { name: "associationStatusDoc", maxCount: 1 },
   ]),
+  // L'ordre est le sujet : on ecrit sur le disque, on verifie les magic bytes
+  // sur le fichier reel, ET SEULEMENT ENSUITE on envoie chez Cloudinary.
   validateUploadedFiles,
+  storeUploadsRemotely,
   register,
 );
 

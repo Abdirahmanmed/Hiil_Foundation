@@ -27,7 +27,8 @@ déploies sans la poser, le service redémarre en boucle.
 | `CAC_PAYMENT_MODE` | **oui, en production** | `mock` tant que le rail CAC n'est pas en service |
 | `APP_PUBLIC_URL` | non | URL publique du front, pour les liens d'invitation et de réinitialisation. Défaut : `CORS_ORIGIN` |
 | `CONTACT_EMAIL` | non | destinataire interne des candidatures. Défaut : `EMAIL_FROM` |
-| `UPLOAD_ROOT` | non, **mais** | racine du stockage des pièces d'identité. Sur un système de fichiers éphémère, elles disparaissent à chaque redéploiement — faire pointer vers un disque persistant |
+| `CLOUDINARY_URL` | **oui, en production** | chaîne unique du tableau de bord Cloudinary (*Account Details → API environment variable*). Sans elle, l'API refuse de démarrer |
+| `UPLOAD_ROOT` | non | aire de transit locale avant l'envoi chez Cloudinary. Ne sert plus de stockage durable |
 | `PRISMA_LOG_QUERIES` | non | `true` pour journaliser le SQL. Écrit les paramètres en clair : jamais en production |
 
 En mode `live`, les six variables `CAC_*` sont exigées au démarrage.
@@ -172,6 +173,38 @@ SEED_BOOTSTRAP_EMAIL=... SEED_BOOTSTRAP_PASSWORD=... node scripts/seed.js
 
 Le seed refuse de toucher à un compte existant. Si tu réutilises l'adresse de l'ancien Super Admin,
 il s'arrête avec un message plutôt que de retirer à l'Ougas Admin son pouvoir d'approbation.
+
+---
+
+## 4 ter. Cloudinary pour les pièces d'identité
+
+`CLOUDINARY_URL` est désormais **obligatoire en production** : sans elle l'API refuse de démarrer,
+volontairement. Le disque de Render est éphémère — les documents déposés y disparaissaient au
+redéploiement suivant, en laissant en base des lignes pointant vers rien.
+
+Ce qui change concrètement :
+
+- les documents partent chez Cloudinary **après** la vérification des magic bytes, jamais avant ;
+- ils sont déposés en `type: authenticated` et `resource_type: raw` : pas d'URL publique, pas de
+  transformation, les octets exacts reviennent ;
+- l'URL signée ne quitte jamais le serveur. `GET /api/kyc/:userId/:docType` va chercher le fichier et
+  le retransmet lui-même, ce qui garde le contrôle de rôle et la ligne d'audit à chaque consultation.
+
+**Les documents déposés avant ce déploiement restent lisibles s'ils existent encore** : la clé locale
+est reconnue et servie comme avant. En pratique, sur Render, ils ont déjà disparu — la route répond
+alors `410` avec un message explicite, et il faut demander à l'adhérent de redéposer sa pièce.
+
+À vérifier une fois en ligne, avec une vraie inscription :
+
+```sql
+-- Les nouvelles clés commencent par « cloudinary| », les anciennes non.
+SELECT id, left("idDocPath", 40) AS cle FROM "User"
+WHERE "idDocPath" IS NOT NULL ORDER BY "createdAt" DESC LIMIT 5;
+```
+
+Puis ouvrir le document depuis l'écran Adhérents. S'il s'affiche, la chaîne complète fonctionne :
+dépôt signé, URL signée, retransmission, audit. **C'est le seul point que je n'ai pas pu vérifier
+sans tes identifiants Cloudinary** — la signature d'URL est testée, la livraison réelle non.
 
 ---
 

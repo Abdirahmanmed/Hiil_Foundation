@@ -111,9 +111,11 @@ le trésorier détient deux pouvoirs sur trois.
 obligatoire en production : un oubli de variable transformerait silencieusement l'encaissement réel
 en simulation.
 
-**Les documents d'identité ne sont jamais servis en statique.** Ils passent par `/api/kyc/...`,
-route authentifiée, réservée à la supervision, avec contrôle anti-traversée de chemin, et **chaque
-consultation est journalisée**.
+**Les documents d'identité ne sont jamais servis en statique.** Ils vivent chez Cloudinary en
+`type: authenticated` — donc sans URL publique — et passent par `/api/kyc/...`, route authentifiée,
+réservée à la supervision, avec contrôle anti-traversée de chemin sur les clés locales héritées. Le
+serveur va chercher les octets avec une URL signée qui ne quitte jamais la machine, puis les
+retransmet : **chaque consultation est journalisée**, et aucun lien ne peut circuler par copier-coller.
 
 **L'audit ne doit jamais casser une requête métier, mais il doit crier.** Un `catch` vide arrêtait la
 piste d'audit en silence pendant que tout le monde croyait qu'elle tournait.
@@ -130,5 +132,5 @@ piste d'audit en silence pendant que tout le monde croyait qu'elle tournait.
   que pour amorcer un environnement neuf.
 - **Les codes de retour de CAC Bank** doivent être confirmés par écrit avant tout passage en `live`,
   avec la durée de validité de l'OTP et le comportement sur un `vender_ref` rejoué.
-- **Le stockage des documents** doit pointer vers un disque persistant (`UPLOAD_ROOT`). Sur un
-  système de fichiers éphémère, ils disparaissent à chaque redéploiement.
+- **Les documents déposés avant le passage à Cloudinary** ont disparu avec le disque éphémère de
+  Render. Leur ligne existe toujours en base ; la route répond `410` et il faut les redemander.

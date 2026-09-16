@@ -8,8 +8,14 @@ import {
 } from "./auth.schemas.js";
 import * as authService from "./auth.service.js";
 import { sendEmailOtp } from "../otp/otp.service.js";
+import { discardUploads } from "../../utils/upload.js";
 
 export async function register(req, res, next) {
+  // Sert a distinguer « l'inscription a echoue » de « l'inscription a reussi
+  // mais l'OTP n'est pas parti » : dans le second cas le compte existe, et
+  // supprimer ses documents le rendrait invérifiable pour toujours.
+  let compteCree = false;
+
   try {
     const accepted =
       req.body.acceptedConditions === true ||
@@ -44,6 +50,7 @@ export async function register(req, res, next) {
       files: req.files,
       req,
     });
+    compteCree = true;
 
     await sendEmailOtp({ email: user.email });
 
@@ -71,6 +78,12 @@ export async function register(req, res, next) {
     });
 
   } catch (err) {
+    // Les documents sont deja chez Cloudinary a ce stade : un echec ici — email
+    // deja pris, champ manquant, validation refusee — y laisserait une piece
+    // d'identite qu'aucune ligne en base ne designe, et que personne ne
+    // retrouvera jamais pour la supprimer.
+    if (!compteCree) await discardUploads(req.files);
+
     if (String(err?.code) === "P2002") {
       return res
         .status(409)

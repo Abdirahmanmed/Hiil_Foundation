@@ -69,6 +69,38 @@ function resolvePaymentMode() {
 
 const cacPaymentMode = resolvePaymentMode();
 
+/**
+ * Ou vivent les pieces d'identite.
+ *
+ * Le disque de Render est ephemere : un deploiement efface tous les documents
+ * deja deposes, en laissant en base des lignes qui pointent vers rien. Le defaut
+ * silencieux — « ca marche en local » — est donc exactement le piege a eviter en
+ * production, d'ou le refus de demarrer plutot que la perte differee.
+ */
+function resolveDocumentStorage() {
+  const parTrois = Boolean(
+    process.env.CLOUDINARY_CLOUD_NAME &&
+      process.env.CLOUDINARY_API_KEY &&
+      process.env.CLOUDINARY_API_SECRET,
+  );
+
+  // Le tableau de bord Cloudinary donne CLOUDINARY_URL en une seule chaine :
+  // c'est la forme la plus simple a coller dans Render, on l'accepte telle quelle.
+  if (parTrois || process.env.CLOUDINARY_URL) return "cloudinary";
+
+  if (nodeEnv === "production") {
+    throw new Error(
+      "❌ Stockage des documents non configuré : renseigne CLOUDINARY_URL, " +
+        "ou CLOUDINARY_CLOUD_NAME + CLOUDINARY_API_KEY + CLOUDINARY_API_SECRET. " +
+        "Sans Cloudinary, les pièces d'identité disparaissent au prochain déploiement.",
+    );
+  }
+
+  return "local";
+}
+
+const documentStorage = resolveDocumentStorage();
+
 // En live, on echoue au DEMARRAGE plutot qu'a la premiere requete de paiement :
 // un serveur qui demarre est un serveur qu'on croit fonctionnel.
 if (cacPaymentMode === "live") {
@@ -143,6 +175,10 @@ export const env = {
 
   // Upload
   UPLOAD_MAX_MB: Number(process.env.UPLOAD_MAX_MB || 10),
+
+  // "cloudinary" ou "local". Voir resolveDocumentStorage() ci-dessus : "local"
+  // est impossible en production.
+  DOCUMENT_STORAGE: documentStorage,
 
   // CAC Bank Payment API
   CAC_BASE_URL: process.env.CAC_BASE_URL,

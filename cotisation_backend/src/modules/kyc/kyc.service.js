@@ -4,6 +4,7 @@ import path from "node:path";
 import prisma from "../../config/prisma.js";
 import { auditLog } from "../../utils/audit.js";
 import { resolveStorageKey } from "../../utils/upload.js";
+import { parseStorageKey, signedDocumentUrl } from "../../config/cloudinary.js";
 
 /**
  * Consultation des documents d'identite.
@@ -59,11 +60,62 @@ export async function openKycDocument({ actor, userId, docType, req }) {
     throw err;
   }
 
-  const absolu = resolveStorageKey(user[champ]);
+  const cle = user[champ];
+  const distant = parseStorageKey(cle);
+
+  // Les deux stockages coexistent volontairement : les documents deposes avant
+  // le passage a Cloudinary portent encore une cle locale, et rien ne justifie
+  // de les rendre illisibles pour uniformiser un prefixe.
+  const emplacement = distant
+    ? ouvrirDistant(cle, distant)
+    : ouvrirLocal(cle);
+
+  // Journalise APRES avoir etabli que le document est atteignable, et avant de
+  // renvoyer les octets : consulter la piece d'identite de quelqu'un est un
+  // acte, pas un detail — mais un 404 n'en est pas un.
+  await auditLog({
+    userId: actor.id,
+    action: "KYC_DOCUMENT_VIEWED",
+    entity: "User",
+    entityId: userId,
+    req,
+    meta: { docType, viewerRole: actor.role, storage: distant ? "cloudinary" : "local" },
+  });
+
+  return {
+    ...emplacement,
+    filename: `${docType.toLowerCase()}-${userId}${emplacement.extension}`,
+  };
+}
+
+function typeMime(extension) {
+  return TYPE_MIME[extension] || "application/octet-stream";
+}
+
+function ouvrirDistant(cle, { publicId }) {
+  const url = signedDocumentUrl(cle);
+
+  if (!url) {
+    // Cloudinary n'est pas configure alors que la cle vient de lui : le
+    // document existe, on ne sait simplement pas l'atteindre. Le dire, plutot
+    // que de laisser croire a une disparition.
+    const err = new Error(
+      "Le stockage distant n'est pas configuré sur ce serveur : ce document est inaccessible.",
+    );
+    err.status = 503;
+    throw err;
+  }
+
+  const extension = path.extname(publicId).toLowerCase();
+  return { source: "cloudinary", url, extension, contentType: typeMime(extension) };
+}
+
+function ouvrirLocal(cle) {
+  const absolu = resolveStorageKey(cle);
 
   if (!fs.existsSync(absolu)) {
-    // Cas tres probable sur un hebergement au systeme de fichiers ephemere :
-    // la ligne existe en base, le fichier a disparu au redeploiement.
+    // Cas tres probable pour les documents anterieurs a Cloudinary : la ligne
+    // existe en base, le fichier a disparu au redeploiement suivant.
     const err = new Error(
       "Le fichier n'est plus présent sur le serveur. Demandez à l'adhérent de le redéposer.",
     );
@@ -71,20 +123,8 @@ export async function openKycDocument({ actor, userId, docType, req }) {
     throw err;
   }
 
-  await auditLog({
-    userId: actor.id,
-    action: "KYC_DOCUMENT_VIEWED",
-    entity: "User",
-    entityId: userId,
-    req,
-    meta: { docType, viewerRole: actor.role },
-  });
-
-  return {
-    absolutePath: absolu,
-    contentType: TYPE_MIME[path.extname(absolu).toLowerCase()] || "application/octet-stream",
-    filename: `${docType.toLowerCase()}-${userId}${path.extname(absolu)}`,
-  };
+  const extension = path.extname(absolu).toLowerCase();
+  return { source: "local", absolutePath: absolu, extension, contentType: typeMime(extension) };
 }
 
 /** Ce que le back-office peut savoir des documents d'un membre, sans les ouvrir. */

@@ -4,6 +4,11 @@ import fs from "fs";
 import crypto from "crypto";
 import { fileURLToPath } from "node:url";
 import { env } from "../config/env.js";
+import {
+  destroyDocument,
+  isCloudinaryEnabled,
+  uploadDocument,
+} from "../config/cloudinary.js";
 
 const BACKEND_ROOT = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -25,12 +30,16 @@ const BACKEND_ROOT = path.resolve(
 export const UPLOAD_ROOT = path.resolve(process.env.UPLOAD_ROOT || BACKEND_ROOT);
 
 /**
- * Cle relative normalisee, stockee en base a la place du chemin absolu. Sans
- * elle, changer UPLOAD_ROOT rendrait faux tous les chemins deja enregistres,
- * et les antislashs Windows se retrouvaient en base.
+ * Cle de stockage a ecrire en base.
+ *
+ * Avec Cloudinary, storeUploadsRemotely a deja pose `storageKey` sur le fichier
+ * et le fichier local n'existe plus. Sans Cloudinary — developpement seulement —
+ * on retombe sur une cle relative a UPLOAD_ROOT : les chemins etaient absolus,
+ * donc changer UPLOAD_ROOT rendait faux tout l'existant, et les antislashs
+ * Windows se retrouvaient en base.
  */
 export const toStorageKey = (file) =>
-  path.relative(UPLOAD_ROOT, file.path).split(path.sep).join("/");
+  file.storageKey || path.relative(UPLOAD_ROOT, file.path).split(path.sep).join("/");
 
 /**
  * Resout une cle de stockage en chemin absolu, en refusant toute sortie de la
@@ -142,4 +151,71 @@ export function validateUploadedFiles(req, res, next) {
   } catch {
     return res.status(400).json({ message: "Fichier invalide" });
   }
+}
+
+function supprimerTemporaires(files) {
+  for (const file of files) {
+    try {
+      if (file.path && fs.existsSync(file.path)) fs.unlinkSync(file.path);
+    } catch {
+      // Un temporaire qui resiste n'a pas a faire echouer une inscription
+      // reussie : il sera repris au prochain redemarrage du disque ephemere.
+    }
+  }
+}
+
+/**
+ * Efface tout ce qu'une requete a deja deposé, distant comme local.
+ *
+ * A appeler quand l'enregistrement echoue APRES le televersement : sans cela,
+ * une inscription refusee — email deja pris, champ manquant — laisserait chez
+ * Cloudinary une piece d'identite que plus aucune ligne en base ne designe.
+ * Personne ne la retrouvera pour la supprimer, et elle y restera indefiniment.
+ */
+export async function discardUploads(files) {
+  const liste = Object.values(files || {}).flat();
+  if (!liste.length) return;
+
+  await Promise.allSettled(
+    liste.filter((f) => f.storageKey).map((f) => destroyDocument(f.storageKey)),
+  );
+  supprimerTemporaires(liste);
+}
+
+/**
+ * Deplace les fichiers vers Cloudinary, apres validation et avant le controleur.
+ *
+ * L'ordre compte : le disque local reste l'aire de transit, parce que c'est lui
+ * qui rend possible la verification des magic bytes sur un vrai fichier. Envoyer
+ * d'abord et verifier ensuite reviendrait a stocker chez Cloudinary un fichier
+ * dont on ne sait rien.
+ *
+ * En cas d'echec partiel, les documents deja televerses sont detruits : sinon
+ * une inscription refusee laisserait derriere elle des pieces d'identite
+ * orphelines, que plus aucune ligne en base ne designe et que personne ne
+ * pensera jamais a supprimer.
+ */
+export async function storeUploadsRemotely(req, res, next) {
+  const files = Object.values(req.files || {}).flat();
+
+  if (!files.length || !isCloudinaryEnabled()) return next();
+
+  const deposes = [];
+  try {
+    for (const file of files) {
+      file.storageKey = await uploadDocument(file);
+      deposes.push(file.storageKey);
+    }
+  } catch (err) {
+    console.error("[upload] Cloudinary indisponible:", err?.message);
+    await Promise.allSettled(deposes.map((key) => destroyDocument(key)));
+    supprimerTemporaires(files);
+    return res.status(502).json({
+      message:
+        "Le dépôt des documents a échoué. Réessayez dans un instant — aucune inscription n'a été enregistrée.",
+    });
+  }
+
+  supprimerTemporaires(files);
+  next();
 }
