@@ -9,7 +9,9 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate:deploy": "prisma migrate deploy",
     "prisma:migrate": "prisma migrate dev",
-    "prisma:studio": "prisma studio"
+    "prisma:studio": "prisma studio",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "engines": {
     "node": ">=20"
@@ -21,6 +23,7 @@
     "@prisma/adapter-pg": "^7.3.0",
     "@prisma/client": "^7.3.0",
     "argon2": "^0.44.0",
+    "cloudinary": "^2.11.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "dotenv": "^17.2.4",
@@ -31,11 +34,13 @@
     "morgan": "^1.10.1",
     "multer": "^2.0.2",
     "nodemailer": "^8.0.1",
+    "pg": "8.18.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/node": "^25.2.2",
     "nodemon": "^3.1.11",
-    "prisma": "^7.3.0"
+    "prisma": "^7.3.0",
+    "vitest": "^3.2.7"
   }
 }

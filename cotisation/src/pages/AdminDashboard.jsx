@@ -19,9 +19,14 @@ import {
   patchUserStatus,
   patchUserRole,
   resetUserOtp,
+  resendUserInvite,
   getUserDetails,
+  getOversight,
   getAudit,
 } from "../api/admin.api";
+
+import { getExpenseTrail } from "../api/expenses.api";
+import { http } from "../api/http";
 
 import { SimpleBarChart, SimplePieChart } from "../components/DashboardCharts";
 import DashboardTabs from "../components/DashboardTabs";
@@ -42,6 +47,13 @@ const SUB_STATUS_TONES = {
   CANCELLED: "red",
 };
 
+const EXPENSE_STATUS_TONES = {
+  EN_ATTENTE: "yellow",
+  APPROUVER: "blue",
+  EFFECTUER: "green",
+  REJETER: "red",
+};
+
 const ROLE_OPTIONS = ["ADMIN", "GESTIONNAIRE_DEPENSE", "EQUIPE_TRESORERIE"];
 const ADMIN_ROLE_OPTIONS = ["GESTIONNAIRE_DEPENSE", "EQUIPE_TRESORERIE"];
 
@@ -50,6 +62,15 @@ function fmtDate(d) {
     return new Date(d).toLocaleString();
   } catch {
     return "-";
+  }
+}
+
+function fmtAmount(n) {
+  if (n === null || n === undefined) return "—";
+  try {
+    return Number(n).toLocaleString("fr-FR");
+  } catch {
+    return String(n);
   }
 }
 
@@ -81,20 +102,21 @@ export default function AdminDashboard() {
   const { user, logout } = useAuth();
 
   // Tabs
-  const [tab, setTab] = useState("overview"); // overview | users | adherents | audit
+  const [tab, setTab] = useState("overview"); // overview | oversight | users | adherents | audit
+  const [trailExpenseId, setTrailExpenseId] = useState(null);
 
   // Users
   const [userSearch, setUserSearch] = useState("");
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [createUserOpen, setCreateUserOpen] = useState(false);
+  // Aucun mot de passe ici : le titulaire du compte le fixe lui-meme via le lien
+  // d'invitation envoye a son email. Le createur ne doit connaitre aucun secret
+  // permettant de se connecter sous l'identite du compte qu'il cree.
   const [createUserForm, setCreateUserForm] = useState({
     fullName: "",
     email: "",
     phone: "",
     role: "GESTIONNAIRE_DEPENSE",
-    status: "ACTIVE",
-    password: "",
-    confirmPassword: "",
   });
 
   // Adhérents
@@ -122,6 +144,18 @@ export default function AdminDashboard() {
     queryKey: ["admin-adherents-contributions"],
     queryFn: getAdherentsContributions,
     enabled: tab === "adherents",
+  });
+
+  const qOversight = useQuery({
+    queryKey: ["admin-oversight"],
+    queryFn: getOversight,
+    enabled: tab === "oversight",
+  });
+
+  const qTrail = useQuery({
+    queryKey: ["expense-trail", trailExpenseId],
+    queryFn: () => getExpenseTrail(trailExpenseId),
+    enabled: !!trailExpenseId,
   });
 
   const qUserDetails = useQuery({
@@ -163,7 +197,7 @@ export default function AdminDashboard() {
 
   const stats = qStats.data?.stats;
   const users = useMemo(
-    () => (qUsers.data?.users || []).filter((apiUser) => apiUser.role !== "SUPER_ADMIN"),
+    () => (qUsers.data?.users || []).filter((apiUser) => apiUser.role !== "OUGAS_ADMIN"),
     [qUsers.data?.users],
   );
   const subs = useMemo(() => qSubs.data?.contributions || [], [qSubs.data?.contributions]);
@@ -256,6 +290,18 @@ export default function AdminDashboard() {
       toast.error(err?.response?.data?.message || t("error_generic")),
   });
 
+  const mResendInvite = useMutation({
+    mutationFn: (userId) => resendUserInvite(userId),
+    onSuccess: () => {
+      toast.success(
+        t("admin.inviteSent", "Invitation renvoyée à l'adresse du titulaire."),
+      );
+      qUsers.refetch();
+    },
+    onError: (err) =>
+      toast.error(err?.response?.data?.message || t("error_generic")),
+  });
+
   const mResetOtp = useMutation({
     mutationFn: (userId) => resetUserOtp(userId),
     onSuccess: () => {
@@ -269,17 +315,29 @@ export default function AdminDashboard() {
 
   const mCreateUser = useMutation({
     mutationFn: createAdminUser,
-    onSuccess: () => {
-      toast.success(t("user_created_success"));
+    onSuccess: (data) => {
+      if (data?.user?.invitationSent === false) {
+        toast.error(
+          t(
+            "admin.inviteSendFailed",
+            "Compte créé, mais l'email d'invitation n'est pas parti. Renvoyez-le depuis la fiche.",
+          ),
+          { duration: 8000 },
+        );
+      } else {
+        toast.success(
+          t(
+            "admin.inviteSent",
+            "Compte créé. Une invitation a été envoyée à son adresse email.",
+          ),
+        );
+      }
       setCreateUserOpen(false);
       setCreateUserForm({
         fullName: "",
         email: "",
         phone: "",
-        role: user?.role === "SUPER_ADMIN" ? "ADMIN" : "GESTIONNAIRE_DEPENSE",
-        status: "ACTIVE",
-        password: "",
-        confirmPassword: "",
+        role: user?.role === "OUGAS_ADMIN" ? "ADMIN" : "GESTIONNAIRE_DEPENSE",
       });
       qUsers.refetch();
       qStats.refetch();
@@ -288,8 +346,33 @@ export default function AdminDashboard() {
       toast.error(err?.response?.data?.message || t("error_generic")),
   });
 
-  const canCreateAdminUser = user?.role === "SUPER_ADMIN";
+  const canCreateAdminUser = user?.role === "OUGAS_ADMIN";
   const createUserRoleOptions = canCreateAdminUser ? ROLE_OPTIONS : ADMIN_ROLE_OPTIONS;
+
+  /**
+   * Ouvre un document dans un onglet. La route est authentifiée : on ne peut
+   * pas se contenter d'un href, il faut porter le jeton. Le blob est révoqué
+   * pour ne pas laisser la pièce d'identité en mémoire du navigateur.
+   */
+  async function openKycDocument(userId, docType) {
+    try {
+      const res = await http.get(`/api/kyc/${userId}/${docType}`, {
+        responseType: "blob",
+      });
+      const url = URL.createObjectURL(res.data);
+      window.open(url, "_blank", "noopener");
+      setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    } catch (err) {
+      const message =
+        err?.response?.status === 410
+          ? t(
+              "admin.kyc.gone",
+              "Le fichier n'est plus sur le serveur. Demandez à l'adhérent de le redéposer.",
+            )
+          : t("error_generic");
+      toast.error(message);
+    }
+  }
 
   function updateCreateUserForm(field, value) {
     setCreateUserForm((current) => ({ ...current, [field]: value }));
@@ -299,10 +382,6 @@ export default function AdminDashboard() {
     e.preventDefault();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(createUserForm.email)) {
       toast.error(t("email_invalid"));
-      return;
-    }
-    if (createUserForm.password !== createUserForm.confirmPassword) {
-      toast.error(t("password_mismatch"));
       return;
     }
     mCreateUser.mutate(createUserForm);
@@ -331,6 +410,7 @@ export default function AdminDashboard() {
         <DashboardTabs
           tabs={[
             { id: "overview", label: t("admin_overview") },
+            { id: "oversight", label: t("admin.oversight.tab", "Supervision") },
             { id: "users", label: t("users") },
             { id: "adherents", label: t("adherents") },
             { id: "audit", label: t("admin_audit") },
@@ -361,7 +441,29 @@ export default function AdminDashboard() {
                 <StatCard label={t("admin_treasury_users_count")} value={stats?.treasuryUsersCount} />
                 <StatCard label={t("admin_monthly_contributions")} value={stats?.monthlySubscriptionsCount} hint={stats?.monthlyCotisation} />
                 <StatCard label={t("admin_annual_contributions")} value={stats?.annualSubscriptionsCount} hint={stats?.annualCotisation} />
-                <StatCard label={t("admin_total_contributions_amount")} value={stats?.totalCotisation} />
+                {/* « Engagé » et « encaissé » côte à côte, et nommés. Un seul
+                    chiffre laissait croire que les engagements étaient des
+                    recettes : un clic de consentement suffisait à le gonfler. */}
+                <StatCard
+                  label={t("admin.pledged", "Engagé (mandats signés)")}
+                  value={fmtAmount(stats?.totalCotisation)}
+                />
+                <StatCard
+                  label={t("admin.collected", "Encaissé (argent reçu)")}
+                  value={fmtAmount(stats?.encaisseTotal)}
+                  hint={
+                    stats?.encaisseCount !== undefined
+                      ? `${stats.encaisseCount} ${t("admin.payments", "versements")}`
+                      : undefined
+                  }
+                />
+                {stats?.encaissementsEnAttente ? (
+                  <StatCard
+                    label={t("admin.pendingPayments", "Encaissements en attente")}
+                    value={stats.encaissementsEnAttente}
+                    hint={t("admin.pendingPaymentsHint", "à réconcilier avec la banque")}
+                  />
+                ) : null}
               </div>
 
               <div className="mt-6 grid gap-4 md:grid-cols-2">
@@ -400,6 +502,213 @@ export default function AdminDashboard() {
         ) : null}
 
         {/* USERS */}
+        {/* SUPERVISION — lecture seule. Aucun bouton d'action ici : ni
+            Approuver, ni Rejeter, ni Créer un ordre, ni Imprimer. Si un bouton
+            apparaît dans cet onglet, le contrôle interne est percé. */}
+        {tab === "oversight" ? (
+          <div className="space-y-6">
+            <Card className="p-7 border border-emerald-100 bg-white">
+              <SectionTitle
+                title={t("admin.oversight.title", "Supervision")}
+                subtitle={t(
+                  "admin.oversight.sub",
+                  "Le déroulement du travail des gestionnaires de dépense et de l'équipe trésorerie. Lecture seule.",
+                )}
+                right={
+                  <div className="text-xs text-slate-500">
+                    {qOversight.isLoading ? t("loading") : "OK"}
+                  </div>
+                }
+              />
+
+              <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <StatCard
+                  label={t("admin.oversight.pending", "Dépenses en attente")}
+                  value={qOversight.data?.indicators?.pending?.count}
+                  hint={fmtAmount(qOversight.data?.indicators?.pending?.amount)}
+                />
+                <StatCard
+                  label={t("admin.oversight.approved", "Approuvées, non décaissées")}
+                  value={qOversight.data?.indicators?.approvedNotDisbursed?.count}
+                  hint={fmtAmount(
+                    qOversight.data?.indicators?.approvedNotDisbursed?.amount,
+                  )}
+                />
+                <StatCard
+                  label={t("admin.oversight.ordersMonth", "Ordres émis ce mois")}
+                  value={qOversight.data?.indicators?.ordersThisMonth}
+                />
+                {/* Le chiffre qui compte pour un superviseur n'est pas le
+                    volume, c'est le dossier qui attend depuis le plus longtemps. */}
+                <StatCard
+                  label={t("admin.oversight.oldest", "Plus ancienne en attente")}
+                  value={
+                    qOversight.data?.indicators?.oldestPending
+                      ? `${qOversight.data.indicators.oldestPending.ageDays} j`
+                      : "—"
+                  }
+                  hint={qOversight.data?.indicators?.oldestPending?.label}
+                />
+              </div>
+            </Card>
+
+            <div className="grid gap-6 lg:grid-cols-2">
+              <Card className="p-6 border border-emerald-100 bg-white">
+                <SectionTitle
+                  title={t("admin.oversight.managers", "Gestionnaires de dépense")}
+                  subtitle={t("admin.oversight.last30", "Sur 30 jours")}
+                />
+                <div className="mt-4 space-y-3">
+                  {(qOversight.data?.managers || []).map((m) => (
+                    <div
+                      key={m.id}
+                      className="rounded-2xl border border-emerald-100 bg-emerald-50/30 p-4"
+                    >
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <div className="font-black text-slate-900">
+                          {m.fullName || m.email}
+                        </div>
+                        <Badge tone={USER_STATUS_TONES[m.status] || "neutral"}>
+                          {m.status}
+                        </Badge>
+                      </div>
+                      <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-slate-600 sm:grid-cols-4">
+                        <div>
+                          <span className="font-black text-slate-900">{m.created30d}</span>{" "}
+                          {t("admin.oversight.created", "créées")}
+                        </div>
+                        <div>
+                          <span className="font-black text-slate-900">{m.pending}</span>{" "}
+                          {t("admin.oversight.waiting", "en attente")}
+                        </div>
+                        <div className={m.rejected ? "text-red-700" : ""}>
+                          <span className="font-black">{m.rejected}</span>{" "}
+                          {t("admin.oversight.rejected", "rejetées")}
+                        </div>
+                        <div>{fmtAmount(m.engagedAmount30d)}</div>
+                      </div>
+                      <div className="mt-2 text-[11px] text-slate-500">
+                        {t("admin.oversight.lastActivity", "Dernière activité")} :{" "}
+                        {m.lastActivityAt ? fmtDate(m.lastActivityAt) : "—"}
+                      </div>
+                    </div>
+                  ))}
+                  {!qOversight.isLoading && !(qOversight.data?.managers || []).length ? (
+                    <div className="text-sm text-slate-500">
+                      {t("admin.oversight.noManager", "Aucun gestionnaire de dépense.")}
+                    </div>
+                  ) : null}
+                </div>
+              </Card>
+
+              <Card className="p-6 border border-emerald-100 bg-white">
+                <SectionTitle
+                  title={t("admin.oversight.treasurers", "Équipe trésorerie")}
+                  subtitle={t("admin.oversight.last30", "Sur 30 jours")}
+                />
+                <div className="mt-4 space-y-3">
+                  {(qOversight.data?.treasurers || []).map((tr) => (
+                    <div
+                      key={tr.id}
+                      className="rounded-2xl border border-emerald-100 bg-emerald-50/30 p-4"
+                    >
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <div className="font-black text-slate-900">
+                          {tr.fullName || tr.email}
+                        </div>
+                        <Badge tone={USER_STATUS_TONES[tr.status] || "neutral"}>
+                          {tr.status}
+                        </Badge>
+                      </div>
+                      <div className="mt-2 flex flex-wrap gap-3 text-xs text-slate-600">
+                        <div>
+                          <span className="font-black text-slate-900">{tr.orders30d}</span>{" "}
+                          {t("admin.oversight.orders", "ordres")}
+                        </div>
+                        <div className={tr.notPrinted ? "text-red-700 font-black" : ""}>
+                          {tr.notPrinted} {t("admin.oversight.notPrinted", "non imprimés")}
+                        </div>
+                      </div>
+                      {/* Par devise : additionner francs, birrs et dollars
+                          produirait un total qui n'existe pas. */}
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {Object.entries(tr.amountByCurrency30d || {}).map(([cur, amt]) => (
+                          <span
+                            key={cur}
+                            className="rounded-lg bg-white px-2 py-1 text-[11px] font-black text-slate-700 ring-1 ring-emerald-100"
+                          >
+                            {fmtAmount(amt)} {cur}
+                          </span>
+                        ))}
+                      </div>
+                      <div className="mt-2 text-[11px] text-slate-500">
+                        {t("admin.oversight.lastActivity", "Dernière activité")} :{" "}
+                        {tr.lastActivityAt ? fmtDate(tr.lastActivityAt) : "—"}
+                      </div>
+                    </div>
+                  ))}
+                  {!qOversight.isLoading && !(qOversight.data?.treasurers || []).length ? (
+                    <div className="text-sm text-slate-500">
+                      {t("admin.oversight.noTreasurer", "Aucun membre de l'équipe trésorerie.")}
+                    </div>
+                  ) : null}
+                </div>
+              </Card>
+            </div>
+
+            <Card className="p-6 border border-emerald-100 bg-white">
+              <SectionTitle
+                title={t("admin.oversight.files", "Dossiers de dépense")}
+                subtitle={t(
+                  "admin.oversight.filesSub",
+                  "Tous statuts confondus. Cliquez une ligne pour voir sa chronologie.",
+                )}
+              />
+              <div className="mt-4 overflow-x-auto">
+                <table className="w-full min-w-[760px] text-left text-sm">
+                  <thead className="text-xs uppercase tracking-wide text-slate-500">
+                    <tr>
+                      <th className="px-3 py-2">{t("admin.oversight.label", "Objet")}</th>
+                      <th className="px-3 py-2">{t("admin.oversight.engagedBy", "Engagée par")}</th>
+                      <th className="px-3 py-2">{t("admin.oversight.disbursedBy", "Décaissée par")}</th>
+                      <th className="px-3 py-2">{t("amount", "Montant")}</th>
+                      <th className="px-3 py-2">{t("status", "Statut")}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(qOversight.data?.recentExpenses || []).map((e) => (
+                      <tr
+                        key={e.id}
+                        onClick={() => setTrailExpenseId(e.id)}
+                        className="cursor-pointer border-t border-emerald-50 hover:bg-emerald-50/40"
+                      >
+                        <td className="px-3 py-2">
+                          <div className="font-bold text-slate-900">{e.label}</div>
+                          <div className="text-[11px] text-slate-500">
+                            {e.beneficiaryName} · {fmtDate(e.createdAt)}
+                          </div>
+                        </td>
+                        <td className="px-3 py-2 text-xs">
+                          {e.createdBy?.fullName || e.createdBy?.email || "—"}
+                        </td>
+                        <td className="px-3 py-2 text-xs">
+                          {e.paymentOrders?.[0]?.createdBy?.fullName || "—"}
+                        </td>
+                        <td className="px-3 py-2 font-black">{fmtAmount(e.amount)}</td>
+                        <td className="px-3 py-2">
+                          <Badge tone={EXPENSE_STATUS_TONES[e.status] || "neutral"}>
+                            {t(`enumStatus.${e.status}`, e.status)}
+                          </Badge>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
+          </div>
+        ) : null}
+
         {tab === "users" ? (
           <Card className="p-5 sm:p-7 border border-emerald-100 bg-white shadow-[0_20px_60px_-30px_rgba(16,185,129,0.2)]">
             <SectionTitle
@@ -445,7 +754,7 @@ export default function AdminDashboard() {
                 </div>
               ) : (
                 usersFiltered.map((u) => {
-                  const canEditRole = user?.role === "SUPER_ADMIN" && u.id !== user?.id;
+                  const canEditRole = user?.role === "OUGAS_ADMIN" && u.id !== user?.id;
                   const editableRoles = ROLE_OPTIONS;
 
                   return (
@@ -500,22 +809,36 @@ export default function AdminDashboard() {
                       </div>
 
                       <div className="col-span-2 flex justify-end gap-2">
-                        <Select
-                          value={u.status}
-                          onChange={(e) =>
-                            mUserStatus.mutate({
-                              userId: u.id,
-                              status: e.target.value,
-                            })
-                          }
-                          className="max-w-[160px]"
-                        >
-                          {["ACTIVE", "SUSPENDED"].map((s) => (
-                            <option key={s} value={s}>
-                              {s}
-                            </option>
-                          ))}
-                        </Select>
+                        {/* Un compte en attente d'activation n'a pas de statut a
+                            changer : le selecteur afficherait ACTIVE alors que le
+                            badge dit PENDING_VERIFICATION, et le moindre
+                            changement casserait son lien d'invitation. */}
+                        {u.status === "PENDING_VERIFICATION" ? (
+                          <button
+                            onClick={() => mResendInvite.mutate(u.id)}
+                            disabled={mResendInvite.isPending}
+                            className="rounded-xl border border-emerald-200 bg-white px-3 py-2 text-xs font-black text-slate-700 hover:bg-emerald-50 disabled:opacity-60"
+                          >
+                            {t("admin.resendInvite", "Renvoyer l'invitation")}
+                          </button>
+                        ) : (
+                          <Select
+                            value={u.status}
+                            onChange={(e) =>
+                              mUserStatus.mutate({
+                                userId: u.id,
+                                status: e.target.value,
+                              })
+                            }
+                            className="max-w-[160px]"
+                          >
+                            {["ACTIVE", "SUSPENDED"].map((s) => (
+                              <option key={s} value={s}>
+                                {s}
+                              </option>
+                            ))}
+                          </Select>
+                        )}
 
                         {u.otpLockedUntil || u.otpSendCountHour ? (
                           <button
@@ -759,6 +1082,98 @@ export default function AdminDashboard() {
       </div>
 
       {/* CREATE INTERNAL USER DRAWER */}
+      {/* Chronologie d'un dossier : l'information qui n'existait nulle part et
+          qui fait la différence entre surveiller et regarder. */}
+      <Drawer
+        open={!!trailExpenseId}
+        onClose={() => setTrailExpenseId(null)}
+        title={t("admin.oversight.trail", "Chronologie du dossier")}
+        subtitle={qTrail.data?.expense?.label || trailExpenseId}
+      >
+        {qTrail.isLoading ? (
+          <div className="text-sm text-slate-600">{t("loading")}</div>
+        ) : qTrail.isError ? (
+          <div className="text-sm text-red-600">{t("error_details")}</div>
+        ) : (
+          <div className="space-y-5">
+            <div className="grid grid-cols-2 gap-3">
+              <SoftKpi
+                label={t("amount", "Montant")}
+                value={fmtAmount(qTrail.data?.expense?.amount)}
+              />
+              <SoftKpi
+                label={t("status", "Statut")}
+                value={t(
+                  `enumStatus.${qTrail.data?.expense?.status}`,
+                  qTrail.data?.expense?.status,
+                )}
+              />
+              <SoftKpi
+                label={t("admin.oversight.beneficiary", "Bénéficiaire")}
+                value={qTrail.data?.expense?.beneficiaryName}
+              />
+              <SoftKpi
+                label={t("admin.oversight.engagedBy", "Engagée par")}
+                value={qTrail.data?.expense?.createdBy?.fullName}
+              />
+            </div>
+
+            {(qTrail.data?.orders || []).length ? (
+              <div>
+                <div className="mb-2 text-xs font-black uppercase tracking-wide text-slate-500">
+                  {t("admin.oversight.orders", "Ordres de paiement")}
+                </div>
+                <div className="space-y-2">
+                  {qTrail.data.orders.map((o) => (
+                    <div
+                      key={o.id}
+                      className="rounded-xl border border-emerald-100 bg-emerald-50/30 p-3 text-xs"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="font-black text-slate-900">
+                          {o.referenceNumber}
+                        </span>
+                        <Badge tone={o.status === "IMPRIME" ? "green" : "yellow"}>
+                          {o.status}
+                        </Badge>
+                      </div>
+                      <div className="mt-1 text-slate-600">
+                        {fmtAmount(o.amount)} {o.currency} ·{" "}
+                        {o.createdBy?.fullName || o.createdBy?.email} ·{" "}
+                        {fmtDate(o.createdAt)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
+            <div>
+              <div className="mb-2 text-xs font-black uppercase tracking-wide text-slate-500">
+                {t("admin.oversight.history", "Historique")}
+              </div>
+              <ol className="space-y-2 border-l-2 border-emerald-100 pl-4">
+                {(qTrail.data?.logs || []).map((l, i) => (
+                  <li key={i} className="relative text-xs">
+                    <span className="absolute -left-[21px] top-1 h-2 w-2 rounded-full bg-emerald-500" />
+                    <div className="font-black text-slate-900">{l.action}</div>
+                    <div className="text-slate-600">
+                      {l.user?.fullName || l.user?.email || "—"}
+                      {l.user?.role ? ` (${l.user.role})` : ""} · {fmtDate(l.createdAt)}
+                    </div>
+                  </li>
+                ))}
+                {!(qTrail.data?.logs || []).length ? (
+                  <li className="text-xs text-slate-500">
+                    {t("admin.oversight.noHistory", "Aucune trace d'audit sur ce dossier.")}
+                  </li>
+                ) : null}
+              </ol>
+            </div>
+          </div>
+        )}
+      </Drawer>
+
       <Drawer
         open={createUserOpen}
         onClose={() => setCreateUserOpen(false)}
@@ -800,63 +1215,27 @@ export default function AdminDashboard() {
             />
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
-            <div>
-              <div className="mb-1 text-xs font-black text-slate-600">
-                {t("role")}
-              </div>
-              <Select
-                value={createUserForm.role}
-                onChange={(e) => updateCreateUserForm("role", e.target.value)}
-              >
-                {createUserRoleOptions.map((role) => (
-                  <option key={role} value={role}>
-                    {role}
-                  </option>
-                ))}
-              </Select>
-            </div>
-
-            <div>
-              <div className="mb-1 text-xs font-black text-slate-600">
-                {t("status")}
-              </div>
-              <Select
-                value={createUserForm.status}
-                onChange={(e) => updateCreateUserForm("status", e.target.value)}
-              >
-                <option value="ACTIVE">ACTIVE</option>
-                <option value="SUSPENDED">SUSPENDED</option>
-              </Select>
-            </div>
-          </div>
-
           <div>
             <div className="mb-1 text-xs font-black text-slate-600">
-              {t("password")}
+              {t("role")}
             </div>
-            <Input
-              type="password"
-              minLength={8}
-              value={createUserForm.password}
-              onChange={(e) => updateCreateUserForm("password", e.target.value)}
-              required
-            />
+            <Select
+              value={createUserForm.role}
+              onChange={(e) => updateCreateUserForm("role", e.target.value)}
+            >
+              {createUserRoleOptions.map((role) => (
+                <option key={role} value={role}>
+                  {role}
+                </option>
+              ))}
+            </Select>
           </div>
 
-          <div>
-            <div className="mb-1 text-xs font-black text-slate-600">
-              {t("confirm_password")}
-            </div>
-            <Input
-              type="password"
-              minLength={8}
-              value={createUserForm.confirmPassword}
-              onChange={(e) =>
-                updateCreateUserForm("confirmPassword", e.target.value)
-              }
-              required
-            />
+          <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-900">
+            {t(
+              "admin.inviteNotice",
+              "Le compte sera créé en attente d'activation. Son titulaire recevra un lien par email pour choisir lui-même son mot de passe — vous ne le connaîtrez pas.",
+            )}
           </div>
 
           <button
@@ -948,6 +1327,38 @@ export default function AdminDashboard() {
                       </div>
                     </div>
                   ) : null}
+
+                  {/* Les documents étaient collectés puis jamais relus : pour un
+                      adhérent, l'administration ne voyait même pas un nom de
+                      fichier. Chaque consultation est journalisée côté serveur. */}
+                  <div className="rounded-2xl border border-emerald-100 bg-white p-4">
+                    <div className="text-xs font-black text-slate-600">
+                      {t("admin.kyc.title", "Pièces justificatives")}
+                    </div>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {[
+                        ["ID_DOC", u.idDocPath, t("admin.kyc.idDoc", "Pièce d'identité")],
+                        ["SELFIE", u.selfiePath, t("admin.kyc.selfie", "Selfie")],
+                        ["PRESIDENT_ID_DOC", u.presidentIdDocPath, t("admin.kyc.president", "Pièce du président")],
+                        ["ASSOCIATION_STATUS_DOC", u.associationStatusDocPath, t("admin.kyc.statuts", "Statuts")],
+                      ]
+                        .filter(([, chemin]) => Boolean(chemin))
+                        .map(([docType, , libelle]) => (
+                          <button
+                            key={docType}
+                            onClick={() => openKycDocument(u.id, docType)}
+                            className="rounded-xl border border-emerald-200 bg-white px-3 py-2 text-xs font-black text-slate-700 hover:bg-emerald-50"
+                          >
+                            {libelle}
+                          </button>
+                        ))}
+                      {![u.idDocPath, u.selfiePath, u.presidentIdDocPath, u.associationStatusDocPath].some(Boolean) ? (
+                        <span className="text-xs text-slate-500">
+                          {t("admin.kyc.none", "Aucun document déposé.")}
+                        </span>
+                      ) : null}
+                    </div>
+                  </div>
 
                   <div className="rounded-2xl border border-emerald-100 bg-emerald-50/40 p-4">
                     <div className="flex items-center justify-between">

@@ -151,6 +151,16 @@ export default function Login() {
                 </GhostButton>
               </div>
 
+              <p className="text-xs text-slate-500">
+                <button
+                  type="button"
+                  onClick={() => nav("/reinitialisation")}
+                  className="font-semibold text-emerald-700 underline-offset-2 hover:underline"
+                >
+                  {t("reset.link", "Mot de passe oublié ?")}
+                </button>
+              </p>
+
               {m.isPending ? (
                 <p className="text-xs font-semibold text-emerald-700">
                   Connexion en cours, redirection vers votre dashboard...

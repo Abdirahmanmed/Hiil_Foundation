@@ -27,3 +27,24 @@ export function hashOtp(code) {
     .update(String(code) + env.OTP_PEPPER)
     .digest("hex");
 }
+
+/**
+ * Jeton d'invitation d'un compte interne.
+ * sha256 : le jeton fait 32 octets aleatoires, il n'a donc pas besoin d'un
+ * hachage lent — seul le vol de la base doit rester sans effet.
+ */
+export function hashInviteToken(token) {
+  return crypto
+    .createHash("sha256")
+    .update(String(token) + env.OTP_PEPPER)
+    .digest("hex");
+}
+
+/**
+ * Mot de passe volontairement inutilisable, pour un compte cree par un tiers.
+ * Le titulaire fixera le sien via le jeton d'invitation. Personne — pas meme le
+ * createur du compte — ne connait cette valeur.
+ */
+export async function hashUnusablePassword() {
+  return hashPassword(crypto.randomBytes(48).toString("base64url"));
+}

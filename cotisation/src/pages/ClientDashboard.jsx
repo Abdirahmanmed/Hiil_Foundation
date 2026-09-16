@@ -13,6 +13,8 @@ import {
   createSubscriptionApi,
   listSubscriptionsApi,
   consentApi,
+  updateSubscriptionApi,
+  cancelSubscriptionApi,
 } from "../api/subscriptions.api";
 import {
   confirmCacSubscriptionPaymentApi,
@@ -119,6 +121,47 @@ export default function ClientDashboard() {
     onError: (err) =>
       toast.error(err?.response?.data?.message || t("consent_error")),
   });
+
+  const updateSubM = useMutation({
+    mutationFn: ({ id, amount }) => updateSubscriptionApi(id, { amount }),
+    onSuccess: () => {
+      toast.success(t("sub.updated", "Cotisation mise à jour."));
+      q.refetch();
+    },
+    onError: (err) => toast.error(err?.response?.data?.message || t("error_generic")),
+  });
+
+  const cancelSubM = useMutation({
+    mutationFn: ({ id }) => cancelSubscriptionApi(id),
+    onSuccess: () => {
+      toast.success(t("sub.cancelled", "Cotisation arrêtée."));
+      q.refetch();
+    },
+    onError: (err) => toast.error(err?.response?.data?.message || t("error_generic")),
+  });
+
+  function askUpdateSubscription(s) {
+    const saisie = window.prompt(
+      t("sub.editPrompt", "Nouveau montant de votre cotisation :"),
+      String(s.amount),
+    );
+    if (saisie === null) return;
+    const montant = Number(saisie);
+    if (!Number.isInteger(montant) || montant <= 0) {
+      return toast.error(t("sub.invalidAmount", "Montant invalide."));
+    }
+    updateSubM.mutate({ id: s.id, amount: montant });
+  }
+
+  function askCancelSubscription(s) {
+    const ok = window.confirm(
+      t(
+        "sub.cancelConfirm",
+        "Arrêter cette cotisation ? Vos versements déjà effectués sont conservés, et vous pourrez en créer une nouvelle ensuite.",
+      ),
+    );
+    if (ok) cancelSubM.mutate({ id: s.id });
+  }
 
   const initiateCacM = useMutation({
     mutationFn: ({ id }) => initiateCacSubscriptionPaymentApi(id),
@@ -380,10 +423,15 @@ export default function ClientDashboard() {
                 subs.map((s) => {
                   const isCacPaymentCandidate =
                     s.walletProvider === "CAC_PAY" || s.bankName === "CAC Bank";
+                  // Miroir exact d'assertPayable côté serveur. L'ancienne règle
+                  // — PENDING_CONSENT et pas de référence CAC — condamnait le
+                  // membre dès son premier paiement : sa cotisation devenait
+                  // ACTIVE avec une référence, donc plus jamais payable. C'était
+                  // la récurrence elle-même qui disparaissait. L'anti-double
+                  // paiement est désormais porté par la clé d'idempotence de
+                  // l'encaissement, pas par le statut de l'engagement.
                   const canPayWithCac =
-                    isCacPaymentCandidate &&
-                    s.status === "PENDING_CONSENT" &&
-                    !s.cacReference;
+                    isCacPaymentCandidate && s.status !== "CANCELLED";
                   const isCacOtpOpen =
                     activeCacSubscriptionId === s.id ||
                     s.cacStatus === "OTP_SENT";
@@ -409,11 +457,23 @@ export default function ClientDashboard() {
                       {s.amount} {s.currency} • {s.frequency}
                     </div>
 
+                    {/* Référence du dernier paiement ET bouton doivent coexister :
+                        dans un ternaire, la référence masquait définitivement le
+                        moyen de payer l'échéance suivante. */}
                     {s.cacReference ? (
                       <div className="mt-2 text-xs font-semibold text-slate-600">
                         {t("cac_payment_reference")}: {s.cacReference}
                       </div>
-                    ) : canPayWithCac ? (
+                    ) : null}
+
+                    {s.nextDueDate ? (
+                      <div className="mt-1 text-xs text-slate-600">
+                        {t("next_due", "Prochaine échéance")} :{" "}
+                        {new Date(s.nextDueDate).toLocaleDateString("fr-FR")}
+                      </div>
+                    ) : null}
+
+                    {canPayWithCac ? (
                       <div className="mt-3 space-y-3">
                         <PrimaryButton
                           loading={
@@ -455,7 +515,11 @@ export default function ClientDashboard() {
                       </div>
                     ) : null}
 
-                    {!s.consentAccepted && !canPayWithCac ? (
+                    {/* Le `&& !canPayWithCac` est retiré : maintenant que
+                        canPayWithCac reste vrai pour une cotisation active, il
+                        masquait le bouton de consentement d'une cotisation qui
+                        ne l'avait justement pas encore donné. */}
+                    {!s.consentAccepted ? (
                       <div className="mt-3">
                         <PrimaryButton
                           loading={consentM.isPending}
@@ -470,6 +534,28 @@ export default function ClientDashboard() {
                         ✅ {t("consent_ok")}
                       </div>
                     )}
+
+                    {/* Modifier et arrêter son mandat : les routes existent
+                        depuis 3dc7f6b, rien ne les exposait. Sans elles, la
+                        règle « un seul mandat ouvert » enferme le membre. */}
+                    {s.status !== "CANCELLED" ? (
+                      <div className="mt-3 flex flex-wrap gap-2 border-t border-emerald-100 pt-3">
+                        <button
+                          type="button"
+                          onClick={() => askUpdateSubscription(s)}
+                          className="rounded-xl border border-emerald-200 bg-white px-3 py-2 text-xs font-black text-slate-700 hover:bg-emerald-50"
+                        >
+                          {t("sub.edit", "Modifier le montant")}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => askCancelSubscription(s)}
+                          className="rounded-xl border border-red-200 bg-white px-3 py-2 text-xs font-black text-red-700 hover:bg-red-50"
+                        >
+                          {t("sub.cancel", "Arrêter ma cotisation")}
+                        </button>
+                      </div>
+                    ) : null}
                   </div>
                   );
                 })

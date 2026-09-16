@@ -13,7 +13,7 @@ import { statusRowsToChart } from "../components/chartUtils";
 import { useAuth } from "../context/AuthContext";
 import { getExpenses } from "../api/expenses.api";
 import { getTreasuryDashboard } from "../api/treasury.api";
-import { createPaymentOrder, getPaymentOrderPrint, getPaymentOrders, markPaymentOrderPrinted } from "../api/paymentOrders.api";
+import { cancelPaymentOrder, createPaymentOrder, getPaymentOrderPrint, getPaymentOrders, markPaymentOrderExecuted, markPaymentOrderPrinted } from "../api/paymentOrders.api";
 import { useTranslation } from "react-i18next";
 import { logPerf } from "../utils/perf";
 
@@ -44,7 +44,7 @@ export default function TreasuryDashboard() {
   const [tab, setTab] = useState("dashboard");
   const [selectedExpense, setSelectedExpense] = useState(null);
   const [printOrder, setPrintOrder] = useState(null);
-  const [form, setForm] = useState({ token: "", paymentMethod: "VIREMENT_BANCAIRE", currency: "FRANC", paymentCountry: "DJIBOUTI", amount: 1, bankName: "CAC Bank", bankReference: "", bankAccountHolder: "" });
+  const [form, setForm] = useState({ paymentMethod: "VIREMENT_BANCAIRE", currency: "FRANC", paymentCountry: "DJIBOUTI", amount: 1, bankName: "CAC Bank", bankReference: "", bankAccountHolder: "" });
 
   const qStats = useQuery({ queryKey: ["treasury-dashboard"], queryFn: getTreasuryDashboard });
   const qExpenses = useQuery({ queryKey: ["expenses", "treasury"], queryFn: getExpenses, enabled: tab === "expenses" });
@@ -68,12 +68,47 @@ export default function TreasuryDashboard() {
 
   const createMut = useMutation({ mutationFn: createPaymentOrder, onSuccess: () => { toast.success(t("create_payment_order") + " ✅"); setSelectedExpense(null); qc.invalidateQueries({ queryKey: ["expenses"] }); qc.invalidateQueries({ queryKey: ["payment-orders"] }); qc.invalidateQueries({ queryKey: ["treasury-dashboard"] }); }, onError: (e) => toast.error(e?.response?.data?.message || t("sub_create_error")) });
   const printMut = useMutation({ mutationFn: getPaymentOrderPrint, onSuccess: (data) => setPrintOrder(data.paymentOrder), onError: (e) => toast.error(e?.response?.data?.message || t("error_generic")) });
-  const markPrintedMut = useMutation({ mutationFn: markPaymentOrderPrinted, onSuccess: (data) => { setPrintOrder(data.paymentOrder); qc.invalidateQueries({ queryKey: ["payment-orders"] }); qc.invalidateQueries({ queryKey: ["treasury-dashboard"] }); window.print(); }, onError: (e) => toast.error(e?.response?.data?.message || t("error_generic")) });
+  const markPrintedMut = useMutation({ mutationFn: markPaymentOrderPrinted, onSuccess: (data) => { setPrintOrder(data.paymentOrder); qc.invalidateQueries({ queryKey: ["payment-orders"] }); qc.invalidateQueries({ queryKey: ["treasury-dashboard"] }); }, onError: (e) => toast.error(e?.response?.data?.message || t("error_generic")) });
+
+  const executeMut = useMutation({
+    mutationFn: ({ id, executedAt }) => markPaymentOrderExecuted(id, executedAt),
+    onSuccess: (d) => { toast.success(d?.message || t("treasury.markExecuted", "Marquer payé")); qc.invalidateQueries({ queryKey: ["payment-orders"] }); qc.invalidateQueries({ queryKey: ["treasury-dashboard"] }); },
+    onError: (e) => toast.error(e?.response?.data?.message || t("error_generic")),
+  });
+
+  const cancelMut = useMutation({
+    mutationFn: ({ id, reason }) => cancelPaymentOrder(id, reason),
+    onSuccess: (d) => { toast.success(d?.message || t("treasury.cancel", "Annuler")); qc.invalidateQueries({ queryKey: ["payment-orders"] }); qc.invalidateQueries({ queryKey: ["expenses"] }); qc.invalidateQueries({ queryKey: ["treasury-dashboard"] }); },
+    onError: (e) => toast.error(e?.response?.data?.message || t("error_generic")),
+  });
+
+  function askExecuted(order) {
+    const saisie = window.prompt(
+      t("treasury.executedPrompt", "Date de sortie bancaire (AAAA-MM-JJ). Laisser vide pour aujourd'hui :"),
+      "",
+    );
+    if (saisie === null) return;
+    executeMut.mutate({ id: order.id, executedAt: saisie.trim() || undefined });
+  }
+
+  function askCancel(order) {
+    // Le serveur tranche selon l'état : un ordre imprimé exige le Super Admin,
+    // un ordre exécuté ne s'annule jamais. Le message d'erreur le dira.
+    const reason = window.prompt(
+      t("treasury.cancelPrompt", "Motif de l'annulation (3 caractères minimum) :"),
+    );
+    if (reason === null) return;
+    if (reason.trim().length < 3) {
+      toast.error(t("treasury.reasonTooShort", "Motif trop court."));
+      return;
+    }
+    cancelMut.mutate({ id: order.id, reason: reason.trim() });
+  }
 
   function openOrder(expense) {
     const paymentCountry = expense.beneficiaryCountry || "DJIBOUTI";
     setSelectedExpense(expense);
-    setForm({ token: "", paymentMethod: "VIREMENT_BANCAIRE", currency: "FRANC", paymentCountry, amount: expense.amount || 1, bankName: bankOptionsByCountry[paymentCountry][0], bankReference: "", bankAccountHolder: expense.beneficiaryName || "" });
+    setForm({ paymentMethod: "VIREMENT_BANCAIRE", currency: expense.currency || "FRANC", paymentCountry, amount: expense.amount || 1, bankName: bankOptionsByCountry[paymentCountry][0], bankReference: "", bankAccountHolder: expense.beneficiaryName || "" });
   }
 
   function setPaymentMethod(paymentMethod) {
@@ -102,7 +137,12 @@ export default function TreasuryDashboard() {
   }
 
   function printCurrentOrder() {
-    if (!printOrder?.id || markPrintedMut.isPending) return;
+    if (!printOrder?.id) return;
+    // Impression D'ABORD, traçabilité ensuite en best-effort. L'ordre inverse
+    // avait deux défauts : React 19 regroupe les mises à jour, donc window.print()
+    // partait avant que le DOM ne reflète le nouvel objet ; et un backend
+    // indisponible empêchait d'imprimer un bon pourtant déjà valide.
+    window.print();
     markPrintedMut.mutate(printOrder.id);
   }
 
@@ -240,9 +280,19 @@ export default function TreasuryDashboard() {
                       <td className="px-4 py-3 font-black">{fmtMoney(e.amount)}</td>
                       <td className="px-4 py-3"><Badge tone={statusTones[e.status]}>{t(`enumStatus.${e.status}`, e.status)}</Badge></td>
                       <td className="px-4 py-3">
-                        <button onClick={() => openOrder(e)} className="rounded-xl bg-emerald-600 px-3 py-2 text-xs font-black text-white">
-                          {t("treasury.createOrder")}
-                        </button>
+                        {/* L'OUGAS_ADMIN consulte la position de caisse pour
+                            arbitrer, il ne decaisse pas. Le backend le refuse
+                            de toute facon ; lui montrer le bouton reviendrait a
+                            l'inviter a contourner sa propre procedure. */}
+                        {user?.role === "EQUIPE_TRESORERIE" ? (
+                          <button onClick={() => openOrder(e)} className="rounded-xl bg-emerald-600 px-3 py-2 text-xs font-black text-white">
+                            {t("treasury.createOrder")}
+                          </button>
+                        ) : (
+                          <span className="text-xs text-slate-400">
+                            {t("treasury.readOnly", "Lecture seule")}
+                          </span>
+                        )}
                       </td>
                     </tr>
                   ))}
@@ -277,9 +327,23 @@ export default function TreasuryDashboard() {
                       <td className="px-4 py-3 font-black">{fmtMoney(o.amount)}</td>
                       <td className="px-4 py-3"><Badge tone={statusTones[o.status]}>{t(`enumStatus.${o.status}`, o.status)}</Badge></td>
                       <td className="px-4 py-3">
-                        <button onClick={() => printMut.mutate(o.id)} className="rounded-xl border border-emerald-200 px-3 py-2 text-xs font-black">
-                          {t("treasury.table.print")}
-                        </button>
+                        <div className="flex flex-wrap gap-2">
+                          <button onClick={() => printMut.mutate(o.id)} className="rounded-xl border border-emerald-200 px-3 py-2 text-xs font-black">
+                            {t("treasury.table.print")}
+                          </button>
+                          {/* Un ordre exécuté ou annulé est terminal : plus
+                              aucune action possible dessus. */}
+                          {o.status !== "EXECUTE" && o.status !== "ANNULE" ? (
+                            <>
+                              <button onClick={() => askExecuted(o)} className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-black text-emerald-800">
+                                {t("treasury.markExecuted", "Marquer payé")}
+                              </button>
+                              <button onClick={() => askCancel(o)} className="rounded-xl border border-red-200 px-3 py-2 text-xs font-black text-red-700">
+                                {t("treasury.cancel", "Annuler")}
+                              </button>
+                            </>
+                          ) : null}
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -296,9 +360,10 @@ export default function TreasuryDashboard() {
       {/* Drawer: Create payment order */}
       <Drawer open={!!selectedExpense} onClose={() => setSelectedExpense(null)} title={t("treasury.order.createTitle")}>
         <form onSubmit={submit} className="space-y-4">
-          <Field label={t("treasury.order.token")}>
-            <Input value={form.token} onChange={(e) => setForm({ ...form, token: e.target.value })} required />
-          </Field>
+          {/* Plus de champ « token » : le jeton d'approbation n'existe plus.
+              La dépense apparaît dans cette liste parce qu'elle est approuvée,
+              et ce statut EST l'autorisation. Le Super Admin n'a plus rien à
+              transmettre à la main. */}
           <Field label={t("treasury.order.paymentMethod")}>
             <Select value={form.paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
               <option value="VIREMENT_BANCAIRE">{t("paymentMethods.VIREMENT_BANCAIRE")}</option>
@@ -306,12 +371,16 @@ export default function TreasuryDashboard() {
               <option value="CHEQUE">{t("paymentMethods.CHEQUE")}</option>
             </Select>
           </Field>
+          {/* La devise découle de la dépense approuvée. Le serveur refuse toute
+              autre valeur : payer en dollars une dépense engagée en francs,
+              c'est changer le montant sans changer le chiffre. */}
           <Field label={t("treasury.order.currency")}>
-            <Select value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value })}>
-              <option value="FRANC">{t("currencies.FRANC")}</option>
-              <option value="DOLLAR">{t("currencies.DOLLAR")}</option>
-              <option value="BIRR_ETHIOPIEN">{t("currencies.BIRR_ETHIOPIEN")}</option>
-            </Select>
+            <Input
+              value={t(`currencies.${form.currency}`, form.currency)}
+              readOnly
+              tabIndex={-1}
+              className="cursor-not-allowed bg-slate-100 text-slate-600"
+            />
           </Field>
           <Field label={t("treasury.order.paymentCountry")}>
             <Select value={form.paymentCountry} onChange={(e) => setPaymentCountry(e.target.value)}>
@@ -324,19 +393,43 @@ export default function TreasuryDashboard() {
           </Field>
           {form.paymentMethod !== "CASH" && (
             <>
-              <Field label={t("treasury.order.bankName")}>
-                <Select value={form.bankName} onChange={(e) => setForm({ ...form, bankName: e.target.value })}>
-                  {bankOptionsByCountry[form.paymentCountry || "DJIBOUTI"].map((bank) => (
-                    <option key={bank} value={bank}>{bank}</option>
-                  ))}
-                </Select>
-              </Field>
-              <Field label={t("treasury.order.bankReference")}>
-                <Input value={form.bankReference} onChange={(e) => setForm({ ...form, bankReference: e.target.value })} required />
-              </Field>
-              <Field label={t("treasury.order.bankAccountHolder")}>
-                <Input value={form.bankAccountHolder} onChange={(e) => setForm({ ...form, bankAccountHolder: e.target.value })} />
-              </Field>
+              {/* Si la dépense porte le compte à payer, il a été approuvé avec
+                  elle : on l'affiche, on ne le ressaisit pas. Le serveur ignore
+                  de toute façon ce qui serait envoyé ici. */}
+              {/* Même condition que le serveur — banque ET numéro — sinon les
+                  deux divergent et le trésorier saisit un compte qui sera jeté. */}
+              {selectedExpense?.beneficiaryBankName && selectedExpense?.beneficiaryAccountRef ? (
+                <div className="rounded-xl border border-emerald-200 bg-emerald-50/60 p-3 text-sm">
+                  <div className="text-xs font-black uppercase tracking-wide text-emerald-800">
+                    {t("treasury.order.approvedAccount", "Compte approuvé avec la dépense")}
+                  </div>
+                  <p className="mt-2"><b>{t("treasury.order.bankName")} :</b> {selectedExpense.beneficiaryBankName}</p>
+                  <p><b>{t("treasury.order.bankReference")} :</b> {selectedExpense.beneficiaryAccountRef || "—"}</p>
+                  <p><b>{t("treasury.order.bankAccountHolder")} :</b> {selectedExpense.beneficiaryAccountHolder || selectedExpense.beneficiaryName}</p>
+                </div>
+              ) : (
+                <>
+                  <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
+                    {t(
+                      "treasury.order.noApprovedAccount",
+                      "Cette dépense ne porte pas de compte approuvé. Votre saisie sera enregistrée comme telle dans le journal d'audit.",
+                    )}
+                  </div>
+                  <Field label={t("treasury.order.bankName")}>
+                    <Select value={form.bankName} onChange={(e) => setForm({ ...form, bankName: e.target.value })}>
+                      {bankOptionsByCountry[form.paymentCountry || "DJIBOUTI"].map((bank) => (
+                        <option key={bank} value={bank}>{bank}</option>
+                      ))}
+                    </Select>
+                  </Field>
+                  <Field label={t("treasury.order.bankReference")}>
+                    <Input value={form.bankReference} onChange={(e) => setForm({ ...form, bankReference: e.target.value })} required />
+                  </Field>
+                  <Field label={t("treasury.order.bankAccountHolder")}>
+                    <Input value={form.bankAccountHolder} onChange={(e) => setForm({ ...form, bankAccountHolder: e.target.value })} />
+                  </Field>
+                </>
+              )}
             </>
           )}
           <button disabled={createMut.isPending} className="w-full rounded-xl bg-emerald-600 px-4 py-3 text-sm font-black text-white disabled:opacity-50">
@@ -356,7 +449,10 @@ export default function TreasuryDashboard() {
           </button>
         }
       >
-        <div className="print:bg-white rounded-2xl border border-emerald-100 p-6 text-slate-900">
+        {/* id ciblé par la feuille de style @media print : sans elle,
+            window.print() imprimait le tableau de bord entier, overlay du
+            tiroir compris, et le conteneur scrollable tronquait le contenu. */}
+        <div id="payment-order-print" className="print:bg-white rounded-2xl border border-emerald-100 p-6 text-slate-900">
           <div className="text-center">
             <img src="/logoherciise.jpeg" alt="Hiil Foundation" className="mx-auto h-20 w-20 rounded-full object-cover" />
             <h2 className="mt-3 text-2xl font-black">Hiil Foundation</h2>
@@ -368,6 +464,17 @@ export default function TreasuryDashboard() {
             <p><b>{t("treasury.order.expense")} :</b> {printOrder?.expense?.label}</p>
             <p><b>{t("treasury.order.beneficiary")} :</b> {printOrder?.expense?.beneficiaryName}</p>
             <p><b>{t("treasury.order.method")} :</b> {t(`paymentMethods.${printOrder?.paymentMethod}`, printOrder?.paymentMethod)}</p>
+            {/* Sans ces trois lignes, une banque ne peut pas exécuter le
+                document : elles étaient saisies et stockées, mais jamais
+                imprimées. */}
+            {printOrder?.bankName ? (
+              <>
+                <p><b>{t("treasury.order.bankName")} :</b> {printOrder.bankName}</p>
+                <p><b>{t("treasury.order.bankReference")} :</b> {printOrder.bankReference || "—"}</p>
+                <p><b>{t("treasury.order.bankAccountHolder")} :</b> {printOrder.bankAccountHolder || printOrder?.expense?.beneficiaryName}</p>
+                <p><b>{t("treasury.order.bankCountry", "Pays de la banque")} :</b> {t(`countries.${printOrder.bankCountry}`, printOrder.bankCountry || "—")}</p>
+              </>
+            ) : null}
             <p><b>{t("treasury.order.currency2")} :</b> {t(`currencies.${printOrder?.currency}`, printOrder?.currency)}</p>
             <p><b>{t("treasury.order.country")} :</b> {t(`countries.${printOrder?.paymentCountry}`, printOrder?.paymentCountry)}</p>
             <p><b>{t("treasury.order.amount")} :</b> {fmtMoney(printOrder?.amount)}</p>

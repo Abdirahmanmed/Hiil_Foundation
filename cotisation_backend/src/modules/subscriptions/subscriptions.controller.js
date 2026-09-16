@@ -2,6 +2,7 @@ import * as subscriptionService from "./subscriptions.service.js";
 import {
   createSubscriptionSchema,
   consentSchema,
+  updateSubscriptionSchema,
 } from "./subscriptions.schemas.js";
 
 export const createSubscription = async (req, res, next) => {
@@ -51,6 +52,34 @@ export const acceptConsent = async (req, res, next) => {
       req,
     );
     res.json({ message: "Consentement enregistré", subscription: sub });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const updateSubscription = async (req, res, next) => {
+  try {
+    const body = updateSubscriptionSchema.parse(req.body);
+    const updated = await subscriptionService.updateMySubscription(
+      req.user.id,
+      req.params.id,
+      body,
+      req,
+    );
+    res.json(updated);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const cancelSubscription = async (req, res, next) => {
+  try {
+    const result = await subscriptionService.cancelMySubscription(
+      req.user.id,
+      req.params.id,
+      req,
+    );
+    res.json(result);
   } catch (err) {
     next(err);
   }

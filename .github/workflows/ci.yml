@@ -1,0 +1,141 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  backend:
+    name: Backend — tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cotisation_backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: cotisation_backend/package-lock.json
+      # Jamais --omit=dev : la CLI prisma et jiti sont en devOptional.
+      - run: npm ci
+      - run: npx prisma generate
+      - run: npm test
+
+  migrations:
+    name: Migrations sur base vierge
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cotisation_backend
+    # C'est CE job qui aurait attrapé le bug des deux migrations du 3 juin :
+    # un DROP INDEX exécuté avant le CREATE correspondant, invisible sur une
+    # base existante, fatal sur toute base neuve.
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: cotisation_ci
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/cotisation_ci?sslmode=disable
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: cotisation_backend/package-lock.json
+      - run: npm ci
+      - run: npx prisma migrate deploy
+      - run: npx prisma migrate status
+      # Détecte la dérive : un champ ajouté au schéma sans migration.
+      #
+      # On compare la base QUI VIENT D'ÊTRE MIGRÉE au schéma. Comparer
+      # --from-migrations à --to-schema demanderait une base miroir distincte,
+      # et lui passer la base déjà migrée ne comparerait rien d'utile.
+      # `--exit-code` sort en 2 quand un écart existe : c'est l'échec voulu.
+      - name: Aucune dérive entre la base migrée et le schéma
+        run: |
+          npx prisma migrate diff \
+            --from-config-datasource \
+            --to-schema prisma/schema.prisma \
+            --exit-code
+
+  image:
+    name: Image Docker — construction et démarrage
+    runs-on: ubuntu-latest
+    # Construit exactement ce que Render construira. Un Dockerfile ne se vérifie
+    # pas en le lisant : argon2 est un module natif, Prisma génère son client à
+    # la construction, et les deux échouent silencieusement jusqu'au déploiement.
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Construire l'image du backend
+        run: >-
+          docker build
+          -f cotisation_backend/Dockerfile
+          -t hiil-api:ci
+          cotisation_backend
+
+      # Une image qui se construit n'est pas une image qui démarre : env.js
+      # refuse le démarrage sur une variable manquante, et c'est précisément ce
+      # comportement qu'on veut voir passer avec une configuration complète.
+      # DATABASE_URL pointe dans le vide à dessein — rien ne se connecte au boot.
+      - name: L'API démarre et répond
+        run: |
+          docker run -d --name hiil-api-ci -p 4000:4000 \
+            -e DATABASE_URL='postgresql://u:p@localhost:5432/db' \
+            -e JWT_ACCESS_SECRET="$(openssl rand -base64 36 | tr -d '\n')" \
+            -e JWT_REFRESH_SECRET="$(openssl rand -base64 36 | tr -d '\n')" \
+            -e OTP_PEPPER="$(openssl rand -base64 24 | tr -d '\n')" \
+            -e CAC_PAYMENT_MODE=mock \
+            -e STORAGE_MODE=cloudinary \
+            -e CLOUDINARY_URL='cloudinary://123456789012345:abcdefghijklmnopqrstuvwxyz0@ci-demo' \
+            -e BREVO_API_KEY=ci \
+            -e EMAIL_FROM='no-reply@ci.test' \
+            hiil-api:ci
+          for _ in $(seq 1 30); do
+            if curl -sf http://localhost:4000/api/health > /dev/null; then
+              echo "✅ /api/health répond"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "❌ l'API n'a pas répondu en 60 s"
+          docker logs hiil-api-ci
+          exit 1
+
+      - name: Arrêter le conteneur
+        if: always()
+        run: docker rm -f hiil-api-ci || true
+
+  frontend:
+    name: Frontend — lint, i18n, build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cotisation
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: cotisation/package-lock.json
+      - run: npm ci
+      - run: npx eslint src
+      # prebuild lance la vérification des clés i18n : un déploiement avec une
+      # clé manquante échoue ici au lieu d'afficher des identifiants techniques
+      # aux utilisateurs.
+      - run: npm run build
+        env:
+          VITE_API_URL: https://ci.example.test

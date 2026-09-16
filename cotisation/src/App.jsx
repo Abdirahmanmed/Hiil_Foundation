@@ -12,9 +12,12 @@ const OtpVerify = lazy(() => import("./pages/OtpVerify"));
 const ClientDashboard = lazy(() => import("./pages/ClientDashboard"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const ExpenseManagerDashboard = lazy(() => import("./pages/ExpenseManagerDashboard"));
+const OugasAdminDashboard = lazy(() => import("./pages/OugasAdminDashboard"));
 const SuperAdminDashboard = lazy(() => import("./pages/SuperAdminDashboard"));
 const TreasuryDashboard = lazy(() => import("./pages/TreasuryDashboard"));
 const InviteCommunity = lazy(() => import("./pages/InviteCommunity"));
+const SetPassword = lazy(() => import("./pages/SetPassword"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 
 function RTLHandler() {
   const { i18n } = useTranslation();
@@ -39,6 +42,16 @@ export default function App() {
             <Route path="/register" element={<PublicOnlyRoute><Register /></PublicOnlyRoute>} />
             <Route path="/otp" element={<PublicOnlyRoute><OtpVerify /></PublicOnlyRoute>} />
             <Route path="/login" element={<PublicOnlyRoute><Login /></PublicOnlyRoute>} />
+            {/* Activation d'un compte interne. Volontairement HORS PublicOnlyRoute :
+                le titulaire clique souvent son lien depuis un navigateur ou une
+                autre session est deja ouverte (le poste du bureau, celui de
+                l'admin qui vient de creer le compte). PublicOnlyRoute le
+                renverrait vers un dashboard qui n'est pas le sien, en ecrasant
+                le jeton de l'URL sans aucun message. */}
+            <Route path="/activation" element={<SetPassword />} />
+            {/* Hors PublicOnlyRoute pour la même raison : le lien arrive par
+                email et peut être ouvert dans un navigateur déjà connecté. */}
+            <Route path="/reinitialisation" element={<ResetPassword />} />
 
           <Route
             path="/client"
@@ -61,7 +74,7 @@ export default function App() {
           <Route
             path="/admin"
             element={
-              <ProtectedRoute role="ADMIN">
+              <ProtectedRoute roles={["ADMIN", "OUGAS_ADMIN"]}>
                 <AdminDashboard />
               </ProtectedRoute>
             }
@@ -77,6 +90,19 @@ export default function App() {
           />
 
           <Route
+            path="/ougas-admin"
+            element={
+              <ProtectedRoute role="OUGAS_ADMIN">
+                <OugasAdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Le compte d'amorçage. Un seul écran, une seule action : nommer
+              l'Ougas Admin. Il n'a accès à aucune autre route — ni /admin,
+              ni /treasury — parce qu'il ne doit jamais approuver l'argent
+              dont il désigne l'approbateur. */}
+          <Route
             path="/super-admin"
             element={
               <ProtectedRoute role="SUPER_ADMIN">
@@ -88,7 +114,7 @@ export default function App() {
           <Route
             path="/treasury"
             element={
-              <ProtectedRoute role="EQUIPE_TRESORERIE">
+              <ProtectedRoute roles={["EQUIPE_TRESORERIE", "OUGAS_ADMIN"]}>
                 <TreasuryDashboard />
               </ProtectedRoute>
             }

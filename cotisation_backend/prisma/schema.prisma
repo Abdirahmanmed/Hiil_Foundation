@@ -9,12 +9,23 @@ datasource db {
   provider = "postgresql"
 }
 
+/// OUGAS_ADMIN et SUPER_ADMIN ne sont pas deux niveaux du meme pouvoir.
+///
+/// OUGAS_ADMIN est l'autorite metier : lui seul approuve l'argent verse aux
+/// beneficiaires. SUPER_ADMIN est le compte d'amorcage, et son unique pouvoir
+/// est de creer un OUGAS_ADMIN — il ne lit ni depense, ni caisse, ni membre.
+/// Voir src/config/roles.js, ou la matrice complete tient en un ecran.
+/// L'ordre suit celui de la base, pas la logique : RENAME VALUE garde la place
+/// de l'ancien SUPER_ADMIN — devenu OUGAS_ADMIN — et ADD VALUE ajoute le
+/// nouveau a la fin. Reordonner ici ferait echouer le controle de derive de la
+/// CI sans qu'aucune colonne n'ait bouge.
 enum Role {
   CLIENT
   ADMIN
   GESTIONNAIRE_DEPENSE
-  SUPER_ADMIN
+  OUGAS_ADMIN
   EQUIPE_TRESORERIE
+  SUPER_ADMIN
 }
 
 enum MemberStatus {
@@ -97,6 +108,36 @@ enum Currency {
 enum PaymentOrderStatus {
   CREE
   IMPRIME
+  // L'argent a réellement quitté la banque. Jusqu'ici une dépense passait en
+  // EFFECTUER à la seconde où le bon était créé, avant même d'être imprimé,
+  // alors que le virement part des jours plus tard — et parfois jamais.
+  EXECUTE
+  ANNULE
+}
+
+enum PublicSubmissionKind {
+  PROJECT_PROPOSAL
+  VOLUNTEER
+}
+
+/// Etat d'un ENCAISSEMENT, a ne pas confondre avec l'etat de l'engagement.
+enum ContributionStatus {
+  PENDING
+  CONFIRMED
+  FAILED
+  /// La banque n'a pas repondu dans le delai. Surtout pas FAILED : le paiement
+  /// a pu aboutir de son cote. C'est la reconciliation qui tranche.
+  TIMEOUT
+}
+
+enum ContributionChannel {
+  CAC
+  WALLET
+  BANK_TRANSFER
+  CASH
+  CHEQUE
+  /// Saisi a la main par le back-office (versement constate sur un releve).
+  MANUAL
 }
 
 model User {
@@ -140,14 +181,37 @@ model User {
   otpSendCountHour   Int       @default(0)
   otpSendWindowStart DateTime?
 
+  // Incrémenté pour invalider d'un coup toutes les sessions d'un compte
+  // (réinitialisation de mot de passe, compromission). Les jetons émis avant
+  // portent l'ancienne valeur et sont refusés.
+  tokenVersion Int @default(0)
+
+  // ✅ Invitation d'un compte interne (ADMIN / GESTIONNAIRE_DEPENSE / EQUIPE_TRESORERIE).
+  // Le createur du compte ne choisit PAS le mot de passe : le titulaire le fixe
+  // lui-meme via ce jeton, envoye a sa propre adresse email.
+  inviteTokenHash      String?   @unique
+  inviteTokenExpiresAt DateTime?
+
+  // Réinitialisation de mot de passe. Colonnes distinctes de l'invitation :
+  // les deux parcours ne doivent pas pouvoir se recouvrir, et un compte
+  // réinitialisé n'est pas un compte à activer.
+  resetTokenHash      String?   @unique
+  resetTokenExpiresAt DateTime?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   otps          Otp[]
   subscriptions Subscription[]
   auditLogs     AuditLog[]
-  expenses      Expense[]
-  paymentOrders PaymentOrder[]
+  paymentOrders          PaymentOrder[] @relation("PaymentOrderCreatedBy")
+  cancelledPaymentOrders PaymentOrder[] @relation("PaymentOrderCancelledBy")
+
+  // Trois liens distincts vers Expense : engager, approuver et rejeter sont
+  // trois actes differents, portes par trois roles differents.
+  expenses         Expense[] @relation("ExpenseCreatedBy")
+  approvedExpenses Expense[] @relation("ExpenseApprovedBy")
+  rejectedExpenses Expense[] @relation("ExpenseRejectedBy")
 
   @@index([status])
 }
@@ -171,7 +235,11 @@ model Otp {
 model Subscription {
   id     String @id @default(cuid())
   userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // Restrict et non Cascade : supprimer un membre effaçait ses cotisations,
+  // leurs encaissements et leurs références bancaires. Une trace financière ne
+  // doit pas disparaître parce qu'un compte disparaît. Un droit à l'effacement
+  // se traite par anonymisation du membre, pas par suppression de la ligne.
+  user   User   @relation(fields: [userId], references: [id], onDelete: Restrict)
 
   bankCountry String
   bankName    String
@@ -197,12 +265,26 @@ model Subscription {
 
   status SubscriptionStatus @default(PENDING_CONSENT)
 
+  // ⚠️ Ces six champs sont HISTORIQUES et figés.
+  //
+  // Ils ne peuvent porter qu'UN SEUL encaissement : structurellement, une
+  // cotisation mensuelle de 6 000 DJF ne pouvait jamais représenter les douze
+  // versements de l'année. Les encaissements vivent désormais dans
+  // Contribution, un par versement. Ces colonnes restent le temps que la
+  // reprise soit vérifiée, puis elles seront supprimées.
   cacPaymentRequestId String?
   cacConfirmReference String?
   cacReference        String?
   cacStatus           String?
   cacRawResponse      Json?
   paidAt              DateTime?
+
+  /// Prochaine échéance attendue. Mise à jour à chaque encaissement confirmé.
+  /// Le retard se calcule à la lecture : pas d'échéancier généré à l'avance,
+  /// pas de tâche planifiée, pas de service supplémentaire à héberger.
+  nextDueDate DateTime?
+
+  contributions Contribution[]
 
   consentAccepted  Boolean   @default(false)
   consentVersion   String?
@@ -234,6 +316,10 @@ model AuditLog {
 
   @@index([action, createdAt])
   @@index([userId, createdAt])
+  // La chronologie d'un dossier (GET /api/expenses/:id/trail) interroge
+  // AuditLog par entity + entityId. Sans cet index, chaque ouverture de fiche
+  // fait un seq scan sur une table qui ne fait que grossir.
+  @@index([entity, entityId, createdAt])
 }
 
 model Expense {
@@ -247,17 +333,48 @@ model Expense {
   quantity           Int
   unitPrice          Int
   amount             Int
+
+  // Expense n'avait AUCUNE devise, alors que PaymentOrder en a une stricte.
+  // On ne savait donc pas dans quelle monnaie une dépense était engagée, et le
+  // contrôle « montant de l'ordre = montant de la dépense » comparait des
+  // unités potentiellement différentes. DJF par défaut : c'est la monnaie de
+  // toutes les lignes existantes.
+  currency           Currency @default(FRANC)
   beneficiaryName    String
   beneficiaryCountry Country
   beneficiaryCity    String
+
+  // Coordonnées de paiement du bénéficiaire, saisies par le dépensier et lues
+  // par le Super Admin AU MOMENT D'APPROUVER.
+  //
+  // Sans elles, rien ne reliait le bénéficiaire approuvé au compte réellement
+  // payé : le Super Admin approuvait « 300 000 DJF à la clinique de Balbala »,
+  // et le trésorier saisissait ensuite, seul et sans revalidation, le nom de la
+  // banque et le numéro de compte. Le contrôle interne ne voyait rien.
+  beneficiaryBankName       String?
+  beneficiaryAccountRef     String?
+  beneficiaryAccountHolder  String?
   status             ExpenseStatus @default(EN_ATTENTE)
 
-  createdById           String
-  createdBy             User      @relation(fields: [createdById], references: [id], onDelete: Restrict)
-  approvedByManagerAt   DateTime?
-  approvalTokenHash     String?
-  approvalTokenExpiresAt DateTime?
-  superAdminNotifiedAt  DateTime?
+  // Qui a engagé la dépense.
+  createdById String
+  createdBy   User   @relation("ExpenseCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+
+  // Qui l'a approuvée. Jusqu'ici seul l'horodatage existait : l'identité de
+  // l'approbateur n'était nulle part, sauf dans le journal d'audit — donc
+  // impossible à afficher dans l'écran de supervision.
+  approvedById        String?
+  approvedBy          User?     @relation("ExpenseApprovedBy", fields: [approvedById], references: [id], onDelete: SetNull)
+  approvedByManagerAt DateTime?
+
+  // Qui l'a rejetée, et pourquoi. Rejeter sans motif rend l'audit muet.
+  rejectedById    String?
+  rejectedBy      User?     @relation("ExpenseRejectedBy", fields: [rejectedById], references: [id], onDelete: SetNull)
+  rejectedAt      DateTime?
+  rejectionReason String?
+
+  // Horodatage de la notification envoyée à la trésorerie.
+  superAdminNotifiedAt DateTime?
 
   paymentOrders PaymentOrder[]
 
@@ -274,9 +391,30 @@ model PaymentOrder {
   expense   Expense @relation(fields: [expenseId], references: [id], onDelete: Restrict)
 
   createdById String
-  createdBy   User   @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  createdBy   User   @relation("PaymentOrderCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
 
-  tokenUsedHash   String
+  // Vaut expenseId tant que l'ordre est actif, NULL une fois annulé.
+  // PostgreSQL autorise plusieurs NULL dans un index UNIQUE : un seul ordre
+  // ACTIF par dépense, et la réémission après annulation reste possible.
+  // Sans cette contrainte, deux requêtes simultanées produisaient deux ordres
+  // pour la même dépense, chacun imprimable et remis à la banque.
+  activeExpenseId String? @unique
+
+  // Sortie bancaire réellement constatée.
+  executedAt DateTime?
+
+  // Annulation. Bornée par rôle : un ordre CREE (jamais imprimé) est annulable
+  // par la trésorerie, un ordre IMPRIME ne l'est que par le Super Admin, un
+  // ordre EXECUTE ne l'est jamais — on enregistre un remboursement, pas une
+  // annulation.
+  cancelledAt        DateTime?
+  cancelledById      String?
+  cancelledBy        User?     @relation("PaymentOrderCancelledBy", fields: [cancelledById], references: [id], onDelete: SetNull)
+  cancellationReason String?
+
+  // Conservé nullable pour l'audit des ordres émis avant la suppression du
+  // jeton d'approbation. Plus jamais alimenté.
+  tokenUsedHash     String?
   paymentMethod     PaymentMethod
   currency          Currency
   paymentCountry    Country
@@ -291,4 +429,73 @@ model PaymentOrder {
   @@index([expenseId])
   @@index([createdById, createdAt])
   @@index([status])
+}
+
+/// Candidatures deposees depuis la vitrine publique : appel a projets et
+/// benevolat. Avant, les deux formulaires se contentaient d'un setSubmitted(true)
+/// cote navigateur : le candidat voyait un ecran de remerciement et sa
+/// candidature n'existait nulle part.
+model PublicSubmission {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  kind     PublicSubmissionKind
+  fullName String
+  email    String
+
+  // Appel a projets
+  organization String?
+  theme        String?
+  message      String?
+
+  // Benevolat
+  skills       String?
+  availability String?
+
+  ip        String?
+  userAgent String?
+
+  handledAt DateTime?
+
+  @@index([kind, createdAt])
+  @@index([handledAt])
+}
+
+/// Un ENCAISSEMENT : un versement réellement reçu, ou en cours de l'être.
+///
+/// Subscription porte l'ENGAGEMENT (le mandat : montant, périodicité,
+/// consentement). Contribution porte l'argent. Les confondre était la cause
+/// racine du chiffre ambigu du tableau de bord : le simple clic de
+/// consentement faisait passer une cotisation en ACTIVE, et ce statut était
+/// additionné comme s'il s'agissait d'une recette.
+model Contribution {
+  id             String       @id @default(cuid())
+  subscriptionId String
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Restrict)
+
+  amount   Int
+  currency String
+
+  /// Échéance couverte par ce versement. Permet de dire « la mensualité de
+  /// mars est impayée » sans générer d'échéancier à l'avance.
+  periodStart DateTime
+
+  status  ContributionStatus  @default(PENDING)
+  channel ContributionChannel
+
+  /// Clé d'idempotence STABLE, de la forme SUB-<id>-AAAA-MM-JJ.
+  /// L'ancien venderRef contenait Date.now() et changeait à chaque clic : deux
+  /// clics produisaient deux OTP valides, donc un double débit possible sans
+  /// trace du premier.
+  idempotencyKey String @unique
+
+  reference   String?
+  rawResponse Json?
+  paidAt      DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([subscriptionId, periodStart])
+  @@index([status, createdAt])
 }

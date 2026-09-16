@@ -56,6 +56,25 @@ async function postJson(path, body, token) {
       throw err;
     }
 
+    // Le succes etait deduit du seul code HTTP. Les API bancaires renvoient
+    // couramment un 200 portant un code d'erreur METIER dans le corps : un
+    // paiement refuse passait donc pour un paiement reussi.
+    //
+    // ⚠️ Les valeurs exactes de responseCode doivent etre confirmees PAR ECRIT
+    // avec CAC Bank avant tout passage en live, avec la duree de validite de
+    // l'OTP et leur comportement en cas de reappel du meme vender_ref. En
+    // attendant, on refuse tout code non vide different de "0"/"00"/"000",
+    // ce qui est le defaut ferme.
+    const code = data?.responseCode ?? data?.response_code ?? null;
+    if (code !== null && code !== undefined && !["0", "00", "000"].includes(String(code))) {
+      const err = new Error(
+        data?.description || data?.message || `CAC Bank a refusé l'opération (code ${code})`,
+      );
+      err.status = 402;
+      err.cacResponse = data;
+      throw err;
+    }
+
     return data;
   } finally {
     clearTimeout(timeout);
@@ -112,6 +131,7 @@ export async function initiatePayment({
   description,
   venderRef,
   amount,
+  currency,
 }) {
   if (isMockMode()) {
     return {
@@ -126,7 +146,10 @@ export async function initiatePayment({
     {
       ...credentialsBody(),
       customer_mobile: customerMobile,
-      currency: env.CAC_CURRENCY,
+      // La devise vient de la souscription. Le repli sur CAC_CURRENCY ne sert
+      // qu'aux appels qui n'en fournissent pas : un membre ayant choisi USD
+      // etait sinon debite en DJF.
+      currency: currency || env.CAC_CURRENCY,
       desc: description,
       vender_ref: venderRef,
       amount,

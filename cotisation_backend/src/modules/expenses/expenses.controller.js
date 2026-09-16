@@ -1,5 +1,10 @@
 import * as service from "./expenses.service.js";
-import { createExpenseSchema, expenseIdParamsSchema } from "./expenses.schemas.js";
+import {
+  createExpenseSchema,
+  expenseIdParamsSchema,
+  approveExpenseSchema,
+  rejectExpenseSchema,
+} from "./expenses.schemas.js";
 
 export async function dashboard(req, res, next) {
   try {
@@ -29,10 +34,26 @@ export async function list(req, res, next) {
   }
 }
 
+export async function trail(req, res, next) {
+  try {
+    const params = expenseIdParamsSchema.parse(req.params);
+    const result = await service.getExpenseTrail({ id: params.id });
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
+}
+
 export async function approve(req, res, next) {
   try {
     const params = expenseIdParamsSchema.parse(req.params);
-    const result = await service.approveExpense({ userId: req.user.id, role: req.user.role, id: params.id, req });
+    const body = approveExpenseSchema.parse(req.body);
+    const result = await service.approveExpense({
+      userId: req.user.id,
+      id: params.id,
+      password: body.password,
+      req,
+    });
     res.json(result);
   } catch (err) {
     next(err);
@@ -42,7 +63,13 @@ export async function approve(req, res, next) {
 export async function reject(req, res, next) {
   try {
     const params = expenseIdParamsSchema.parse(req.params);
-    const result = await service.rejectExpense({ user: req.user, id: params.id, req });
+    const body = rejectExpenseSchema.parse(req.body);
+    const result = await service.rejectExpense({
+      user: req.user,
+      id: params.id,
+      reason: body.reason,
+      req,
+    });
     res.json(result);
   } catch (err) {
     next(err);

@@ -38,10 +38,116 @@ function parseOptionalPositiveInteger(name) {
   return value;
 }
 
-function parsePaymentMode(name, fallback = "mock") {
-  const value = process.env[name] || fallback;
-  if (["mock", "live"].includes(value)) return value;
-  throw new Error(`❌ Variable d’environnement invalide : ${name} doit être mock ou live`);
+const nodeEnv = process.env.NODE_ENV || "development";
+
+/**
+ * Le mode "mock" accepte un OTP constant : c'est un defaut OUVERT.
+ * Il ne doit jamais s'appliquer par omission sur un serveur de production —
+ * un oubli de variable transformerait silencieusement l'encaissement reel en
+ * simulation. En production, le choix doit donc etre explicite.
+ */
+function resolvePaymentMode() {
+  const raw = process.env.CAC_PAYMENT_MODE;
+
+  if (!raw) {
+    if (nodeEnv === "production") {
+      throw new Error(
+        "❌ CAC_PAYMENT_MODE doit être défini explicitement (mock ou live) en production",
+      );
+    }
+    return "mock";
+  }
+
+  if (!["mock", "live"].includes(raw)) {
+    throw new Error(
+      "❌ Variable d’environnement invalide : CAC_PAYMENT_MODE doit être mock ou live",
+    );
+  }
+
+  return raw;
+}
+
+const cacPaymentMode = resolvePaymentMode();
+
+/**
+ * Ou vivent les pieces d'identite.
+ *
+ * Le disque de Render est ephemere : un deploiement efface tous les documents
+ * deja deposes, en laissant en base des lignes qui pointent vers rien. Le defaut
+ * silencieux — « ca marche en local » — est donc exactement le piege a eviter en
+ * production, d'ou le refus de demarrer plutot que la perte differee.
+ */
+function resolveDocumentStorage() {
+  const mode = process.env.STORAGE_MODE;
+
+  // Le tableau de bord Cloudinary donne CLOUDINARY_URL en une seule chaine ;
+  // les trois variables separees font la meme chose. On accepte les deux.
+  const identifiants = Boolean(
+    (process.env.CLOUDINARY_CLOUD_NAME &&
+      process.env.CLOUDINARY_API_KEY &&
+      process.env.CLOUDINARY_API_SECRET) ||
+      process.env.CLOUDINARY_URL,
+  );
+
+  if (mode && !["cloudinary", "local"].includes(mode)) {
+    throw new Error(
+      "❌ Variable d’environnement invalide : STORAGE_MODE doit être cloudinary ou local",
+    );
+  }
+
+  // STORAGE_MODE=cloudinary sans identifiants doit ECHOUER, jamais retomber sur
+  // le disque. Une retombee silencieuse est precisement le scenario a eviter :
+  // le service demarre, les inscriptions passent, et les pieces d'identite sont
+  // perdues au redeploiement suivant sans qu'aucune erreur n'ait ete levee.
+  if (mode === "cloudinary") {
+    if (!identifiants) {
+      throw new Error(
+        "❌ STORAGE_MODE=cloudinary mais aucun identifiant : renseigne CLOUDINARY_URL, " +
+          "ou CLOUDINARY_CLOUD_NAME + CLOUDINARY_API_KEY + CLOUDINARY_API_SECRET.",
+      );
+    }
+    return "cloudinary";
+  }
+
+  if (mode === "local") {
+    if (nodeEnv === "production") {
+      throw new Error(
+        "❌ STORAGE_MODE=local est interdit en production : le disque est éphémère, " +
+          "les pièces d'identité disparaîtraient au prochain déploiement.",
+      );
+    }
+    return "local";
+  }
+
+  // Sans STORAGE_MODE, on deduit — et on refuse de deduire « local » en production.
+  if (identifiants) return "cloudinary";
+
+  if (nodeEnv === "production") {
+    throw new Error(
+      "❌ Stockage des documents non configuré : pose STORAGE_MODE=cloudinary et " +
+        "CLOUDINARY_URL, ou CLOUDINARY_CLOUD_NAME + CLOUDINARY_API_KEY + CLOUDINARY_API_SECRET. " +
+        "Sans Cloudinary, les pièces d'identité disparaissent au prochain déploiement.",
+    );
+  }
+
+  return "local";
+}
+
+const documentStorage = resolveDocumentStorage();
+
+// En live, on echoue au DEMARRAGE plutot qu'a la premiere requete de paiement :
+// un serveur qui demarre est un serveur qu'on croit fonctionnel.
+if (cacPaymentMode === "live") {
+  for (const name of [
+    "CAC_BASE_URL",
+    "CAC_USERNAME",
+    "CAC_PASSWORD",
+    "CAC_APP_KEY",
+    "CAC_API_KEY",
+    "CAC_COMPANY_SERVICE_ID",
+  ]) {
+    required(name);
+  }
 }
 
 const hasBrevoApiKey = Boolean(process.env.BREVO_API_KEY);
@@ -53,7 +159,7 @@ const emailPass = hasBrevoApiKey ? process.env.EMAIL_PASS : required("EMAIL_PASS
 
 export const env = {
   // Server
-  NODE_ENV: process.env.NODE_ENV || "development",
+  NODE_ENV: nodeEnv,
   PORT: Number(process.env.PORT || 4000),
 
   // Database (Neon)
@@ -68,6 +174,14 @@ export const env = {
   // CORS
   CORS_ORIGIN: process.env.CORS_ORIGIN || "http://localhost:5173",
 
+  // Base des liens envoyes par email (invitation d'un compte interne).
+  // Par defaut l'origine du front, qui est deja connue via CORS_ORIGIN.
+  APP_PUBLIC_URL: (
+    process.env.APP_PUBLIC_URL ||
+    process.env.CORS_ORIGIN ||
+    "http://localhost:5173"
+  ).replace(/\/+$/, ""),
+
   // OTP
   OTP_TTL_MINUTES: Number(process.env.OTP_TTL_MINUTES || 10),
   OTP_MAX_ATTEMPTS: Number(process.env.OTP_MAX_ATTEMPTS || 5),
@@ -78,6 +192,10 @@ export const env = {
   BREVO_API_KEY: process.env.BREVO_API_KEY,
   EMAIL_FROM: emailFrom,
   EMAIL_FROM_NAME: process.env.EMAIL_FROM_NAME || "Hiil Foundation",
+
+  // Destinataire interne des candidatures deposees sur la vitrine.
+  // Par defaut l'adresse d'envoi, qui est deja validee cote Brevo.
+  CONTACT_EMAIL: process.env.CONTACT_EMAIL || emailFrom,
 
   // EMAIL SMTP fallback (used only when BREVO_API_KEY is absent)
   EMAIL_HOST: emailHost,
@@ -92,6 +210,10 @@ export const env = {
   // Upload
   UPLOAD_MAX_MB: Number(process.env.UPLOAD_MAX_MB || 10),
 
+  // "cloudinary" ou "local". Voir resolveDocumentStorage() ci-dessus : "local"
+  // est impossible en production.
+  DOCUMENT_STORAGE: documentStorage,
+
   // CAC Bank Payment API
   CAC_BASE_URL: process.env.CAC_BASE_URL,
   CAC_USERNAME: process.env.CAC_USERNAME,
@@ -100,5 +222,5 @@ export const env = {
   CAC_API_KEY: process.env.CAC_API_KEY,
   CAC_COMPANY_SERVICE_ID: parseOptionalPositiveInteger("CAC_COMPANY_SERVICE_ID"),
   CAC_CURRENCY: process.env.CAC_CURRENCY || "DJF",
-  CAC_PAYMENT_MODE: parsePaymentMode("CAC_PAYMENT_MODE", "mock"),
+  CAC_PAYMENT_MODE: cacPaymentMode,
 };

@@ -3,6 +3,8 @@ import { AnimatePresence, motion } from "framer-motion"; // eslint-disable-line 
 
 import { useTranslation } from "react-i18next";
 import { useMemo, useState } from "react";
+import toast from "react-hot-toast";
+import { submitPublicFormApi } from "../api/publicForms.api";
 import Brand from "../components/Brand";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 import { useAuth } from "../context/AuthContext";
@@ -37,18 +39,6 @@ const floaty = {
     y: [0, -9, 0],
     transition: { duration: 5, repeat: Infinity, ease: "easeInOut" },
   },
-};
-
-const generateSixDigitCode = () => {
-  const cryptoApi = globalThis.crypto;
-
-  if (cryptoApi?.getRandomValues) {
-    const values = new Uint32Array(1);
-    cryptoApi.getRandomValues(values);
-    return String(100000 + (values[0] % 900000));
-  }
-
-  return String(100000 + (Date.now() % 900000));
 };
 
 /* ─── SectionLabel ───────────────────────────────────────── */
@@ -222,10 +212,15 @@ function NosActions({ G, t }) {
   const [formData, setFormData] = useState({
     nom: "",
     org: "",
+    email: "",
     theme: "",
     desc: "",
+    // Champ piege : cache aux humains, rempli par la plupart des robots.
+    // Le serveur repond 201 sans rien ecrire quand il est renseigne.
+    website: "",
   });
   const [submitted, setSubmitted] = useState(false);
+  const [sending, setSending] = useState(false);
 
   const filtered = activeTheme
     ? programmes.filter((p) => p.thematique === activeTheme)
@@ -850,6 +845,14 @@ function NosActions({ G, t }) {
                               "home.actions.form.organizationPlaceholder"
                             ),
                           },
+                          {
+                            key: "email",
+                            label: t("home.actions.form.emailLabel", "Email"),
+                            placeholder: t(
+                              "home.actions.form.emailPlaceholder",
+                              "pour vous répondre",
+                            ),
+                          },
                         ].map(({ key, label, placeholder }) => (
                           <div key={key}>
                             <label
@@ -961,9 +964,83 @@ function NosActions({ G, t }) {
                           }}
                         />
                       </div>
+                      {/* piege a robots : jamais visible, jamais focusable */}
+                      <input
+                        type="text"
+                        name="website"
+                        tabIndex={-1}
+                        autoComplete="off"
+                        aria-hidden="true"
+                        value={formData.website}
+                        onChange={(e) =>
+                          setFormData({ ...formData, website: e.target.value })
+                        }
+                        style={{
+                          position: "absolute",
+                          left: "-9999px",
+                          width: 1,
+                          height: 1,
+                          opacity: 0,
+                        }}
+                      />
                       <button
-                        onClick={() => {
-                          if (formData.nom && formData.desc) setSubmitted(true);
+                        disabled={sending}
+                        onClick={async () => {
+                          if (!formData.nom || !formData.email || !formData.desc) {
+                            toast.error(
+                              t(
+                                "home.actions.form.required",
+                                "Nom, email et description sont requis.",
+                              ),
+                            );
+                            return;
+                          }
+                          if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+                            toast.error(
+                              t(
+                                "home.actions.form.emailInvalid",
+                                "Cette adresse email n'est pas valide.",
+                              ),
+                            );
+                            return;
+                          }
+                          // Aligne sur le schema zod du backend : min 10 caracteres.
+                          // Sans ce controle, le candidat recoit un 400 generique
+                          // sans savoir quel champ est en cause.
+                          if (formData.desc.trim().length < 10) {
+                            toast.error(
+                              t(
+                                "home.actions.form.descTooShort",
+                                "Décrivez votre projet en quelques mots (10 caractères minimum).",
+                              ),
+                            );
+                            return;
+                          }
+                          setSending(true);
+                          try {
+                            await submitPublicFormApi({
+                              kind: "PROJECT_PROPOSAL",
+                              fullName: formData.nom,
+                              email: formData.email,
+                              organization: formData.org,
+                              theme: formData.theme,
+                              message: formData.desc,
+                              website: formData.website,
+                            });
+                            // L'ecran de remerciement ne s'affiche QUE si le
+                            // serveur a confirme l'enregistrement.
+                            setSubmitted(true);
+                          } catch (err) {
+                            toast.error(
+                              err?.response?.data?.message ||
+                                t(
+                                  "home.actions.form.error",
+                                  "Envoi impossible pour le moment. Réessayez dans un instant.",
+                                ),
+                            );
+                          } finally {
+                            setSending(false);
+                          }
                         }}
                         style={{
                           padding: "0.85rem 2rem",
@@ -3328,13 +3405,17 @@ function Soutenir({ G }) {
   const { t } = useTranslation();
   const [donType, setDonType] = useState("instantane");
   const [selectedAmount, setSelectedAmount] = useState("");
+  // Deux etapes seulement : on choisit un montant, puis on est oriente vers le
+  // vrai parcours d'adhesion. Le tunnel "wallet -> OTP -> succes" qui existait
+  // ici etait entierement simule dans le navigateur — code genere par
+  // crypto.getRandomValues, compare localement, aucun appel reseau, aucun
+  // paiement. Sur la page publique d'une fondation caritative, une maquette de
+  // parcours de paiement n'a pas sa place tant que le rail bancaire n'est pas
+  // branche.
   const [donStep, setDonStep] = useState("amounts");
-  const [selectedWallet, setSelectedWallet] = useState("");
-  const [phone, setPhone] = useState("");
-  const [otp, setOtp] = useState("");
-  const [generatedOtp, setGeneratedOtp] = useState("");
-  const [benevoleForm, setBenevoleForm] = useState({ nom: "", email: "", competence: "", dispo: "" });
+  const [benevoleForm, setBenevoleForm] = useState({ nom: "", email: "", competence: "", dispo: "", website: "" });
   const [benevoleSubmitted, setBenevoleSubmitted] = useState(false);
+  const [benevoleSending, setBenevoleSending] = useState(false);
 
   const donTabs = useMemo(
     () => [
@@ -3346,17 +3427,6 @@ function Soutenir({ G }) {
   );
 
   const amountsInstantane = ["100$", "250$", "500$", "1000$", "2000$"];
-
-  const wallets = useMemo(
-    () => [
-      { id: "waafi",  label: "Waafi",   emoji: "📱" },
-      { id: "dmoney", label: "D-Money", emoji: "💳" },
-      { id: "cac",    label: "CAC Pay", emoji: "🏦" },
-      { id: "saba",   label: "Saba Pay", emoji: "💰" },
-      { id: "other",  label: t("home.support.wallets.other"), emoji: "🔗" },
-    ],
-    [t]
-  );
 
   const whyGive = useMemo(
     () => [
@@ -3446,30 +3516,12 @@ function Soutenir({ G }) {
 
   const handleAmountSelect = (amount) => {
     setSelectedAmount(amount);
-    setDonStep("wallet");
-    setSelectedWallet("");
-    setPhone("");
-  };
-
-  const handleSendOtp = () => {
-    if (selectedWallet && phone.length >= 8) {
-      const code = generateSixDigitCode();
-      setGeneratedOtp(code);
-      setDonStep("otp");
-      setOtp("");
-    }
-  };
-
-  const handleConfirmOtp = () => {
-    if (otp === generatedOtp) setDonStep("success");
+    setDonStep("adhesion");
   };
 
   const resetDon = () => {
     setDonStep("amounts");
     setSelectedAmount("");
-    setSelectedWallet("");
-    setPhone("");
-    setOtp("");
   };
 
   return (
@@ -3608,108 +3660,37 @@ function Soutenir({ G }) {
                   </>
                 )}
 
-                {donStep === "wallet" && (
+                {donStep === "adhesion" && (
                   <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
                     <button onClick={resetDon} style={{ background: "none", border: "none", color: G.slateMid, fontSize: "0.8rem", cursor: "pointer", marginBottom: "1rem", display: "flex", alignItems: "center", gap: "0.3rem", padding: 0 }}>
                       ← {t("home.support.back")}
                     </button>
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1.25rem", padding: "0.6rem 1rem", borderRadius: "0.75rem", background: G.goldLight, border: `1px solid rgba(184,134,11,0.2)`, fontSize: "0.88rem" }}>
+
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1.25rem", padding: "0.6rem 1rem", borderRadius: "0.75rem", background: G.goldLight, border: "1px solid rgba(184,134,11,0.2)", fontSize: "0.88rem" }}>
                       <span style={{ fontWeight: 800, color: G.gold }}>{t("home.support.instant.amountLabel")} :</span>
                       <span style={{ fontWeight: 900, color: G.slate }}>{selectedAmount}</span>
                     </div>
-                    <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: G.slate, marginBottom: "0.65rem" }}>
-                      {t("home.support.instant.chooseWallet")}
-                    </label>
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(100px, 1fr))", gap: "0.5rem", marginBottom: "1.25rem" }}>
-                      {wallets.map((w) => (
-                        <button key={w.id} onClick={() => setSelectedWallet(w.id)}
-                          style={{ padding: "0.65rem 0.5rem", borderRadius: "0.75rem", border: `1px solid ${selectedWallet === w.id ? G.greenBorder : G.border}`, background: selectedWallet === w.id ? G.greenLight : G.offWhite, color: selectedWallet === w.id ? G.green : G.slate, fontWeight: 700, fontSize: "0.78rem", cursor: "pointer", transition: "all 0.2s", textAlign: "center" }}
-                        >
-                          <div style={{ fontSize: "1.3rem", marginBottom: "0.2rem" }}>{w.emoji}</div>
-                          {w.label}
-                        </button>
-                      ))}
-                    </div>
-                    <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: G.slate, marginBottom: "0.3rem" }}>
-                      {t("home.support.instant.phoneLabel")}
-                    </label>
-                    <input type="tel" placeholder={t("home.support.instant.phonePlaceholder")} value={phone} onChange={(e) => setPhone(e.target.value)}
-                      style={{ width: "100%", padding: "0.65rem 0.85rem", borderRadius: "0.625rem", border: `1px solid ${G.border}`, fontSize: "0.85rem", background: G.offWhite, outline: "none", boxSizing: "border-box", marginBottom: "1.2rem" }}
-                    />
-                    <button onClick={handleSendOtp} disabled={!selectedWallet || phone.length < 8}
-                      style={{ width: "100%", padding: "0.9rem", borderRadius: "0.875rem", background: selectedWallet && phone.length >= 8 ? `linear-gradient(135deg,#d97706,${G.gold})` : G.border, color: selectedWallet && phone.length >= 8 ? "white" : G.slateMid, fontWeight: 800, fontSize: "0.9rem", border: "none", cursor: selectedWallet && phone.length >= 8 ? "pointer" : "not-allowed", transition: "all 0.2s" }}
-                    >
-                      {t("home.support.instant.sendOtpBtn")}
-                    </button>
-                  </motion.div>
-                )}
 
-                {donStep === "otp" && (
-                  <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
-                    <button onClick={() => setDonStep("wallet")} style={{ background: "none", border: "none", color: G.slateMid, fontSize: "0.8rem", cursor: "pointer", marginBottom: "1rem", display: "flex", alignItems: "center", gap: "0.3rem", padding: 0 }}>
-                      ← {t("home.support.back")}
-                    </button>
-                    <div style={{ textAlign: "center", padding: "1rem", borderRadius: "0.875rem", background: G.greenLight, border: `1px solid ${G.greenBorder}`, marginBottom: "1.5rem" }}>
-                      <div style={{ fontSize: "1.75rem", marginBottom: "0.4rem" }}>📲</div>
-                      <p style={{ fontSize: "0.85rem", color: G.slateMid, lineHeight: 1.65, margin: 0 }}>
-                        {t("home.support.otp.sentTo")} <strong style={{ color: G.slate }}>{phone}</strong>.<br />
-                        {t("home.support.otp.enterBelow")}
-                      </p>
-                    </div>
-                    <div style={{ textAlign: "center", padding: "0.75rem 1rem", borderRadius: "0.75rem", background: "#fffbeb", border: "1px solid rgba(184,134,11,0.3)", marginBottom: "1rem", fontSize: "0.78rem", color: G.slateMid }}>
-                      🧪 <strong style={{ color: G.gold }}>{t("home.support.otp.testMode")}</strong>{" "}
-                      <span style={{ fontWeight: 900, fontSize: "1.1rem", letterSpacing: "0.2em", color: G.slate }}>{generatedOtp}</span>
-                    </div>
-                    <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: G.slate, marginBottom: "0.3rem" }}>
-                      {t("home.support.otp.label")}
-                    </label>
-                    <input type="number" placeholder="000000" maxLength={6} value={otp} onChange={(e) => setOtp(e.target.value.slice(0, 6))}
-                      style={{ width: "100%", padding: "0.75rem 0.85rem", borderRadius: "0.625rem", border: `1px solid ${G.border}`, fontSize: "1.1rem", letterSpacing: "0.4em", textAlign: "center", background: G.offWhite, outline: "none", boxSizing: "border-box", marginBottom: "1.2rem", fontWeight: 800 }}
-                    />
-                    <button onClick={handleConfirmOtp} disabled={otp !== generatedOtp}
-                      style={{ width: "100%", padding: "0.9rem", borderRadius: "0.875rem", background: otp === generatedOtp ? `linear-gradient(135deg,#d97706,${G.gold})` : G.border, color: otp === generatedOtp ? "white" : G.slateMid, fontWeight: 800, fontSize: "0.9rem", border: "none", cursor: otp === generatedOtp ? "pointer" : "not-allowed", transition: "all 0.2s" }}
-                    >
-                      🔒 {t("home.support.otp.confirmBtn")} {selectedAmount} →
-                    </button>
+                    <p style={{ fontSize: "0.88rem", color: G.slateMid, lineHeight: 1.7, marginBottom: "1.25rem" }}>
+                      {t(
+                        "home.support.adhesion.intro",
+                        "Les dons passent par une adhésion : vous créez votre compte, vous déclarez le montant et la périodicité de votre cotisation, et la fondation vous indique comment la régler.",
+                      )}
+                    </p>
 
-                    <p
-                      style={{
-                        fontSize: "0.72rem",
-                        color: G.slateLight,
-                        textAlign: "center",
-                        marginTop: "0.75rem",
-                      }}
+                    <Link
+                      to="/register"
+                      style={{ display: "block", width: "100%", boxSizing: "border-box", padding: "0.9rem", borderRadius: "0.875rem", background: `linear-gradient(135deg,${G.greenMid},${G.green})`, color: "white", fontWeight: 800, fontSize: "0.9rem", border: "none", cursor: "pointer", textAlign: "center", textDecoration: "none" }}
                     >
-                      Vous n'avez pas reçu le code ?{" "}
-                      <span
-                        style={{ color: G.green, cursor: "pointer", fontWeight: 700 }}
-                        onClick={() => {
-                          const code = generateSixDigitCode();
-                          setGeneratedOtp(code);
-                          setOtp("");
-                        }}
-                      >
-                        {t("home.support.otp.resend")}
-                      </span>
-                    </p>
-                  </motion.div>
-                )}
+                      {t("home.support.adhesion.cta", "Créer mon compte adhérent")} →
+                    </Link>
 
-                {donStep === "success" && (
-                  <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} style={{ textAlign: "center", padding: "2rem 1rem" }}>
-                    <div style={{ fontSize: "3.5rem", marginBottom: "1rem" }}>🎉</div>
-                    <h4 style={{ fontSize: "1.2rem", fontWeight: 900, color: G.slate, marginBottom: "0.5rem" }}>
-                      {t("home.support.success.title")}
-                    </h4>
-                    <p style={{ color: G.slateMid, fontSize: "0.9rem", lineHeight: 1.7, marginBottom: "0.5rem" }}>
-                      {t("home.support.success.desc")} <strong style={{ color: G.slate }}>{selectedAmount}</strong>{t("home.support.success.thanks")}
+                    <p style={{ fontSize: "0.78rem", color: G.slateLight, textAlign: "center", marginTop: "0.85rem" }}>
+                      {t("home.support.adhesion.already", "Vous avez déjà un compte ?")}{" "}
+                      <Link to="/login" style={{ color: G.green, fontWeight: 700, textDecoration: "none" }}>
+                        {t("login", "Se connecter")}
+                      </Link>
                     </p>
-                    <p style={{ color: G.slateMid, fontSize: "0.82rem", marginBottom: "1.5rem" }}>
-                      {t("home.support.success.receipt")}
-                    </p>
-                    <button onClick={resetDon} style={{ padding: "0.65rem 1.75rem", borderRadius: "0.75rem", background: G.greenLight, border: `1px solid ${G.greenBorder}`, color: G.green, fontWeight: 800, cursor: "pointer", fontSize: "0.85rem" }}>
-                      {t("home.support.success.anotherDon")}
-                    </button>
                   </motion.div>
                 )}
               </>
@@ -3779,7 +3760,7 @@ function Soutenir({ G }) {
               <p style={{ color: G.slateMid, fontSize: "0.85rem" }}>
                 {t("home.support.volunteer.submittedDesc")}
               </p>
-              <button onClick={() => { setBenevoleSubmitted(false); setBenevoleForm({ nom: "", email: "", competence: "", dispo: "" }); }}
+              <button onClick={() => { setBenevoleSubmitted(false); setBenevoleForm({ nom: "", email: "", competence: "", dispo: "", website: "" }); }}
                 style={{ marginTop: "1rem", padding: "0.55rem 1.2rem", borderRadius: "0.75rem", background: G.white, border: `1px solid ${G.greenBorder}`, color: G.green, fontWeight: 700, cursor: "pointer", fontSize: "0.82rem" }}
               >
                 {t("home.support.volunteer.closeBtn")}
@@ -3825,7 +3806,62 @@ function Soutenir({ G }) {
                     {dispoOptions.map((o) => <option key={o}>{o}</option>)}
                   </select>
                 </div>
-                <button onClick={() => { if (benevoleForm.nom && benevoleForm.email) setBenevoleSubmitted(true); }}
+                <input
+                  type="text"
+                  name="website"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  aria-hidden="true"
+                  value={benevoleForm.website}
+                  onChange={(e) =>
+                    setBenevoleForm({ ...benevoleForm, website: e.target.value })
+                  }
+                  style={{ position: "absolute", left: "-9999px", width: 1, height: 1, opacity: 0 }}
+                />
+                <button
+                  disabled={benevoleSending}
+                  onClick={async () => {
+                    if (!benevoleForm.nom || !benevoleForm.email) {
+                      toast.error(
+                        t(
+                          "home.benevole.required",
+                          "Nom et email sont requis.",
+                        ),
+                      );
+                      return;
+                    }
+                    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(benevoleForm.email)) {
+                      toast.error(
+                        t(
+                          "home.benevole.emailInvalid",
+                          "Cette adresse email n'est pas valide.",
+                        ),
+                      );
+                      return;
+                    }
+                    setBenevoleSending(true);
+                    try {
+                      await submitPublicFormApi({
+                        kind: "VOLUNTEER",
+                        fullName: benevoleForm.nom,
+                        email: benevoleForm.email,
+                        skills: benevoleForm.competence,
+                        availability: benevoleForm.dispo,
+                        website: benevoleForm.website,
+                      });
+                      setBenevoleSubmitted(true);
+                    } catch (err) {
+                      toast.error(
+                        err?.response?.data?.message ||
+                          t(
+                            "home.benevole.error",
+                            "Envoi impossible pour le moment. Réessayez dans un instant.",
+                          ),
+                      );
+                    } finally {
+                      setBenevoleSending(false);
+                    }
+                  }}
                   style={{ padding: "0.85rem", borderRadius: "0.875rem", background: `linear-gradient(135deg,${G.greenMid},${G.green})`, color: "white", fontWeight: 800, fontSize: "0.9rem", border: "none", cursor: "pointer" }}
                 >
                   {t("home.support.volunteer.submitBtn")}

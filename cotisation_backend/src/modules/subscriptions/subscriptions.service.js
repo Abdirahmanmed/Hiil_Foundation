@@ -46,9 +46,29 @@ export const createSubscription = async (userId, data, req) => {
     consentUserAgent: null,
   };
 
-  // (Option) empêcher plusieurs subscriptions actives si tu veux
-  // const existing = await prisma.subscription.findFirst({ where: { userId, status: { in: ["ACTIVE", "ACTIVE_MANUAL"] } } });
-  // if (existing) throw Object.assign(new Error("Vous avez déjà une cotisation active."), { status: 409 });
+  // Un seul mandat ouvert par membre.
+  //
+  // Ce garde-fou était écrit puis commenté : un membre pouvait créer un nombre
+  // illimité de cotisations ACTIVE, toutes additionnées dans les statistiques
+  // présentées au conseil. Les versements supplémentaires — don ponctuel,
+  // rattrapage — sont des Contribution rattachées au mandat existant, pas de
+  // nouveaux mandats. C'est ce qui rend le compteur « nombre de cotisants »
+  // égal au nombre de personnes.
+  const existante = await prisma.subscription.findFirst({
+    where: {
+      userId,
+      status: { in: ["PENDING_CONSENT", "ACTIVE", "ACTIVE_MANUAL"] },
+    },
+    select: { id: true, status: true },
+  });
+
+  if (existante) {
+    const err = new Error(
+      "Vous avez déjà une cotisation en cours. Modifiez-la plutôt que d'en créer une seconde.",
+    );
+    err.status = 409;
+    throw err;
+  }
 
   const created = await prisma.subscription.create({ data: payload });
 
@@ -141,4 +161,90 @@ export const acceptConsent = async (userId, id, accepted, req) => {
   });
 
   return updated;
+};
+
+/**
+ * Modifier son mandat.
+ *
+ * Seuls le montant et la periodicite sont modifiables : changer de canal de
+ * paiement revient a signer un autre mandat, avec un autre consentement. Les
+ * encaissements deja confirmes ne sont pas touches — on ne recrit pas le passe.
+ */
+export const updateMySubscription = async (userId, id, data, req) => {
+  const sub = await prisma.subscription.findFirst({ where: { id, userId } });
+  if (!sub) {
+    const err = new Error("Cotisation introuvable");
+    err.status = 404;
+    throw err;
+  }
+
+  if (sub.status === "CANCELLED") {
+    const err = new Error("Cette cotisation est annulée.");
+    err.status = 409;
+    throw err;
+  }
+
+  const updated = await prisma.subscription.update({
+    where: { id },
+    data: {
+      amount: data.amount ?? sub.amount,
+      frequency: data.frequency ?? sub.frequency,
+    },
+  });
+
+  await prisma.auditLog.create({
+    data: {
+      userId,
+      action: "SUBSCRIPTION_UPDATED",
+      entity: "Subscription",
+      entityId: id,
+      // Avant / après : sans cela, personne ne peut dire six mois plus tard
+      // que le montant a changé, ni dans quel sens.
+      meta: {
+        from: { amount: sub.amount, frequency: sub.frequency },
+        to: { amount: updated.amount, frequency: updated.frequency },
+      },
+      ip: getIp(req),
+      userAgent: req.headers["user-agent"] || null,
+    },
+  });
+
+  return updated;
+};
+
+/**
+ * Annuler son mandat.
+ *
+ * Le mandat s'arrete, les encaissements passes restent : ils sont de l'argent
+ * reellement recu, pas une intention. C'est aussi ce qui libere le membre pour
+ * en signer un nouveau, le garde-fou anti-doublon n'admettant qu'un mandat
+ * ouvert a la fois.
+ */
+export const cancelMySubscription = async (userId, id, req) => {
+  const { count } = await prisma.subscription.updateMany({
+    where: { id, userId, status: { in: ["DRAFT", "PENDING_CONSENT", "ACTIVE", "ACTIVE_MANUAL"] } },
+    data: { status: "CANCELLED", nextDueDate: null },
+  });
+
+  if (count === 0) {
+    const existe = await prisma.subscription.findFirst({ where: { id, userId } });
+    const err = new Error(
+      existe ? "Cette cotisation est déjà annulée." : "Cotisation introuvable",
+    );
+    err.status = existe ? 409 : 404;
+    throw err;
+  }
+
+  await prisma.auditLog.create({
+    data: {
+      userId,
+      action: "SUBSCRIPTION_CANCELLED",
+      entity: "Subscription",
+      entityId: id,
+      ip: getIp(req),
+      userAgent: req.headers["user-agent"] || null,
+    },
+  });
+
+  return { message: "Cotisation annulée." };
 };

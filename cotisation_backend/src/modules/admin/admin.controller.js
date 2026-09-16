@@ -66,6 +66,7 @@ export async function setUserStatus(req, res, next) {
     const body = setUserStatusSchema.parse(req.body);
     const updated = await adminService.setUserStatus({
       adminId: req.user.id,
+      adminRole: req.user.role,
       userId: req.params.userId,
       status: body.status,
       req,
@@ -97,10 +98,25 @@ export async function resetUserOtp(req, res, next) {
     resetUserOtpSchema.parse(req.body || {});
     const updated = await adminService.resetUserOtpSecurity({
       adminId: req.user.id,
+      adminRole: req.user.role,
       userId: req.params.userId,
       req,
     });
     res.json({ otpSecurity: updated });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function resendInvite(req, res, next) {
+  try {
+    const result = await adminService.resendInternalUserInvitation({
+      adminId: req.user.id,
+      adminRole: req.user.role,
+      userId: req.params.userId,
+      req,
+    });
+    res.json(result);
   } catch (err) {
     next(err);
   }
@@ -133,6 +149,15 @@ export async function forceConsent(req, res, next) {
       req,
     });
     res.json({ subscription: updated });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function oversight(req, res, next) {
+  try {
+    const data = await adminService.getOversight();
+    res.json(data);
   } catch (err) {
     next(err);
   }

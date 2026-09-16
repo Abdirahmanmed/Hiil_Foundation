@@ -1,6 +1,10 @@
 import prisma from "../../config/prisma.js";
+import { CAN_SUPERVISE } from "../../config/roles.js";
+import { invalidateUserCache } from "../../middlewares/auth.js";
 import { auditLog } from "../../utils/audit.js";
-import { hashPassword } from "../../utils/hash.js";
+import { hashUnusablePassword } from "../../utils/hash.js";
+import { issueInvitation } from "../../utils/invitation.js";
+import { sendInternalInviteMail } from "../../services/mail.service.js";
 
 const VISIBLE_INTERNAL_USER_ROLES = [
   "ADMIN",
@@ -92,7 +96,11 @@ function mapStatusRows(rows) {
 export async function getDashboardStats({ role } = {}) {
   const { monthStart, yearStart } = getPeriodStarts();
   const subscriptionActiveWhere = { status: { in: ["ACTIVE", "ACTIVE_MANUAL"] } };
-  const includeFinancials = role === "SUPER_ADMIN";
+  // L'ADMIN supervise le deroulement du travail du tresorier et du depensier :
+  // il lui faut les chiffres consolides. Superviser sans voir les montants n'est
+  // pas superviser. Il reste en lecture seule : aucune route d'ecriture des
+  // modules expenses / payment-orders ne le mentionne.
+  const includeFinancials = CAN_SUPERVISE.includes(role);
 
   const [
     totalUsers,
@@ -157,6 +165,31 @@ export async function getDashboardStats({ role } = {}) {
     }),
   ]);
 
+  // « Engagé » et « encaissé » sont deux chiffres différents, et les confondre
+  // était la cause racine du tableau de bord ambigu : un simple clic de
+  // consentement faisait passer une cotisation en ACTIVE, et ce statut était
+  // additionné comme s'il s'agissait d'une recette.
+  const [encaisseTotal, encaisseMois, encaisseParDevise, enAttenteEncaissement] =
+    await Promise.all([
+      prisma.contribution.aggregate({
+        where: { status: "CONFIRMED" },
+        _sum: { amount: true },
+        _count: true,
+      }),
+      prisma.contribution.aggregate({
+        where: { status: "CONFIRMED", paidAt: { gte: monthStart } },
+        _sum: { amount: true },
+        _count: true,
+      }),
+      prisma.contribution.groupBy({
+        by: ["currency"],
+        where: { status: "CONFIRMED" },
+        _sum: { amount: true },
+        _count: { currency: true },
+      }),
+      prisma.contribution.count({ where: { status: { in: ["PENDING", "TIMEOUT"] } } }),
+    ]);
+
   const stats = {
     totalUsers,
     activeUsers,
@@ -169,9 +202,26 @@ export async function getDashboardStats({ role } = {}) {
     activeSubscriptions,
     monthlySubscriptionsCount,
     annualSubscriptionsCount,
+    // Ces trois-là sont des ENGAGEMENTS : ce que les membres se sont engagés à
+    // verser. Le nom est conservé pour ne rien casser côté front, mais ce ne
+    // sont pas des recettes.
     monthlyCotisation: monthlyCotisation._sum.amount || 0,
     annualCotisation: annualCotisation._sum.amount || 0,
     totalCotisation: totalCotisation._sum.amount || 0,
+
+    // Ceux-là sont de l'argent réellement reçu.
+    encaisseTotal: encaisseTotal._sum.amount || 0,
+    encaisseCount: encaisseTotal._count,
+    encaisseMois: encaisseMois._sum.amount || 0,
+    encaisseMoisCount: encaisseMois._count,
+    encaisseParDevise: encaisseParDevise.map((r) => ({
+      currency: r.currency,
+      count: r._count.currency,
+      amount: r._sum.amount || 0,
+    })),
+    // Encaissements ouverts mais non confirmés : un TIMEOUT peut cacher un
+    // paiement abouti côté banque, il attend une réconciliation.
+    encaissementsEnAttente: enAttenteEncaissement,
     latestUsers,
     latestSubscriptions,
   };
@@ -249,6 +299,7 @@ export async function listAdherentsContributions() {
       currency: true,
       status: true,
       createdAt: true,
+      paidAt: true,
       user: {
         select: {
           id: true,
@@ -276,7 +327,14 @@ export async function listAdherentsContributions() {
     amount: subscription.amount,
     currency: subscription.currency,
     status: subscription.status,
-    paidAt: subscription.createdAt,
+    // La date de creation de l'engagement n'est PAS une date d'encaissement.
+    // Renvoyer l'une a la place de l'autre faisait passer chaque cotisation
+    // declaree pour une cotisation payee dans l'ecran des contributions.
+    // `paidAt` n'est alimente que par un paiement CAC confirme ; ailleurs il est
+    // null, et c'est la verite tant que la vague 2 n'a pas separe l'engagement
+    // de l'encaissement.
+    declaredAt: subscription.createdAt,
+    paidAt: subscription.paidAt ?? null,
   }));
 }
 
@@ -284,9 +342,17 @@ export async function listAdherentsContributions() {
    ACTIONS: USERS
    ========================= */
 
+// Les deux roles qui ne naissent jamais ici.
+//
+// OUGAS_ADMIN vient du module bootstrap, et de lui seul : si cet ecran pouvait
+// le creer, l'Ougas Admin se clonerait lui-meme et le compte d'amorcage ne
+// servirait plus a rien. SUPER_ADMIN, lui, ne vient d'aucune interface : c'est
+// scripts/seed.js, une fois, a l'installation.
+const ROLES_HORS_INTERFACE_ADMIN = ["OUGAS_ADMIN", "SUPER_ADMIN"];
+
 function assertCanCreateInternalUser({ adminRole, role }) {
-  if (role === "SUPER_ADMIN") {
-    throw createHttpError("SUPER_ADMIN ne peut pas être créé depuis l'interface", 403);
+  if (ROLES_HORS_INTERFACE_ADMIN.includes(role)) {
+    throw createHttpError(`${role} ne peut pas être créé depuis cet écran`, 403);
   }
 
   if (!CREATABLE_INTERNAL_ROLES.includes(role)) {
@@ -301,20 +367,37 @@ function assertCanCreateInternalUser({ adminRole, role }) {
 export async function createInternalUser({ adminId, adminRole, data, req }) {
   assertCanCreateInternalUser({ adminRole, role: data.role });
 
-  const passwordHash = await hashPassword(data.password);
-  const created = await prisma.user.create({
-    data: {
-      fullName: data.fullName,
-      email: data.email.toLowerCase(),
-      phone: data.phone,
-      role: data.role,
-      status: data.status || "ACTIVE",
-      passwordHash,
-      country: "N/A",
-      city: "N/A",
-    },
-    select: userPublicSelect(),
-  });
+  // Mot de passe inutilisable : le titulaire fixera le sien via l'invitation.
+  // Le createur du compte ne connait aucun secret permettant de s'y connecter.
+  const passwordHash = await hashUnusablePassword();
+
+  let created;
+  try {
+    created = await prisma.user.create({
+      data: {
+        fullName: data.fullName,
+        email: data.email.toLowerCase(),
+        phone: data.phone,
+        role: data.role,
+        status: "PENDING_VERIFICATION",
+        passwordHash,
+        country: "N/A",
+        city: "N/A",
+      },
+      select: userPublicSelect(),
+    });
+  } catch (err) {
+    // Email et telephone sont @unique. Sans ce traitement, une simple faute de
+    // frappe renvoie un 500 portant le texte brut de Prisma jusque dans
+    // l'interface, nom de contrainte compris.
+    if (err?.code === "P2002") {
+      const champs = Array.isArray(err.meta?.target)
+        ? err.meta.target.join(", ")
+        : "email ou téléphone";
+      throw createHttpError(`Un compte utilise déjà ce ${champs}.`, 409);
+    }
+    throw err;
+  }
 
   await auditLog({
     userId: adminId,
@@ -322,13 +405,162 @@ export async function createInternalUser({ adminId, adminRole, data, req }) {
     entity: "User",
     entityId: created.id,
     req,
-    meta: { role: created.role, status: created.status },
+    meta: { role: created.role, status: created.status, invited: true },
   });
 
-  return created;
+  // L'envoi de l'email ne doit pas faire echouer la creation : si Brevo tombe,
+  // le compte existe et l'invitation se renvoie depuis l'interface.
+  let invitationSent = true;
+  try {
+    const { token, expiresAt } = await issueInvitation(created.id);
+    await sendInternalInviteMail({
+      email: created.email,
+      fullName: created.fullName,
+      role: created.role,
+      token,
+      expiresAt,
+    });
+  } catch (err) {
+    invitationSent = false;
+    console.error("[invite] envoi impossible:", err?.message);
+    await auditLog({
+      userId: adminId,
+      action: "USER_INVITE_SEND_FAILED",
+      entity: "User",
+      entityId: created.id,
+      req,
+      meta: { reason: err?.message },
+    });
+  }
+
+  return { ...created, invitationSent };
 }
 
-export async function setUserStatus({ adminId, userId, status, req }) {
+export async function resendInternalUserInvitation({ adminId, adminRole, userId, req }) {
+  await assertCanActOnTarget({
+    adminId,
+    adminRole,
+    userId,
+    action: "USER_INVITE_RESEND",
+    req,
+  });
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true, email: true, fullName: true, role: true, status: true },
+  });
+
+  if (user.status !== "PENDING_VERIFICATION") {
+    throw createHttpError("Ce compte est déjà activé", 409);
+  }
+
+  const { token, expiresAt } = await issueInvitation(userId);
+  await sendInternalInviteMail({
+    email: user.email,
+    fullName: user.fullName,
+    role: user.role,
+    token,
+    expiresAt,
+  });
+
+  await auditLog({
+    userId: adminId,
+    action: "USER_INVITE_RESENT",
+    entity: "User",
+    entityId: userId,
+    req,
+  });
+
+  return { invitationSent: true, expiresAt };
+}
+
+/**
+ * Garde commune a toutes les actions d'un ADMIN sur le compte d'autrui.
+ *
+ * Elle porte sur la CIBLE, jamais sur la valeur demandee : une garde posee
+ * seulement sur la suspension laisserait un ADMIN REACTIVER un compte que
+ * l'OUGAS_ADMIN vient de bloquer, ce qui revient au meme.
+ */
+async function assertCanActOnTarget({ adminId, adminRole, userId, action, req }) {
+  const target = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true, role: true, status: true },
+  });
+
+  if (!target) throw createHttpError("Utilisateur introuvable", 404);
+
+  // Le compte d'amorcage est hors d'atteinte de cet ecran, quel que soit
+  // l'appelant. C'est lui qui permet de renommer un Ougas Admin perdu ou
+  // compromis : si l'Ougas Admin pouvait le suspendre, il supprimerait le seul
+  // recours contre lui-meme et deviendrait irrevocable.
+  if (target.role === "SUPER_ADMIN") {
+    await auditLog({
+      userId: adminId,
+      action: `${action}_DENIED`,
+      entity: "User",
+      entityId: userId,
+      req,
+      meta: { targetRole: target.role, reason: "BOOTSTRAP_ACCOUNT" },
+    });
+    throw createHttpError(
+      "Le compte d'amorçage ne se gère pas depuis cet écran",
+      403,
+    );
+  }
+
+  const isProtectedTarget =
+    target.role === "ADMIN" ||
+    target.role === "OUGAS_ADMIN" ||
+    target.id === adminId;
+
+  if (adminRole === "ADMIN" && isProtectedTarget) {
+    await auditLog({
+      userId: adminId,
+      action: `${action}_DENIED`,
+      entity: "User",
+      entityId: userId,
+      req,
+      meta: { targetRole: target.role, reason: "PROTECTED_TARGET" },
+    });
+    throw createHttpError(
+      "Un ADMIN ne peut pas agir sur un ADMIN, un Ougas Admin, ni sur son propre compte",
+      403,
+    );
+  }
+
+  return target;
+}
+
+export async function setUserStatus({ adminId, adminRole, userId, status, req }) {
+  const target = await assertCanActOnTarget({
+    adminId,
+    adminRole,
+    userId,
+    action: "ADMIN_SET_USER_STATUS",
+    req,
+  });
+
+  // Un compte encore en invitation n'a pas de mot de passe que son titulaire
+  // connaisse. Le passer ACTIVE ou SUSPENDED casse l'unique chemin d'activation :
+  // acceptInvitation exige PENDING_VERIFICATION, et le renvoi d'invitation aussi.
+  // BLOCKED reste permis, c'est la facon d'annuler une invitation.
+  // Le retour VERS PENDING_VERIFICATION reste permis : c'est le filet qui repare
+  // un compte deja casse.
+  if (target.status === "PENDING_VERIFICATION" && status !== "BLOCKED") {
+    await auditLog({
+      userId: adminId,
+      action: "ADMIN_SET_USER_STATUS_DENIED",
+      entity: "User",
+      entityId: userId,
+      req,
+      meta: { from: target.status, to: status, reason: "INVITE_PENDING" },
+    });
+    throw createHttpError(
+      "Ce compte n'a pas encore activé son invitation : renvoyez l'invitation, ou bloquez le compte.",
+      409,
+    );
+  }
+
   const updated = await prisma.user.update({
     where: { id: userId },
     data: { status },
@@ -342,13 +574,17 @@ export async function setUserStatus({ adminId, userId, status, req }) {
     },
   });
 
+  // Sans cette invalidation, la revocation attendrait jusqu'a 30 secondes le
+  // temps que le cache du middleware expire. La rendre immediate ne coute rien.
+  invalidateUserCache(updated.id);
+
   await auditLog({
     userId: adminId,
     action: "ADMIN_SET_USER_STATUS",
     entity: "User",
     entityId: updated.id,
     req,
-    meta: { status },
+    meta: { from: target.status, to: status, targetRole: updated.role },
   });
 
   return updated;
@@ -361,40 +597,59 @@ function createHttpError(message, status) {
 }
 
 async function assertCanSetUserRole({ adminId, adminRole, userId, role, req }) {
-  if (role === "SUPER_ADMIN") {
+  const refuser = async (reason, message, status = 403) => {
     await auditLog({
       userId: adminId,
       action: "ADMIN_SET_USER_ROLE_DENIED",
       entity: "User",
       entityId: userId,
       req,
-      meta: { requestedRole: role, reason: "SUPER_ADMIN_BLOCKED" },
+      meta: { requestedRole: role, reason },
     });
-    throw createHttpError("SUPER_ADMIN ne peut pas être attribué depuis l'interface", 403);
+    throw createHttpError(message, status);
+  };
+
+  if (ROLES_HORS_INTERFACE_ADMIN.includes(role)) {
+    await refuser(
+      "ROLE_HORS_INTERFACE",
+      `${role} ne peut pas être attribué depuis cet écran`,
+    );
   }
 
-  if (adminRole !== "SUPER_ADMIN") {
-    await auditLog({
-      userId: adminId,
-      action: "ADMIN_SET_USER_ROLE_DENIED",
-      entity: "User",
-      entityId: userId,
-      req,
-      meta: { requestedRole: role, reason: "SUPER_ADMIN_REQUIRED" },
-    });
-    throw createHttpError("Seul le Super Admin peut modifier les roles utilisateurs", 403);
+  if (adminRole !== "OUGAS_ADMIN") {
+    await refuser(
+      "OUGAS_ADMIN_REQUIRED",
+      "Seul l'Ougas Admin peut modifier les rôles utilisateurs",
+    );
   }
 
   if (adminId === userId) {
-    await auditLog({
-      userId: adminId,
-      action: "SUPER_ADMIN_SET_OWN_ROLE_DENIED",
-      entity: "User",
-      entityId: userId,
-      req,
-      meta: { requestedRole: role, reason: "SELF_ROLE_CHANGE_BLOCKED" },
-    });
-    throw createHttpError("Un Super Admin ne peut pas modifier son propre role", 400);
+    await refuser(
+      "SELF_ROLE_CHANGE_BLOCKED",
+      "Un Ougas Admin ne peut pas modifier son propre rôle",
+      400,
+    );
+  }
+
+  // Le changement de role est la porte derobee de la suspension : refuser de
+  // suspendre le compte d'amorcage tout en laissant le retrograder en CLIENT
+  // reviendrait a poser un verrou sur une porte et pas sur l'autre.
+  //
+  // Un Ougas Admin n'est pas retrogradable non plus : il ne nait que du module
+  // bootstrap, il ne doit donc mourir que par suspension, pas par mutation en
+  // un role qu'il n'a jamais accepte.
+  const target = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { role: true },
+  });
+
+  if (!target) throw createHttpError("Utilisateur introuvable", 404);
+
+  if (ROLES_HORS_INTERFACE_ADMIN.includes(target.role)) {
+    await refuser(
+      "TARGET_HORS_INTERFACE",
+      `Le rôle d'un ${target.role} ne se modifie pas depuis cet écran`,
+    );
   }
 }
 
@@ -414,9 +669,13 @@ export async function setUserRole({ adminId, adminRole, userId, role, req }) {
     },
   });
 
+  // Le role vient desormais de la base a chaque requete : une retrogradation
+  // prend effet immediatement plutot qu'a l'expiration du jeton.
+  invalidateUserCache(updated.id);
+
   await auditLog({
     userId: adminId,
-    action: "SUPER_ADMIN_SET_USER_ROLE",
+    action: "OUGAS_ADMIN_SET_USER_ROLE",
     entity: "User",
     entityId: updated.id,
     req,
@@ -426,7 +685,15 @@ export async function setUserRole({ adminId, adminRole, userId, role, req }) {
   return updated;
 }
 
-export async function resetUserOtpSecurity({ adminId, userId, req }) {
+export async function resetUserOtpSecurity({ adminId, adminRole, userId, req }) {
+  await assertCanActOnTarget({
+    adminId,
+    adminRole,
+    userId,
+    action: "ADMIN_RESET_OTP_SECURITY",
+    req,
+  });
+
   const updated = await prisma.user.update({
     where: { id: userId },
     data: {
@@ -610,4 +877,158 @@ export async function getUserDetails({ userId }) {
   }
 
   return user;
+}
+
+/* =========================
+   SUPERVISION (lecture seule)
+   ========================= */
+
+const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+
+/**
+ * Ce que l'ADMIN doit voir pour suivre le deroulement du travail de ses deux
+ * profils. Uniquement des agregations et des listes : aucune ecriture, aucune
+ * action possible depuis cet ecran.
+ */
+export async function getOversight() {
+  const now = new Date();
+  const since = new Date(now.getTime() - THIRTY_DAYS_MS);
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+  const [
+    managers,
+    treasurers,
+    expensesByStatus,
+    expensesByManager,
+    ordersByTreasurer,
+    ordersThisMonth,
+    oldestPending,
+    lastActivity,
+    recentExpenses,
+  ] = await Promise.all([
+    prisma.user.findMany({
+      where: { role: "GESTIONNAIRE_DEPENSE" },
+      select: { id: true, fullName: true, email: true, status: true },
+      orderBy: { fullName: "asc" },
+    }),
+    prisma.user.findMany({
+      where: { role: "EQUIPE_TRESORERIE" },
+      select: { id: true, fullName: true, email: true, status: true },
+      orderBy: { fullName: "asc" },
+    }),
+    prisma.expense.groupBy({
+      by: ["status"],
+      _count: { status: true },
+      _sum: { amount: true },
+    }),
+    prisma.expense.groupBy({
+      by: ["createdById", "status"],
+      where: { createdAt: { gte: since } },
+      _count: { status: true },
+      _sum: { amount: true },
+    }),
+    prisma.paymentOrder.groupBy({
+      by: ["createdById", "currency", "status"],
+      where: { createdAt: { gte: since } },
+      _count: { status: true },
+      _sum: { amount: true },
+    }),
+    prisma.paymentOrder.count({ where: { createdAt: { gte: monthStart } } }),
+    prisma.expense.findFirst({
+      where: { status: "EN_ATTENTE" },
+      orderBy: { createdAt: "asc" },
+      select: { id: true, createdAt: true, label: true, amount: true },
+    }),
+    prisma.auditLog.groupBy({
+      by: ["userId"],
+      _max: { createdAt: true },
+    }),
+    prisma.expense.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 50,
+      select: {
+        id: true,
+        createdAt: true,
+        label: true,
+        type: true,
+        amount: true,
+        status: true,
+        beneficiaryName: true,
+        createdBy: { select: { id: true, fullName: true, email: true } },
+        paymentOrders: {
+          select: {
+            id: true,
+            referenceNumber: true,
+            status: true,
+            createdBy: { select: { id: true, fullName: true } },
+          },
+        },
+      },
+    }),
+  ]);
+
+  const parStatut = expensesByStatus.reduce((acc, r) => {
+    acc[r.status] = { count: r._count.status, amount: r._sum.amount || 0 };
+    return acc;
+  }, {});
+
+  const derniereActivite = new Map(
+    lastActivity.filter((r) => r.userId).map((r) => [r.userId, r._max.createdAt]),
+  );
+
+  const profilDepensier = (u) => {
+    const lignes = expensesByManager.filter((r) => r.createdById === u.id);
+    const compte = (statut) =>
+      lignes.filter((r) => r.status === statut).reduce((n, r) => n + r._count.status, 0);
+    return {
+      ...u,
+      lastActivityAt: derniereActivite.get(u.id) || null,
+      created30d: lignes.reduce((n, r) => n + r._count.status, 0),
+      engagedAmount30d: lignes.reduce((n, r) => n + (r._sum.amount || 0), 0),
+      pending: compte("EN_ATTENTE"),
+      rejected: compte("REJETER"),
+    };
+  };
+
+  const profilTresorier = (u) => {
+    const lignes = ordersByTreasurer.filter((r) => r.createdById === u.id);
+    // Les montants sont regroupes PAR DEVISE : additionner des francs
+    // djiboutiens, des birrs et des dollars produirait un nombre qui n'existe
+    // pas — et c'est un nombre sur lequel on deciderait d'un decaissement.
+    const parDevise = {};
+    for (const r of lignes) {
+      parDevise[r.currency] = (parDevise[r.currency] || 0) + (r._sum.amount || 0);
+    }
+    return {
+      ...u,
+      lastActivityAt: derniereActivite.get(u.id) || null,
+      orders30d: lignes.reduce((n, r) => n + r._count.status, 0),
+      amountByCurrency30d: parDevise,
+      notPrinted: lignes
+        .filter((r) => r.status === "CREE")
+        .reduce((n, r) => n + r._count.status, 0),
+    };
+  };
+
+  return {
+    indicators: {
+      pending: parStatut.EN_ATTENTE || { count: 0, amount: 0 },
+      approvedNotDisbursed: parStatut.APPROUVER || { count: 0, amount: 0 },
+      disbursed: parStatut.EFFECTUER || { count: 0, amount: 0 },
+      ordersThisMonth,
+      // Le chiffre qui compte pour un superviseur n'est pas le volume, c'est le
+      // dossier qui attend depuis le plus longtemps.
+      oldestPending: oldestPending
+        ? {
+            ...oldestPending,
+            ageDays: Math.floor(
+              (now.getTime() - oldestPending.createdAt.getTime()) / 86_400_000,
+            ),
+          }
+        : null,
+    },
+    managers: managers.map(profilDepensier),
+    treasurers: treasurers.map(profilTresorier),
+    recentExpenses,
+  };
 }

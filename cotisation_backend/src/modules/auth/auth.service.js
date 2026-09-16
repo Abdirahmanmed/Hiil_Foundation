@@ -1,7 +1,12 @@
+import crypto from "node:crypto";
+
 import prisma from "../../config/prisma.js";
-import { hashPassword, verifyPassword } from "../../utils/hash.js";
+import { hashInviteToken, hashPassword, verifyPassword } from "../../utils/hash.js";
 import { signAccessToken, signRefreshToken } from "../../utils/tokens.js";
 import { auditLog } from "../../utils/audit.js";
+import { invalidateUserCache } from "../../middlewares/auth.js";
+import { sendPasswordResetMail } from "../../services/mail.service.js";
+import { toStorageKey } from "../../utils/upload.js";
 import { performance } from "node:perf_hooks";
 
 export async function createUser({ data, files, req }) {
@@ -58,22 +63,22 @@ export async function createUser({ data, files, req }) {
       commune: isAssociation ? data.commune : null,
 
       associationStatusDocPath: isAssociation
-        ? associationStatusDoc.path
+        ? toStorageKey(associationStatusDoc)
         : null,
       representativeType: isAssociation ? data.representativeType : null,
       representativeName: isAssociation ? data.representativeName : null,
       representativePhone: isAssociation ? data.representativePhone : null,
       representativeAddress: isAssociation ? data.representativeAddress : null,
       representativeEmail: isAssociation ? data.representativeEmail : null,
-      presidentIdDocPath: isAssociation ? presidentIdDoc.path : null,
+      presidentIdDocPath: isAssociation ? toStorageKey(presidentIdDoc) : null,
 
       passwordHash,
       status: "PENDING_VERIFICATION",
       role: "CLIENT",
 
       // fichiers seulement si ADHERENT
-      idDocPath: isAdherent ? idDoc.path : null,
-      selfiePath: isAdherent ? selfie.path : null,
+      idDocPath: isAdherent ? toStorageKey(idDoc) : null,
+      selfiePath: isAdherent ? toStorageKey(selfie) : null,
     },
     select: {
       id: true,
@@ -167,6 +172,7 @@ export async function loginUser({ email, password, req }) {
         role: true,
         status: true,
         accountType: true,
+        tokenVersion: true,
       },
     });
     dbMs = roundMs(dbStart);
@@ -193,8 +199,8 @@ export async function loginUser({ email, password, req }) {
     }
 
     const tokenSignStart = performance.now();
-    const accessToken = signAccessToken({ sub: user.id, role: user.role });
-    const refreshToken = signRefreshToken({ sub: user.id, role: user.role });
+    const accessToken = signAccessToken({ sub: user.id, role: user.role, tv: user.tokenVersion });
+    const refreshToken = signRefreshToken({ sub: user.id, role: user.role, tv: user.tokenVersion });
     tokenSignMs = roundMs(tokenSignStart);
 
     const auditStart = performance.now();
@@ -245,6 +251,19 @@ export async function loginUser({ email, password, req }) {
       },
     };
   } catch (err) {
+    // Seuls les succes etaient journalises : une attaque par force brute sur le
+    // compte OUGAS_ADMIN ne laissait AUCUNE trace. userId est nullable dans le
+    // schema, c'est prevu pour le cas de l'email inconnu.
+    // Jamais le mot de passe dans meta — seulement la raison.
+    await auditLog({
+      userId: user?.id || null,
+      action: "LOGIN_FAILED",
+      entity: "User",
+      entityId: user?.id || null,
+      req,
+      meta: { email: normalizedEmail, reason: err?.message || "unknown" },
+    });
+
     logLoginPerf({
       totalStart,
       dbMs,
@@ -337,4 +356,193 @@ export async function changePassword({
     req,
     meta: { email: user.email },
   });
+}
+
+/**
+ * Activation d'un compte interne par son titulaire.
+ *
+ * C'est le seul chemin par lequel un compte cree par un tiers obtient un mot de
+ * passe : le createur n'en a jamais connu aucun. Le jeton est a usage unique et
+ * il est efface dans la meme transaction que l'ecriture du mot de passe.
+ */
+export async function acceptInvitation({ token, password, req }) {
+  const invalid = () => {
+    const err = new Error("Lien d'invitation invalide ou expiré.");
+    err.status = 400;
+    return err;
+  };
+
+  const user = await prisma.user.findUnique({
+    where: { inviteTokenHash: hashInviteToken(token) },
+    select: {
+      id: true,
+      email: true,
+      role: true,
+      status: true,
+      inviteTokenExpiresAt: true,
+    },
+  });
+
+  if (!user) throw invalid();
+
+  if (!user.inviteTokenExpiresAt || user.inviteTokenExpiresAt < new Date()) {
+    await auditLog({
+      userId: user.id,
+      action: "INVITE_ACCEPT_FAILED",
+      entity: "User",
+      entityId: user.id,
+      req,
+      meta: { reason: "EXPIRED" },
+    });
+    throw invalid();
+  }
+
+  if (user.status !== "PENDING_VERIFICATION") {
+    await auditLog({
+      userId: user.id,
+      action: "INVITE_ACCEPT_FAILED",
+      entity: "User",
+      entityId: user.id,
+      req,
+      meta: { reason: "STATUS", status: user.status },
+    });
+    throw invalid();
+  }
+
+  const passwordHash = await hashPassword(password);
+
+  // updateMany conditionne sur le hash du jeton : deux requetes concurrentes ne
+  // peuvent pas activer le compte deux fois, c'est Postgres qui arbitre.
+  const { count } = await prisma.user.updateMany({
+    where: {
+      id: user.id,
+      inviteTokenHash: hashInviteToken(token),
+      status: "PENDING_VERIFICATION",
+    },
+    data: {
+      passwordHash,
+      status: "ACTIVE",
+      inviteTokenHash: null,
+      inviteTokenExpiresAt: null,
+    },
+  });
+
+  if (count === 0) throw invalid();
+
+  await auditLog({
+    userId: user.id,
+    action: "INVITE_ACCEPTED",
+    entity: "User",
+    entityId: user.id,
+    req,
+    meta: { role: user.role },
+  });
+
+  return { email: user.email, role: user.role };
+}
+
+const RESET_TTL_MINUTES = 60;
+
+/**
+ * Demande de reinitialisation.
+ *
+ * Repond TOUJOURS de la meme facon, que l'email existe ou non : sinon la route
+ * devient un enumerateur de comptes. Un compte encore en invitation est renvoye
+ * vers son lien d'activation, pas vers une reinitialisation.
+ */
+export async function requestPasswordReset({ email, req }) {
+  const normalizedEmail = normalizeEmail(email);
+  const user = await prisma.user.findUnique({
+    where: { email: normalizedEmail },
+    select: { id: true, email: true, fullName: true, status: true, inviteTokenHash: true },
+  });
+
+  if (!user || user.status === "BLOCKED" || user.inviteTokenHash) {
+    await auditLog({
+      userId: user?.id || null,
+      action: "PASSWORD_RESET_REQUESTED_IGNORED",
+      entity: "User",
+      entityId: user?.id || null,
+      req,
+      meta: { email: normalizedEmail },
+    });
+    return;
+  }
+
+  const token = crypto.randomBytes(32).toString("base64url");
+  const expiresAt = new Date(Date.now() + RESET_TTL_MINUTES * 60 * 1000);
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { resetTokenHash: hashInviteToken(token), resetTokenExpiresAt: expiresAt },
+  });
+
+  await sendPasswordResetMail({
+    email: user.email,
+    fullName: user.fullName,
+    token,
+    expiresAt,
+  });
+
+  await auditLog({
+    userId: user.id,
+    action: "PASSWORD_RESET_REQUESTED",
+    entity: "User",
+    entityId: user.id,
+    req,
+  });
+}
+
+/**
+ * Application de la reinitialisation.
+ *
+ * Le jeton est a usage unique et consomme dans la meme transaction que
+ * l'ecriture du mot de passe. tokenVersion est incremente : TOUTES les sessions
+ * ouvertes tombent, ce qui est le comportement attendu si le compte a ete
+ * compromis.
+ */
+export async function resetPassword({ token, password, req }) {
+  const invalide = () => {
+    const err = new Error("Lien de réinitialisation invalide ou expiré.");
+    err.status = 400;
+    return err;
+  };
+
+  const user = await prisma.user.findUnique({
+    where: { resetTokenHash: hashInviteToken(token) },
+    select: { id: true, email: true, resetTokenExpiresAt: true, status: true },
+  });
+
+  if (!user) throw invalide();
+  if (!user.resetTokenExpiresAt || user.resetTokenExpiresAt < new Date()) throw invalide();
+  if (user.status === "BLOCKED") throw invalide();
+
+  const passwordHash = await hashPassword(password);
+
+  const { count } = await prisma.user.updateMany({
+    where: { id: user.id, resetTokenHash: hashInviteToken(token) },
+    data: {
+      passwordHash,
+      resetTokenHash: null,
+      resetTokenExpiresAt: null,
+      tokenVersion: { increment: 1 },
+      // Un compte suspendu ne se reactive pas en changeant de mot de passe.
+      status: user.status === "PENDING_VERIFICATION" ? "ACTIVE" : user.status,
+    },
+  });
+
+  if (count === 0) throw invalide();
+
+  invalidateUserCache(user.id);
+
+  await auditLog({
+    userId: user.id,
+    action: "PASSWORD_RESET_COMPLETED",
+    entity: "User",
+    entityId: user.id,
+    req,
+    meta: { email: user.email },
+  });
+
+  return { email: user.email };
 }

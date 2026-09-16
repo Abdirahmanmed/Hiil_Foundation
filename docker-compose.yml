@@ -1,0 +1,69 @@
+# Environnement de développement local : Postgres + API, rien d'autre.
+#
+# Sa raison d'être principale n'est pas le confort, c'est de pouvoir REJOUER LES
+# MIGRATIONS SUR UNE BASE VIERGE avant de toucher à la production :
+#
+#   docker compose up -d db
+#   cd cotisation_backend
+#   DATABASE_URL='postgresql://hiil:hiil@localhost:5433/hiil_dev?sslmode=disable' \
+#     npx prisma migrate deploy
+#
+# C'est exactement le contrôle que fait la CI, et c'est le seul qui attrape une
+# migration cassée avant qu'elle ne s'applique aux vraies données.
+#
+# Le front n'est pas ici : `npm run dev` avec Vite est plus rapide et rechargé à
+# chaud, un conteneur ne lui apporterait rien.
+
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: hiil
+      POSTGRES_PASSWORD: hiil
+      POSTGRES_DB: hiil_dev
+    ports:
+      # 5433 côté hôte : 5432 est souvent déjà pris par un Postgres installé.
+      - "5433:5432"
+    volumes:
+      - hiil_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hiil -d hiil_dev"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: ./cotisation_backend
+    ports:
+      - "4000:4000"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: development
+      PORT: 4000
+      DATABASE_URL: postgresql://hiil:hiil@db:5432/hiil_dev?sslmode=disable
+      CORS_ORIGIN: http://localhost:5173
+      CAC_PAYMENT_MODE: mock
+
+      # En développement, le disque du conteneur suffit : les documents
+      # disparaissent à chaque reconstruction, et c'est sans conséquence ici.
+      # En production, env.js refuse cette valeur.
+      STORAGE_MODE: local
+
+      # Valeurs de développement, inutilisables ailleurs : elles sont écrites en
+      # clair dans un fichier versionné. Ne JAMAIS les réutiliser en ligne.
+      JWT_ACCESS_SECRET: dev-access-secret-dev-access-secret-dev-access
+      JWT_REFRESH_SECRET: dev-refresh-secret-dev-refresh-secret-dev-refr
+      OTP_PEPPER: dev-otp-pepper-dev-otp-pepper-dev
+
+      # Repli SMTP inerte : sans BREVO_API_KEY, env.js exige EMAIL_HOST,
+      # EMAIL_USER et EMAIL_PASS au démarrage. Aucun mail ne partira.
+      EMAIL_HOST: localhost
+      EMAIL_USER: dev
+      EMAIL_PASS: dev
+      EMAIL_FROM: no-reply@localhost
+
+volumes:
+  hiil_pgdata:

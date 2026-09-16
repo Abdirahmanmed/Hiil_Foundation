@@ -308,6 +308,141 @@ export async function sendOtpMail({ email, code }) {
 
 export const sendOtpEmail = sendOtpMail;
 
+const SUBMISSION_LABELS = {
+  PROJECT_PROPOSAL: "Appel à projets",
+  VOLUNTEER: "Candidature bénévole",
+};
+
+/**
+ * Previent la fondation qu'une candidature vient d'arriver.
+ * La candidature est DEJA enregistree en base quand cet email part : si l'envoi
+ * echoue, rien n'est perdu.
+ */
+export async function sendPublicSubmissionNotification({ submission, data }) {
+  const label = SUBMISSION_LABELS[submission.kind] || submission.kind;
+
+  const lines = [
+    `${label}`,
+    ``,
+    `Nom     : ${data.fullName}`,
+    `Email   : ${data.email}`,
+  ];
+
+  if (submission.kind === "PROJECT_PROPOSAL") {
+    if (data.organization) lines.push(`Structure : ${data.organization}`);
+    if (data.theme) lines.push(`Thématique : ${data.theme}`);
+    lines.push(``, `Projet :`, data.message);
+  } else {
+    if (data.skills) lines.push(`Compétences : ${data.skills}`);
+    if (data.availability) lines.push(`Disponibilités : ${data.availability}`);
+  }
+
+  lines.push(``, `Référence : ${submission.id}`);
+
+  const text = lines.join("\n");
+  const html = lines
+    .map((line) => (line ? `<p>${escapeHtml(line)}</p>` : "<br/>"))
+    .join("");
+
+  return sendEmail({
+    to: env.CONTACT_EMAIL,
+    subject: `${label} — ${data.fullName}`,
+    html,
+    text,
+    context: "PublicSubmission",
+  });
+}
+
+/**
+ * Réinitialisation de mot de passe. Le lien contient le jeton en clair — il
+ * n'existe nulle part ailleurs, seul son hash est conservé en base.
+ */
+export async function sendPasswordResetMail({ email, fullName, token, expiresAt }) {
+  const link = `${env.APP_PUBLIC_URL}/reinitialisation?token=${encodeURIComponent(token)}`;
+  const limite = expiresAt.toLocaleString("fr-FR");
+
+  const lines = [
+    `Bonjour ${fullName || ""},`.trim(),
+    "",
+    "Vous avez demandé à réinitialiser votre mot de passe.",
+    link,
+    "",
+    `Ce lien est valable jusqu'au ${limite}.`,
+    "Toutes vos sessions ouvertes seront fermées après la réinitialisation.",
+    "",
+    "Si vous n'êtes pas à l'origine de cette demande, ignorez cet email : votre mot de passe reste inchangé.",
+  ];
+
+  const html = `
+    <p>Bonjour ${escapeHtml(fullName || "")},</p>
+    <p>Vous avez demandé à réinitialiser votre mot de passe.</p>
+    <p><a href="${escapeHtml(link)}">Choisir un nouveau mot de passe</a></p>
+    <p>Ce lien est valable jusqu'au <strong>${escapeHtml(limite)}</strong>.</p>
+    <p>Toutes vos sessions ouvertes seront fermées après la réinitialisation.</p>
+    <p style="color:#666">Si vous n'êtes pas à l'origine de cette demande, ignorez cet email : votre mot de passe reste inchangé.</p>
+  `;
+
+  return sendEmail({
+    to: email,
+    subject: "Réinitialisation de votre mot de passe",
+    html,
+    text: lines.join("\n"),
+    context: "PasswordReset",
+  });
+}
+
+const INTERNAL_ROLE_LABELS = {
+  ADMIN: "Administrateur",
+  GESTIONNAIRE_DEPENSE: "Gestionnaire de dépense",
+  EQUIPE_TRESORERIE: "Équipe trésorerie",
+  OUGAS_ADMIN: "Ougas Admin",
+};
+
+/**
+ * Invitation d'un compte interne : le titulaire fixe lui-meme son mot de passe.
+ * Le lien contient le jeton en clair — il n'existe nulle part ailleurs, seul son
+ * hash est conserve en base.
+ */
+export async function sendInternalInviteMail({ email, fullName, role, token, expiresAt }) {
+  const link = `${env.APP_PUBLIC_URL}/activation?token=${encodeURIComponent(token)}`;
+  const roleLabel = INTERNAL_ROLE_LABELS[role] || role;
+  const deadline = expiresAt.toLocaleDateString("fr-FR", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+
+  const text = [
+    `Bonjour ${fullName},`,
+    ``,
+    `Un compte ${roleLabel} vient d'être créé pour vous sur ${env.EMAIL_FROM_NAME}.`,
+    `Définissez votre mot de passe avec ce lien :`,
+    link,
+    ``,
+    `Ce lien est valable jusqu'au ${deadline}.`,
+    `Personne d'autre que vous ne connaît le mot de passe de ce compte : c'est vous qui le choisissez.`,
+    ``,
+    `Si vous n'attendiez pas cet email, ignorez-le et prévenez l'administration.`,
+  ].join("\n");
+
+  const html = `
+    <p>Bonjour ${escapeHtml(fullName)},</p>
+    <p>Un compte <strong>${escapeHtml(roleLabel)}</strong> vient d'être créé pour vous sur ${escapeHtml(env.EMAIL_FROM_NAME)}.</p>
+    <p><a href="${escapeHtml(link)}">Définir mon mot de passe</a></p>
+    <p>Ce lien est valable jusqu'au <strong>${escapeHtml(deadline)}</strong>.</p>
+    <p>Personne d'autre que vous ne connaît le mot de passe de ce compte : c'est vous qui le choisissez.</p>
+    <p style="color:#666">Si vous n'attendiez pas cet email, ignorez-le et prévenez l'administration.</p>
+  `;
+
+  return sendEmail({
+    to: email,
+    subject: `Activez votre compte ${roleLabel}`,
+    html,
+    text,
+    context: "InternalInvite",
+  });
+}
+
 export async function verifyMailer() {
   if (env.BREVO_API_KEY) {
     console.log(`Brevo Transactional Email API configured for ${env.EMAIL_FROM}`);
@@ -322,52 +457,45 @@ export async function verifyMailer() {
   }
 }
 
-export async function sendExpenseApprovalTokenEmail({ to, expense, token }) {
-  const expiresAt = expense.approvalTokenExpiresAt
-    ? new Date(expense.approvalTokenExpiresAt).toLocaleString("fr-FR")
-    : "Non renseignée";
+/**
+ * Prévient l'équipe trésorerie qu'une dépense vient d'être approuvée.
+ *
+ * Remplace l'email qui transportait un jeton d'approbation jusqu'au Super Admin,
+ * à charge pour lui de le retransmettre à la main — hors application, sans trace
+ * de qui avait mandaté qui. Celui-ci ne contient aucun secret : il annonce, il
+ * n'autorise pas. La dépense est de toute façon déjà visible dans la liste de la
+ * trésorerie, donc l'échec de cet envoi ne bloque plus aucun décaissement.
+ */
+export async function sendExpenseApprovedEmail({ to, expense }) {
   const lines = [
     "Bonjour,",
     "",
-    "Une dépense Hiil Foundation a été approuvée par le Super Admin.",
-    `Référence dépense : ${expense.id}`,
+    "Une dépense vient d'être approuvée et attend son ordre de paiement.",
     `Libellé : ${expense.label}`,
     `Montant : ${expense.amount}`,
     `Bénéficiaire : ${expense.beneficiaryName}`,
-    `Token : ${token}`,
-    `Expiration : ${expiresAt}`,
+    `Référence : ${expense.id}`,
     "",
-    "Le SUPER_ADMIN doit transmettre ce token manuellement à l’équipe trésorerie.",
-    "Le token n’est pas stocké en clair en base de données.",
+    "Elle apparaît dans votre liste des dépenses approuvées.",
   ];
 
   const html = `
     <p>Bonjour,</p>
-    <p>Une dépense Hiil Foundation a été approuvée par le Super Admin.</p>
+    <p>Une dépense vient d'être approuvée et attend son ordre de paiement.</p>
     <ul>
-      <li><strong>Référence dépense :</strong> ${escapeHtml(expense.id)}</li>
       <li><strong>Libellé :</strong> ${escapeHtml(expense.label)}</li>
       <li><strong>Montant :</strong> ${escapeHtml(expense.amount)}</li>
       <li><strong>Bénéficiaire :</strong> ${escapeHtml(expense.beneficiaryName)}</li>
-      <li><strong>Token :</strong> ${escapeHtml(token)}</li>
-      <li><strong>Expiration :</strong> ${escapeHtml(expiresAt)}</li>
+      <li><strong>Référence :</strong> ${escapeHtml(expense.id)}</li>
     </ul>
-    <p>Le SUPER_ADMIN doit transmettre ce token manuellement à l’équipe trésorerie.</p>
-    <p>Le token n’est pas stocké en clair en base de données.</p>
+    <p>Elle apparaît dans votre liste des dépenses approuvées.</p>
   `;
 
-  try {
-    return await sendEmail({
-      to,
-      subject: "Token d’approbation de dépense - Hiil Foundation",
-      html,
-      text: lines.join("\n"),
-      context: "Expense approval token",
-    });
-  } catch (err) {
-    if (err?.status === 502) {
-      throw err;
-    }
-    throw createEmailDeliveryError("Impossible d’envoyer l’email du token d’approbation pour le moment. Réessayez plus tard.");
-  }
+  return sendEmail({
+    to,
+    subject: "Dépense approuvée — Hiil Foundation",
+    html,
+    text: lines.join("\n"),
+    context: "ExpenseApproved",
+  });
 }

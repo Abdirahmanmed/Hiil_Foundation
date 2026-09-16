@@ -143,6 +143,22 @@ export const loginSchema = z.object({
   password: z.string().min(1, "Mot de passe requis"),
 });
 
+export const acceptInviteSchema = z
+  .object({
+    token: z.string().min(1, "Jeton d'invitation requis"),
+    password: z.string().min(8, "Minimum 8 caractères"),
+    confirmPassword: z.string().min(1, "Confirmation requise"),
+  })
+  .superRefine((data, ctx) => {
+    if (data.password !== data.confirmPassword) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["confirmPassword"],
+        message: "Les mots de passe ne correspondent pas",
+      });
+    }
+  });
+
 export const changePasswordSchema = z
   .object({
     currentPassword: z.string().min(1, "Mot de passe actuel requis"),
@@ -165,6 +181,26 @@ export const changePasswordSchema = z
         code: "custom",
         path: ["newPassword"],
         message: "Le nouveau mot de passe doit être différent de l’ancien",
+      });
+    }
+  });
+
+export const forgotPasswordSchema = z.object({
+  email: z.string().trim().toLowerCase().email("Email invalide"),
+});
+
+export const resetPasswordSchema = z
+  .object({
+    token: z.string().min(1, "Jeton requis"),
+    password: z.string().min(8, "Minimum 8 caractères"),
+    confirmPassword: z.string().min(1, "Confirmation requise"),
+  })
+  .superRefine((data, ctx) => {
+    if (data.password !== data.confirmPassword) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["confirmPassword"],
+        message: "Les mots de passe ne correspondent pas",
       });
     }
   });

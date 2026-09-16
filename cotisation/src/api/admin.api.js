@@ -40,6 +40,20 @@ export async function patchUserRole(userId, role) {
   return res.data; // { user }
 }
 
+// Supervision : agregats par depensier et par tresorier, indicateurs, et les
+// 50 dernieres depenses tous statuts confondus. Lecture seule.
+export async function getOversight() {
+  const res = await http.get(`${basePath}/oversight`);
+  return res.data;
+}
+
+// Renvoie le lien d'activation d'un compte interne encore en attente.
+// Chaque renvoi invalide le lien precedent.
+export async function resendUserInvite(userId) {
+  const res = await http.post(`${basePath}/users/${userId}/invite/resend`, {});
+  return res.data;
+}
+
 export async function resetUserOtp(userId) {
   const res = await http.post(`${basePath}/users/${userId}/otp/reset`, {});
   return res.data; // { otpSecurity }

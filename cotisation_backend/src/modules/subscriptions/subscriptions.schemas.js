@@ -93,5 +93,22 @@ export const createSubscriptionSchema = z
   });
 
 export const consentSchema = z.object({
-  accepted: z.coerce.boolean(),
+  // PAS de z.coerce.boolean() : il applique Boolean(input), donc la chaine
+  // "false" — comme "non", ou n'importe quelle chaine non vide — devient true.
+  // Ce champ est la preuve juridique de l'adhesion d'un membre : il n'accepte
+  // que le booleen true, et rien d'autre.
+  accepted: z.literal(true, {
+    message: "Le consentement doit être explicitement accepté",
+  }),
 });
+
+// Seuls le montant et la periodicite sont modifiables : changer de canal de
+// paiement revient a signer un autre mandat, avec un autre consentement.
+export const updateSubscriptionSchema = z
+  .object({
+    amount: z.coerce.number().int().positive().optional(),
+    frequency: z.enum(["MONTHLY", "QUARTERLY", "SEMIANNUAL", "ANNUAL"]).optional(),
+  })
+  .refine((d) => d.amount !== undefined || d.frequency !== undefined, {
+    message: "Indiquez au moins un montant ou une périodicité",
+  });
