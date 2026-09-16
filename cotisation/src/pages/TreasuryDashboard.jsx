@@ -280,7 +280,7 @@ export default function TreasuryDashboard() {
                       <td className="px-4 py-3 font-black">{fmtMoney(e.amount)}</td>
                       <td className="px-4 py-3"><Badge tone={statusTones[e.status]}>{t(`enumStatus.${e.status}`, e.status)}</Badge></td>
                       <td className="px-4 py-3">
-                        {/* Le SUPER_ADMIN consulte la position de caisse pour
+                        {/* L'OUGAS_ADMIN consulte la position de caisse pour
                             arbitrer, il ne decaisse pas. Le backend le refuse
                             de toute facon ; lui montrer le bouton reviendrait a
                             l'inviter a contourner sa propre procedure. */}

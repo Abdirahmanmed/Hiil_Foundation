@@ -1,10 +1,9 @@
-import crypto from "node:crypto";
-
 import prisma from "../../config/prisma.js";
 import { CAN_SUPERVISE } from "../../config/roles.js";
 import { invalidateUserCache } from "../../middlewares/auth.js";
 import { auditLog } from "../../utils/audit.js";
-import { hashInviteToken, hashUnusablePassword } from "../../utils/hash.js";
+import { hashUnusablePassword } from "../../utils/hash.js";
+import { issueInvitation } from "../../utils/invitation.js";
 import { sendInternalInviteMail } from "../../services/mail.service.js";
 
 const VISIBLE_INTERNAL_USER_ROLES = [
@@ -343,9 +342,17 @@ export async function listAdherentsContributions() {
    ACTIONS: USERS
    ========================= */
 
+// Les deux roles qui ne naissent jamais ici.
+//
+// OUGAS_ADMIN vient du module bootstrap, et de lui seul : si cet ecran pouvait
+// le creer, l'Ougas Admin se clonerait lui-meme et le compte d'amorcage ne
+// servirait plus a rien. SUPER_ADMIN, lui, ne vient d'aucune interface : c'est
+// scripts/seed.js, une fois, a l'installation.
+const ROLES_HORS_INTERFACE_ADMIN = ["OUGAS_ADMIN", "SUPER_ADMIN"];
+
 function assertCanCreateInternalUser({ adminRole, role }) {
-  if (role === "SUPER_ADMIN") {
-    throw createHttpError("SUPER_ADMIN ne peut pas être créé depuis l'interface", 403);
+  if (ROLES_HORS_INTERFACE_ADMIN.includes(role)) {
+    throw createHttpError(`${role} ne peut pas être créé depuis cet écran`, 403);
   }
 
   if (!CREATABLE_INTERNAL_ROLES.includes(role)) {
@@ -355,28 +362,6 @@ function assertCanCreateInternalUser({ adminRole, role }) {
   if (adminRole === "ADMIN" && !ADMIN_CREATABLE_INTERNAL_ROLES.includes(role)) {
     throw createHttpError("Un ADMIN ne peut créer que GESTIONNAIRE_DEPENSE ou EQUIPE_TRESORERIE", 403);
   }
-}
-
-// Duree de validite du lien d'invitation d'un compte interne.
-const INVITE_TTL_HOURS = 168; // 7 jours
-
-/**
- * Fabrique un jeton d'invitation et le renvoie EN CLAIR a l'appelant, qui doit
- * l'envoyer par email au titulaire. Seul son hash est conserve en base.
- */
-async function issueInvitation(userId) {
-  const token = crypto.randomBytes(32).toString("base64url");
-  const expiresAt = new Date(Date.now() + INVITE_TTL_HOURS * 60 * 60 * 1000);
-
-  await prisma.user.update({
-    where: { id: userId },
-    data: {
-      inviteTokenHash: hashInviteToken(token),
-      inviteTokenExpiresAt: expiresAt,
-    },
-  });
-
-  return { token, expiresAt };
 }
 
 export async function createInternalUser({ adminId, adminRole, data, req }) {
@@ -493,8 +478,8 @@ export async function resendInternalUserInvitation({ adminId, adminRole, userId,
  * Garde commune a toutes les actions d'un ADMIN sur le compte d'autrui.
  *
  * Elle porte sur la CIBLE, jamais sur la valeur demandee : une garde posee
- * seulement sur la suspension laisserait un ADMIN REACTIVER un compte que le
- * SUPER_ADMIN vient de bloquer, ce qui revient au meme.
+ * seulement sur la suspension laisserait un ADMIN REACTIVER un compte que
+ * l'OUGAS_ADMIN vient de bloquer, ce qui revient au meme.
  */
 async function assertCanActOnTarget({ adminId, adminRole, userId, action, req }) {
   const target = await prisma.user.findUnique({
@@ -504,9 +489,28 @@ async function assertCanActOnTarget({ adminId, adminRole, userId, action, req })
 
   if (!target) throw createHttpError("Utilisateur introuvable", 404);
 
+  // Le compte d'amorcage est hors d'atteinte de cet ecran, quel que soit
+  // l'appelant. C'est lui qui permet de renommer un Ougas Admin perdu ou
+  // compromis : si l'Ougas Admin pouvait le suspendre, il supprimerait le seul
+  // recours contre lui-meme et deviendrait irrevocable.
+  if (target.role === "SUPER_ADMIN") {
+    await auditLog({
+      userId: adminId,
+      action: `${action}_DENIED`,
+      entity: "User",
+      entityId: userId,
+      req,
+      meta: { targetRole: target.role, reason: "BOOTSTRAP_ACCOUNT" },
+    });
+    throw createHttpError(
+      "Le compte d'amorçage ne se gère pas depuis cet écran",
+      403,
+    );
+  }
+
   const isProtectedTarget =
     target.role === "ADMIN" ||
-    target.role === "SUPER_ADMIN" ||
+    target.role === "OUGAS_ADMIN" ||
     target.id === adminId;
 
   if (adminRole === "ADMIN" && isProtectedTarget) {
@@ -519,7 +523,7 @@ async function assertCanActOnTarget({ adminId, adminRole, userId, action, req })
       meta: { targetRole: target.role, reason: "PROTECTED_TARGET" },
     });
     throw createHttpError(
-      "Un ADMIN ne peut pas agir sur un ADMIN, un SUPER_ADMIN, ni sur son propre compte",
+      "Un ADMIN ne peut pas agir sur un ADMIN, un Ougas Admin, ni sur son propre compte",
       403,
     );
   }
@@ -593,40 +597,59 @@ function createHttpError(message, status) {
 }
 
 async function assertCanSetUserRole({ adminId, adminRole, userId, role, req }) {
-  if (role === "SUPER_ADMIN") {
+  const refuser = async (reason, message, status = 403) => {
     await auditLog({
       userId: adminId,
       action: "ADMIN_SET_USER_ROLE_DENIED",
       entity: "User",
       entityId: userId,
       req,
-      meta: { requestedRole: role, reason: "SUPER_ADMIN_BLOCKED" },
+      meta: { requestedRole: role, reason },
     });
-    throw createHttpError("SUPER_ADMIN ne peut pas être attribué depuis l'interface", 403);
+    throw createHttpError(message, status);
+  };
+
+  if (ROLES_HORS_INTERFACE_ADMIN.includes(role)) {
+    await refuser(
+      "ROLE_HORS_INTERFACE",
+      `${role} ne peut pas être attribué depuis cet écran`,
+    );
   }
 
-  if (adminRole !== "SUPER_ADMIN") {
-    await auditLog({
-      userId: adminId,
-      action: "ADMIN_SET_USER_ROLE_DENIED",
-      entity: "User",
-      entityId: userId,
-      req,
-      meta: { requestedRole: role, reason: "SUPER_ADMIN_REQUIRED" },
-    });
-    throw createHttpError("Seul le Super Admin peut modifier les roles utilisateurs", 403);
+  if (adminRole !== "OUGAS_ADMIN") {
+    await refuser(
+      "OUGAS_ADMIN_REQUIRED",
+      "Seul l'Ougas Admin peut modifier les rôles utilisateurs",
+    );
   }
 
   if (adminId === userId) {
-    await auditLog({
-      userId: adminId,
-      action: "SUPER_ADMIN_SET_OWN_ROLE_DENIED",
-      entity: "User",
-      entityId: userId,
-      req,
-      meta: { requestedRole: role, reason: "SELF_ROLE_CHANGE_BLOCKED" },
-    });
-    throw createHttpError("Un Super Admin ne peut pas modifier son propre role", 400);
+    await refuser(
+      "SELF_ROLE_CHANGE_BLOCKED",
+      "Un Ougas Admin ne peut pas modifier son propre rôle",
+      400,
+    );
+  }
+
+  // Le changement de role est la porte derobee de la suspension : refuser de
+  // suspendre le compte d'amorcage tout en laissant le retrograder en CLIENT
+  // reviendrait a poser un verrou sur une porte et pas sur l'autre.
+  //
+  // Un Ougas Admin n'est pas retrogradable non plus : il ne nait que du module
+  // bootstrap, il ne doit donc mourir que par suspension, pas par mutation en
+  // un role qu'il n'a jamais accepte.
+  const target = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { role: true },
+  });
+
+  if (!target) throw createHttpError("Utilisateur introuvable", 404);
+
+  if (ROLES_HORS_INTERFACE_ADMIN.includes(target.role)) {
+    await refuser(
+      "TARGET_HORS_INTERFACE",
+      `Le rôle d'un ${target.role} ne se modifie pas depuis cet écran`,
+    );
   }
 }
 
@@ -652,7 +675,7 @@ export async function setUserRole({ adminId, adminRole, userId, role, req }) {
 
   await auditLog({
     userId: adminId,
-    action: "SUPER_ADMIN_SET_USER_ROLE",
+    action: "OUGAS_ADMIN_SET_USER_ROLE",
     entity: "User",
     entityId: updated.id,
     req,

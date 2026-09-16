@@ -139,9 +139,39 @@ créés**. Le nouveau parcours d'invitation ne s'applique qu'aux comptes créés
 il ne répare pas l'existant. Tant que ces mots de passe ne sont pas changés par leurs titulaires, la
 séparation des pouvoirs reste contournable sur ces comptes-là.
 
-`scripts/seed.js` pose le même problème par construction : il crée quatre comptes dont les mots de
-passe viennent des variables `SEED_*`. Ne l'utilise que pour amorcer un environnement neuf, et fais
-changer les quatre mots de passe juste après.
+`scripts/seed.js` ne crée plus qu'**un** compte, celui d'amorçage, au lieu de quatre. Ne l'utilise
+que sur un environnement neuf, et change son mot de passe dès la première connexion.
+
+---
+
+## 4 bis. Le renommage SUPER_ADMIN → OUGAS_ADMIN
+
+La migration `20260916000000_ougas_admin_role` renomme la valeur d'enum : **le Super Admin
+actuellement en production devient l'Ougas Admin, sans perdre un seul pouvoir.** Il continue
+d'approuver les dépenses, de forcer un consentement et de modifier les rôles. Il se connecte au même
+endroit ; seule l'URL de son tableau de bord change, de `/super-admin` à `/ougas-admin`, et la
+redirection après connexion suit toute seule.
+
+Le nom `SUPER_ADMIN` est ensuite réutilisé pour un rôle **neuf et vide** : le compte d'amorçage, dont
+l'unique pouvoir est de créer un Ougas Admin. Aucune ligne ne le porte après la migration — c'est le
+seed qui le crée.
+
+À vérifier **après** `prisma migrate deploy` :
+
+```sql
+-- L'ancien Super Admin est bien devenu Ougas Admin, et il est toujours ACTIVE.
+SELECT email, role, status FROM "User" WHERE role IN ('OUGAS_ADMIN','SUPER_ADMIN');
+-- attendu : une ligne OUGAS_ADMIN, aucune ligne SUPER_ADMIN
+```
+
+Puis créer le compte d'amorçage, avec une adresse et un téléphone **qui ne servent à rien d'autre** :
+
+```bash
+SEED_BOOTSTRAP_EMAIL=... SEED_BOOTSTRAP_PASSWORD=... node scripts/seed.js
+```
+
+Le seed refuse de toucher à un compte existant. Si tu réutilises l'adresse de l'ancien Super Admin,
+il s'arrête avec un message plutôt que de retirer à l'Ougas Admin son pouvoir d'approbation.
 
 ---
 

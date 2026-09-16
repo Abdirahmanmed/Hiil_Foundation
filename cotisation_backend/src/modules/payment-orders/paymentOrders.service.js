@@ -205,7 +205,7 @@ export async function createPaymentOrder({ user, data, req }) {
  *
  * Mais annuler est un pouvoir, donc il est borne :
  *   CREE     — jamais imprime, la tresorerie annule seule
- *   IMPRIME  — le document est parti a la banque : SUPER_ADMIN uniquement
+ *   IMPRIME  — le document est parti a la banque : OUGAS_ADMIN uniquement
  *   EXECUTE  — l'argent est sorti : jamais. On enregistre un remboursement.
  * Sans ces bornes, la tresorerie pourrait seule annuler un ordre deja remis,
  * repasser la depense en APPROUVER et en emettre un autre vers un autre
@@ -238,9 +238,9 @@ export async function cancelPaymentOrder({ user, id, reason, req }) {
       throw err;
     }
 
-    if (order.status === "IMPRIME" && user.role !== "SUPER_ADMIN") {
+    if (order.status === "IMPRIME" && user.role !== "OUGAS_ADMIN") {
       const err = new Error(
-        "Cet ordre a déjà été imprimé : seul le Super Admin peut l'annuler.",
+        "Cet ordre a déjà été imprimé : seul l'Ougas Admin peut l'annuler.",
       );
       err.status = 403;
       throw err;

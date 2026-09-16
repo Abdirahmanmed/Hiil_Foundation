@@ -21,8 +21,11 @@ import {
 
 const router = Router();
 
-// 🔒 ADMIN / SUPER_ADMIN
-router.use(auth, requireRole("ADMIN", "SUPER_ADMIN"));
+// 🔒 ADMIN / OUGAS_ADMIN
+//
+// Le SUPER_ADMIN est volontairement absent : le compte d'amorcage ne lit ni
+// membre, ni cotisation, ni depense. Son unique ecran est /bootstrap.
+router.use(auth, requireRole("ADMIN", "OUGAS_ADMIN"));
 
 // READ
 router.get("/dashboard", dashboard);
@@ -33,7 +36,7 @@ router.get("/adherents-contributions", adherentsContributions);
 // ACTIONS USERS
 router.post("/users", createInternalUser);
 router.patch("/users/:userId/status", setUserStatus);
-router.patch("/users/:userId/role", requireRole("SUPER_ADMIN"), setUserRole);
+router.patch("/users/:userId/role", requireRole("OUGAS_ADMIN"), setUserRole);
 router.post("/users/:userId/otp/reset", resetUserOtp);
 // Limiteur : chaque renvoi invalide le jeton precedent. Sans plafond, une
 // boucle d'appels empeche le titulaire de cliquer sur un lien encore valable.
@@ -46,7 +49,7 @@ router.post("/users/:userId/invite/resend", inviteResendLimiter, resendInvite);
 // autorite, sinon le verrou de l'un se contourne par l'autre.
 router.patch(
   "/subscriptions/:subscriptionId/status",
-  requireRole("SUPER_ADMIN"),
+  requireRole("OUGAS_ADMIN"),
   setSubStatus,
 );
 
@@ -55,7 +58,7 @@ router.patch(
 // d'adhesion au nom de quelqu'un d'autre. Ce n'est pas un acte de supervision.
 router.post(
   "/subscriptions/:subscriptionId/consent/force",
-  requireRole("SUPER_ADMIN"),
+  requireRole("OUGAS_ADMIN"),
   forceConsent,
 );
 // SUPERVISION — lecture seule, par construction : c'est un GET, et le service

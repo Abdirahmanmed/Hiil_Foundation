@@ -17,17 +17,33 @@ pratique.
 |---|---|---|
 | `CLIENT` | Cotise. Déclare un mandat, signe le consentement, paie | Rien du back-office |
 | `GESTIONNAIRE_DEPENSE` | **Engage** une dépense | L'approuver, la décaisser |
-| `SUPER_ADMIN` | **Approuve** ou rejette, avec son mot de passe | Engager, décaisser |
+| `OUGAS_ADMIN` | **Approuve** ou rejette, avec son mot de passe | Engager, décaisser |
 | `EQUIPE_TRESORERIE` | **Décaisse** : émet, imprime, exécute, annule un ordre | Engager, approuver |
 | `ADMIN` | **Supervise** : lit tout, crée les comptes internes, suspend | Approuver, décaisser |
+| `SUPER_ADMIN` | **Amorce** : crée un `OUGAS_ADMIN`, et rien d'autre | Lire un montant, un membre, une cotisation |
+
+Les deux derniers ne sont pas deux niveaux du même pouvoir. L'`OUGAS_ADMIN` est l'autorité métier :
+lui seul valide l'argent versé aux bénéficiaires. Le `SUPER_ADMIN` est le compte d'amorçage, détenu
+par l'exploitant du logiciel ; il existe pour qu'on puisse nommer un Ougas Admin sans ouvrir un
+terminal — et pour cette raison précise, il ne doit rien pouvoir approuver lui-même.
+
+La chaîne de création va dans un seul sens, et chaque compte choisit son propre mot de passe :
+
+```
+scripts/seed.js  →  SUPER_ADMIN  →  OUGAS_ADMIN  →  ADMIN  →  GESTIONNAIRE_DEPENSE
+                                                           →  EQUIPE_TRESORERIE
+```
 
 La matrice vit dans un seul fichier, [`cotisation_backend/src/config/roles.js`](cotisation_backend/src/config/roles.js).
-C'est le seul endroit à relire pour auditer la séparation des pouvoirs. L'invariant se vérifie en
-une commande :
+C'est le seul endroit à relire pour auditer la séparation des pouvoirs. Les invariants se vérifient
+en deux commandes :
 
 ```bash
 grep -nE '^export const CAN_(ENGAGE|APPROVE|DISBURSE)' src/config/roles.js | grep -w ADMIN
 # doit ne rien renvoyer — le -w est indispensable, sans lui ADMIN matche SUPER_ADMIN
+
+grep -nw SUPER_ADMIN src/config/roles.js
+# ne doit apparaître que dans CAN_BOOTSTRAP — vérifié aussi par tests/roles.test.js
 ```
 
 ---
@@ -74,14 +90,14 @@ un calcul à la lecture. C'est volontaire.
 serveur, avec une contrainte `CHECK` en base. Un champ éditable permettait de déclarer 10 sacs à
 1 000 et de faire approuver 500 000.
 
-**L'approbation d'une dépense demande le mot de passe du Super Admin.** C'est le second facteur ; il
+**L'approbation d'une dépense demande le mot de passe de l'Ougas Admin.** C'est le second facteur ; il
 a remplacé un jeton qui n'en était pas un — le serveur le générait à l'instant même de
 l'approbation, sans réauthentifier personne, et il circulait par email hors de l'application.
 
 **Un seul ordre de paiement actif par dépense**, garanti par un index UNIQUE sur une colonne
 nullable (`activeExpenseId`) : Postgres autorise plusieurs `NULL`, donc la réémission après
 annulation reste possible. Annuler est borné par état et par rôle — un ordre imprimé n'est annulable
-que par le Super Admin, un ordre exécuté jamais.
+que par l'Ougas Admin, un ordre exécuté jamais.
 
 **`EFFECTUER` ≠ payé.** Une dépense bascule en `EFFECTUER` quand l'ordre est créé ; l'argent ne
 quitte la banque qu'au statut `EXECUTE`, avec sa date réelle. « Engagé » et « réellement payé » sont
@@ -106,9 +122,8 @@ piste d'audit en silence pendant que tout le monde croyait qu'elle tournait.
 
 ## Ce qui reste ouvert
 
-- **Le SUPER_ADMIN est seul approbateur** et ne peut pas être créé depuis l'interface. S'il perd son
-  accès, plus aucune dépense n'est approuvable. Il faut un second compte détenu par une autre
-  personne.
+- **Rien ne limite le nombre d'Ougas Admin.** Le compte d'amorçage peut en nommer autant qu'il veut,
+  et chacun approuve seul. Le garde-fou est l'audit, pas la technique.
 - **Aucun plafond d'engagement** : 50 000 DJF et 50 000 000 DJF suivent le même circuit avec un seul
   approbateur.
 - **`scripts/seed.js`** crée quatre comptes dont l'opérateur connaît les mots de passe. Il n'est fait

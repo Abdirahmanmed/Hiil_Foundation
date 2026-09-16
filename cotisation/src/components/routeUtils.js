@@ -1,6 +1,7 @@
 export const dashboardPathByRole = {
   CLIENT: "/client",
   ADMIN: "/admin",
+  OUGAS_ADMIN: "/ougas-admin",
   SUPER_ADMIN: "/super-admin",
   GESTIONNAIRE_DEPENSE: "/expense-manager",
   EQUIPE_TRESORERIE: "/treasury",

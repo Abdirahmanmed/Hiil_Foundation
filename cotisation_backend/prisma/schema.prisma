@@ -9,12 +9,23 @@ datasource db {
   provider = "postgresql"
 }
 
+/// OUGAS_ADMIN et SUPER_ADMIN ne sont pas deux niveaux du meme pouvoir.
+///
+/// OUGAS_ADMIN est l'autorite metier : lui seul approuve l'argent verse aux
+/// beneficiaires. SUPER_ADMIN est le compte d'amorcage, et son unique pouvoir
+/// est de creer un OUGAS_ADMIN — il ne lit ni depense, ni caisse, ni membre.
+/// Voir src/config/roles.js, ou la matrice complete tient en un ecran.
+/// L'ordre suit celui de la base, pas la logique : RENAME VALUE garde la place
+/// de l'ancien SUPER_ADMIN — devenu OUGAS_ADMIN — et ADD VALUE ajoute le
+/// nouveau a la fin. Reordonner ici ferait echouer le controle de derive de la
+/// CI sans qu'aucune colonne n'ait bouge.
 enum Role {
   CLIENT
   ADMIN
   GESTIONNAIRE_DEPENSE
-  SUPER_ADMIN
+  OUGAS_ADMIN
   EQUIPE_TRESORERIE
+  SUPER_ADMIN
 }
 
 enum MemberStatus {

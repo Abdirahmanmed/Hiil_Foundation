@@ -252,7 +252,7 @@ export async function loginUser({ email, password, req }) {
     };
   } catch (err) {
     // Seuls les succes etaient journalises : une attaque par force brute sur le
-    // compte SUPER_ADMIN ne laissait AUCUNE trace. userId est nullable dans le
+    // compte OUGAS_ADMIN ne laissait AUCUNE trace. userId est nullable dans le
     // schema, c'est prevu pour le cas de l'email inconnu.
     // Jamais le mot de passe dans meta — seulement la raison.
     await auditLog({

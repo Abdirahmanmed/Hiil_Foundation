@@ -48,7 +48,7 @@ export function expenseScopeFor(user) {
   if (user.role === "GESTIONNAIRE_DEPENSE") return { createdById: user.id };
   if (user.role === "EQUIPE_TRESORERIE") return { status: "APPROUVER" };
   // Supervision : tout, par decision. ADMIN en lecture seule, jamais en ecriture.
-  if (user.role === "ADMIN" || user.role === "SUPER_ADMIN") return {};
+  if (user.role === "ADMIN" || user.role === "OUGAS_ADMIN") return {};
 
   const err = new Error("Accès refusé");
   err.status = 403;
@@ -228,9 +228,9 @@ export async function getExpenseTrail({ id }) {
  * Machine a etats d'une depense. Les seules transitions legales :
  *
  *   (creation)  -> EN_ATTENTE   GESTIONNAIRE_DEPENSE
- *   EN_ATTENTE  -> APPROUVER    SUPER_ADMIN
- *   EN_ATTENTE  -> REJETER      SUPER_ADMIN
- *   APPROUVER   -> REJETER      SUPER_ADMIN, tant qu'aucun ordre n'existe
+ *   EN_ATTENTE  -> APPROUVER    OUGAS_ADMIN
+ *   EN_ATTENTE  -> REJETER      OUGAS_ADMIN
+ *   APPROUVER   -> REJETER      OUGAS_ADMIN, tant qu'aucun ordre n'existe
  *   APPROUVER   -> EFFECTUER    EQUIPE_TRESORERIE, via la creation d'un ordre
  *   EFFECTUER   -> APPROUVER    EQUIPE_TRESORERIE, via l'annulation d'un ordre
  *   REJETER     -> (rien)       terminal : on recree une depense
@@ -278,8 +278,8 @@ async function assertApproverPassword({ userId, password, req, expenseId }) {
     select: { id: true, role: true, status: true, passwordHash: true },
   });
 
-  if (!approbateur || approbateur.role !== "SUPER_ADMIN" || approbateur.status !== "ACTIVE") {
-    const err = new Error("Action réservée au Super Admin");
+  if (!approbateur || approbateur.role !== "OUGAS_ADMIN" || approbateur.status !== "ACTIVE") {
+    const err = new Error("Action réservée à l'Ougas Admin");
     err.status = 403;
     throw err;
   }

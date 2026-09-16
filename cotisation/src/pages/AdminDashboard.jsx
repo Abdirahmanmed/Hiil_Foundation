@@ -197,7 +197,7 @@ export default function AdminDashboard() {
 
   const stats = qStats.data?.stats;
   const users = useMemo(
-    () => (qUsers.data?.users || []).filter((apiUser) => apiUser.role !== "SUPER_ADMIN"),
+    () => (qUsers.data?.users || []).filter((apiUser) => apiUser.role !== "OUGAS_ADMIN"),
     [qUsers.data?.users],
   );
   const subs = useMemo(() => qSubs.data?.contributions || [], [qSubs.data?.contributions]);
@@ -337,7 +337,7 @@ export default function AdminDashboard() {
         fullName: "",
         email: "",
         phone: "",
-        role: user?.role === "SUPER_ADMIN" ? "ADMIN" : "GESTIONNAIRE_DEPENSE",
+        role: user?.role === "OUGAS_ADMIN" ? "ADMIN" : "GESTIONNAIRE_DEPENSE",
       });
       qUsers.refetch();
       qStats.refetch();
@@ -346,7 +346,7 @@ export default function AdminDashboard() {
       toast.error(err?.response?.data?.message || t("error_generic")),
   });
 
-  const canCreateAdminUser = user?.role === "SUPER_ADMIN";
+  const canCreateAdminUser = user?.role === "OUGAS_ADMIN";
   const createUserRoleOptions = canCreateAdminUser ? ROLE_OPTIONS : ADMIN_ROLE_OPTIONS;
 
   /**
@@ -754,7 +754,7 @@ export default function AdminDashboard() {
                 </div>
               ) : (
                 usersFiltered.map((u) => {
-                  const canEditRole = user?.role === "SUPER_ADMIN" && u.id !== user?.id;
+                  const canEditRole = user?.role === "OUGAS_ADMIN" && u.id !== user?.id;
                   const editableRoles = ROLE_OPTIONS;
 
                   return (

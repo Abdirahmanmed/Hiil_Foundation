@@ -12,6 +12,7 @@ const OtpVerify = lazy(() => import("./pages/OtpVerify"));
 const ClientDashboard = lazy(() => import("./pages/ClientDashboard"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const ExpenseManagerDashboard = lazy(() => import("./pages/ExpenseManagerDashboard"));
+const OugasAdminDashboard = lazy(() => import("./pages/OugasAdminDashboard"));
 const SuperAdminDashboard = lazy(() => import("./pages/SuperAdminDashboard"));
 const TreasuryDashboard = lazy(() => import("./pages/TreasuryDashboard"));
 const InviteCommunity = lazy(() => import("./pages/InviteCommunity"));
@@ -73,7 +74,7 @@ export default function App() {
           <Route
             path="/admin"
             element={
-              <ProtectedRoute roles={["ADMIN", "SUPER_ADMIN"]}>
+              <ProtectedRoute roles={["ADMIN", "OUGAS_ADMIN"]}>
                 <AdminDashboard />
               </ProtectedRoute>
             }
@@ -89,6 +90,19 @@ export default function App() {
           />
 
           <Route
+            path="/ougas-admin"
+            element={
+              <ProtectedRoute role="OUGAS_ADMIN">
+                <OugasAdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Le compte d'amorçage. Un seul écran, une seule action : nommer
+              l'Ougas Admin. Il n'a accès à aucune autre route — ni /admin,
+              ni /treasury — parce qu'il ne doit jamais approuver l'argent
+              dont il désigne l'approbateur. */}
+          <Route
             path="/super-admin"
             element={
               <ProtectedRoute role="SUPER_ADMIN">
@@ -100,7 +114,7 @@ export default function App() {
           <Route
             path="/treasury"
             element={
-              <ProtectedRoute roles={["EQUIPE_TRESORERIE", "SUPER_ADMIN"]}>
+              <ProtectedRoute roles={["EQUIPE_TRESORERIE", "OUGAS_ADMIN"]}>
                 <TreasuryDashboard />
               </ProtectedRoute>
             }

@@ -395,6 +395,7 @@ const INTERNAL_ROLE_LABELS = {
   ADMIN: "Administrateur",
   GESTIONNAIRE_DEPENSE: "Gestionnaire de dépense",
   EQUIPE_TRESORERIE: "Équipe trésorerie",
+  OUGAS_ADMIN: "Ougas Admin",
 };
 
 /**

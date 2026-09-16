@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   CAN_APPROVE,
+  CAN_BOOTSTRAP,
   CAN_DISBURSE,
   CAN_ENGAGE,
   CAN_READ_MONEY,
@@ -8,6 +9,15 @@ import {
   CAN_SUPERVISE,
 } from "../src/config/roles.js";
 import { expenseScopeFor } from "../src/modules/expenses/expenses.service.js";
+
+const GROUPES_METIER = {
+  CAN_ENGAGE,
+  CAN_APPROVE,
+  CAN_DISBURSE,
+  CAN_READ_MONEY,
+  CAN_SUPERVISE,
+  CAN_SEE_CASH,
+};
 
 /**
  * Le test le plus rentable du lot.
@@ -31,9 +41,10 @@ describe("séparation des pouvoirs", () => {
     expect(CAN_DISBURSE).not.toContain("ADMIN");
   });
 
-  it("le SUPER_ADMIN n'engage ni ne décaisse", () => {
-    expect(CAN_ENGAGE).not.toContain("SUPER_ADMIN");
-    expect(CAN_DISBURSE).not.toContain("SUPER_ADMIN");
+  it("l'OUGAS_ADMIN approuve, sans jamais engager ni décaisser", () => {
+    expect(CAN_APPROVE).toEqual(["OUGAS_ADMIN"]);
+    expect(CAN_ENGAGE).not.toContain("OUGAS_ADMIN");
+    expect(CAN_DISBURSE).not.toContain("OUGAS_ADMIN");
   });
 
   it("l'ADMIN lit l'argent et supervise, sans voir la caisse du trésorier", () => {
@@ -43,8 +54,34 @@ describe("séparation des pouvoirs", () => {
   });
 
   it("un CLIENT ne touche à aucun groupe interne", () => {
-    for (const groupe of [CAN_ENGAGE, CAN_APPROVE, CAN_DISBURSE, CAN_READ_MONEY, CAN_SUPERVISE, CAN_SEE_CASH]) {
+    for (const groupe of Object.values(GROUPES_METIER)) {
       expect(groupe).not.toContain("CLIENT");
+    }
+  });
+});
+
+/**
+ * La regression que ce bloc empeche : glisser le compte d'amorcage dans un
+ * groupe metier « pour qu'il puisse verifier ». Celui qui nomme l'approbateur
+ * ne doit ni approuver, ni voir un montant — sinon il reconstitue a lui seul
+ * toute la chaine de decaissement.
+ */
+describe("compte d'amorçage", () => {
+  it("le SUPER_ADMIN n'appartient à aucun groupe métier", () => {
+    for (const [nom, groupe] of Object.entries(GROUPES_METIER)) {
+      expect(groupe, `${nom} contient SUPER_ADMIN`).not.toContain("SUPER_ADMIN");
+    }
+  });
+
+  it("CAN_BOOTSTRAP ne contient que le SUPER_ADMIN", () => {
+    expect(CAN_BOOTSTRAP).toEqual(["SUPER_ADMIN"]);
+  });
+
+  it("aucun autre rôle n'amorce", () => {
+    for (const groupe of Object.values(GROUPES_METIER)) {
+      for (const role of groupe) {
+        expect(CAN_BOOTSTRAP).not.toContain(role);
+      }
     }
   });
 });
@@ -54,7 +91,7 @@ describe("périmètre de lecture des dépenses", () => {
     ["GESTIONNAIRE_DEPENSE", { createdById: "u1" }],
     ["EQUIPE_TRESORERIE", { status: "APPROUVER" }],
     ["ADMIN", {}],
-    ["SUPER_ADMIN", {}],
+    ["OUGAS_ADMIN", {}],
   ];
 
   it.each(cas)("%s est scopé explicitement", (role, attendu) => {
@@ -63,8 +100,9 @@ describe("périmètre de lecture des dépenses", () => {
 
   // La regression a eviter : un `else {}` muet qui rendrait TOUT visible a un
   // role non prevu. C'est exactement ce qui donnait au tresorier les agregats
-  // de toutes les depenses via le tableau de bord.
-  it.each([["CLIENT"], ["ROLE_INCONNU"], [undefined]])(
+  // de toutes les depenses via le tableau de bord. SUPER_ADMIN figure dans
+  // cette liste a dessein : le compte d'amorcage ne lit aucune depense.
+  it.each([["CLIENT"], ["SUPER_ADMIN"], ["ROLE_INCONNU"], [undefined]])(
     "%s est refusé plutôt que de tout voir",
     (role) => {
       expect(() => expenseScopeFor({ role, id: "u1" })).toThrowError();

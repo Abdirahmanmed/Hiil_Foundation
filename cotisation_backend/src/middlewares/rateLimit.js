@@ -33,7 +33,7 @@ export const changePasswordLimiter = rateLimit({
 
 /**
  * Connexion. La route n'avait aucun limiteur specifique, seulement le limiteur
- * global : une attaque par force brute sur le compte SUPER_ADMIN passait sous
+ * global : une attaque par force brute sur le compte OUGAS_ADMIN passait sous
  * le radar.
  *
  * La cle est composite IP + email, volontairement : une cle par email seul

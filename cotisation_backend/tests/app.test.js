@@ -11,12 +11,16 @@ import { describe, expect, it, beforeAll } from "vitest";
 describe("l'application se charge entièrement", () => {
   let app;
 
+  // 30 s, et non les 10 s par defaut : ce hook charge toute l'application,
+  // client Prisma compris. Seul, il met 2 s ; lance en parallele des autres
+  // fichiers de test, il depassait les 10 s sur une machine chargee et faisait
+  // passer les deux tests en « skipped » — un echec vert, le pire des deux.
   beforeAll(async () => {
     // env.js exige ces valeurs au boot ; on ne teste pas la configuration ici.
     process.env.NODE_ENV = process.env.NODE_ENV || "development";
     process.env.CAC_PAYMENT_MODE = process.env.CAC_PAYMENT_MODE || "mock";
     ({ app } = await import("../src/app.js"));
-  });
+  }, 30_000);
 
   it("expose une application express", () => {
     expect(typeof app).toBe("function");
