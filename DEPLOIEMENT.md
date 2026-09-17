@@ -40,17 +40,25 @@ variables, avec pour chacune si elle est requise et ce qui se passe sans elle.
 
 ---
 
-## 1 bis. Créer les services depuis le blueprint
+## 1 bis. Créer l'API sur Render, le front sur Vercel
 
-[`render.yaml`](render.yaml) décrit les deux services — l'API en conteneur Docker, le front en site
-statique. Sur Render : *New → Blueprint*, choisir le dépôt, Render lit le fichier et demande les
-variables marquées `sync: false`. **Aucun secret n'est écrit dans ce fichier**, c'est ce qui permet
-de le versionner.
+Les deux moitiés ne vivent pas au même endroit :
+
+| | Où | Configuré par |
+|---|---|---|
+| API | Render, conteneur Docker | [`render.yaml`](render.yaml) |
+| Front | Vercel, build statique | [`cotisation/vercel.json`](cotisation/vercel.json) |
+
+### L'API
+
+Sur Render : *New → Blueprint*, choisir le dépôt, Render lit le fichier et demande les variables
+marquées `sync: false`. **Aucun secret n'est écrit dans ce fichier**, c'est ce qui permet de le
+versionner.
 
 Deux points qui ne sont pas des détails :
 
-- **`autoDeploy` est à `false` sur les deux services.** Le backend n'applique pas les migrations
-  tout seul ; déployer du code en avance sur sa base fait échouer la création d'un compte interne.
+- **`autoDeploy` est à `false`.** Le backend n'applique pas les migrations tout seul ; déployer du
+  code en avance sur sa base fait échouer la création d'un compte interne.
   L'ordre migrations → API → front doit rester une décision, pas la conséquence d'un `git push`.
 - **`OTP_PEPPER` ne se régénère pas** sur une base existante : il hache les secrets OTP, les jetons
   d'invitation et ceux de réinitialisation. Le changer les invalide tous d'un coup. Reprends la
@@ -69,6 +77,61 @@ cd cotisation_backend
 DATABASE_URL='postgresql://hiil:hiil@localhost:5433/hiil_dev?sslmode=disable' \
   npx prisma migrate deploy
 ```
+
+### Le front
+
+Sur Vercel : *Add New → Project*, importer le dépôt, puis **une seule case compte** :
+
+> **Root Directory : `cotisation`**
+
+C'est un monorepo. Laissée à la racine, la build échoue — il n'y a pas de `package.json` là-haut.
+C'est aussi cette case qui fait lire `cotisation/vercel.json`, d'où viennent la commande
+d'installation, la build, le dossier de sortie, les réécritures et les en-têtes. Il n'y a rien
+d'autre à cliquer.
+
+Une seule variable à poser, dans *Settings → Environment Variables* :
+
+| Variable | Valeur |
+|---|---|
+| `VITE_API_URL` | l'URL de l'API Render, avec `https://` et **sans** `/api` à la fin |
+
+Les chemins ajoutent `/api` eux-mêmes (`/api/admin/dashboard`) : mettre `.../api` produirait
+`/api/api/admin`.
+
+Trois pièges, dans l'ordre où ils mordent :
+
+- **`VITE_API_URL` est lue à la BUILD**, pas à l'exécution. Vite l'inscrit dans le JavaScript.
+  La modifier n'a aucun effet tant que tu n'as pas **redéployé** — un redémarrage ne fait rien.
+- **Ne la laisse jamais vide.** [`http.js`](cotisation/src/api/http.js) retombe alors sur une valeur
+  en dur, `https://hiil-foundation-api.onrender.com`, qui est l'ancienne API. Le front parlerait à
+  un backend sans aucun des verrous, sans qu'aucune erreur ne s'affiche. Pour savoir sur lequel tu
+  es tombé :
+
+  ```bash
+  curl -o /dev/null -w "%{http_code}\n" https://<ton-api>/api/bootstrap/ougas-admins
+  # 401 → nouveau backend (la route existe, elle exige une authentification)
+  # 404 → ancienne API
+  ```
+
+  `/api/health` répond 200 sur les deux : il ne distingue rien.
+- **Les déploiements de prévisualisation ne marcheront pas contre la production.** Leur URL change à
+  chaque commit, et `CORS_ORIGIN` est une origine exacte, unique. C'est voulu : élargir le CORS de
+  la production pour faire passer des previews ouvrirait l'API financière à toute branche poussée.
+  S'il te faut un environnement de test, c'est une seconde API sur une seconde base, pas un CORS
+  plus large.
+
+### Une fois les deux en ligne
+
+Reviens sur Render poser les deux variables qui dépendent de l'URL Vercel :
+
+| Variable | Valeur |
+|---|---|
+| `CORS_ORIGIN` | l'URL Vercel, avec `https://`, sans slash final |
+| `APP_PUBLIC_URL` | la même — ou laisse vide, elle retombe sur `CORS_ORIGIN` |
+
+Les deux se croisent : `VITE_API_URL` pointe le front vers l'API, `CORS_ORIGIN` autorise l'API à
+répondre au front. C'est la confusion classique, et elle se manifeste par un écran qui charge
+indéfiniment sans message d'erreur lisible.
 
 ---
 

@@ -78,8 +78,9 @@ Tests : `npm test` dans `cotisation_backend`. Les tests sans base tournent toujo
 touchent la base attendent `TEST_DATABASE_URL`, dont la valeur **doit contenir « test »** — le
 garde-fou refuse de démarrer autrement.
 
-Le déploiement a sa propre procédure : [DEPLOIEMENT.md](DEPLOIEMENT.md). Les deux services sont
-décrits dans [render.yaml](render.yaml), qui ne contient aucun secret.
+Le déploiement a sa propre procédure : [DEPLOIEMENT.md](DEPLOIEMENT.md). L'API tourne sur
+Render, décrite par [render.yaml](render.yaml) — qui ne contient aucun secret ; le front est sur
+Vercel, configuré par [cotisation/vercel.json](cotisation/vercel.json).
 
 ---
 
@@ -137,8 +138,9 @@ piste d'audit en silence pendant que tout le monde croyait qu'elle tournait.
   et chacun approuve seul. Le garde-fou est l'audit, pas la technique.
 - **Aucun plafond d'engagement** : 50 000 DJF et 50 000 000 DJF suivent le même circuit avec un seul
   approbateur.
-- **`scripts/seed.js`** crée quatre comptes dont l'opérateur connaît les mots de passe. Il n'est fait
-  que pour amorcer un environnement neuf.
+- **Le mot de passe du compte d'amorçage est connu de l'opérateur** : c'est le seul du système que son
+  titulaire n'a pas choisi lui-même, et il ouvre le compte qui nomme l'autorité d'approbation. À changer
+  dès la première connexion.
 - **Les codes de retour de CAC Bank** doivent être confirmés par écrit avant tout passage en `live`,
   avec la durée de validité de l'OTP et le comportement sur un `vender_ref` rejoué.
 - **Les documents déposés avant le passage à Cloudinary** ont disparu avec le disque éphémère de

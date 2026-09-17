@@ -1,12 +1,14 @@
 # Blueprint Render — https://render.com/docs/blueprint-spec
 #
-# Render lit ce fichier à la racine du dépôt et crée les deux services d'un
-# coup. Les valeurs marquées `sync: false` ne sont JAMAIS écrites ici : Render
+# Render lit ce fichier à la racine du dépôt et crée le service d'API.
+# Le front vit sur Vercel, configuré par cotisation/vercel.json.
+#
+# Les valeurs marquées `sync: false` ne sont JAMAIS écrites ici : Render
 # les demande à la création et les garde de son côté. C'est la règle qui permet
 # de versionner ce fichier sans versionner un seul secret.
 #
 # Ordre de première mise en service :
-#   1. créer les services depuis ce blueprint, renseigner les variables ;
+#   1. créer le service depuis ce blueprint, renseigner les variables ;
 #   2. appliquer les migrations à la main (voir DEPLOIEMENT.md) ;
 #   3. lancer le seed pour créer le compte d'amorçage ;
 #   4. seulement ensuite, déployer.
@@ -89,39 +91,13 @@ services:
       - key: CLOUDINARY_API_SECRET
         sync: false
 
-  # --------------------------------------------------------------- FRONT ----
-  - type: web
-    name: hiil-foundation-web
-    runtime: static
-    rootDir: cotisation
-
-    # `npm run build` déclenche le prebuild check-i18n : un déploiement avec une
-    # clé de traduction manquante échoue ici, au lieu d'afficher un identifiant
-    # technique à l'utilisateur.
-    buildCommand: npm ci && npm run build
-    staticPublishPath: dist
-
-    autoDeploy: false
-
-    envVars:
-      # URL publique de l'API ci-dessus, avec https:// et sans slash final.
-      - key: VITE_API_URL
-        sync: false
-
-    # Application à une seule page : toute URL inconnue doit rendre index.html,
-    # sinon un rechargement sur /ougas-admin renvoie un 404 du serveur statique.
-    routes:
-      - type: rewrite
-        source: /*
-        destination: /index.html
-
-    headers:
-      - path: /*
-        name: X-Frame-Options
-        value: DENY
-      - path: /*
-        name: X-Content-Type-Options
-        value: nosniff
-      - path: /*
-        name: Referrer-Policy
-        value: strict-origin-when-cross-origin
+  # ---------------------------------------------------------------- FRONT ----
+  #
+  # Le front n'est PAS ici : il est déployé sur Vercel, configuré par
+  # cotisation/vercel.json. Un seul front, une seule URL, donc un seul
+  # CORS_ORIGIN à tenir à jour côté API.
+  #
+  # Si tu as déjà créé le site statique « hiil-foundation-web » depuis une
+  # version précédente de ce blueprint, supprime-le dans Render : le laisser
+  # tourner donnerait deux fronts à des versions différentes, dont un que
+  # personne ne regarde.
