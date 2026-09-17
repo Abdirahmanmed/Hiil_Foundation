@@ -8,5 +8,8 @@ export default defineConfig({
     // les memes tables.
     fileParallelism: false,
     globalSetup: ["./tests/setup/guard.js"],
+    // Pose les variables exigees par env.js au chargement. Sans lui, la suite
+    // ne passe que sur un poste ayant un .env — donc jamais en CI.
+    setupFiles: ["./tests/setup/env.js"],
   },
 });
